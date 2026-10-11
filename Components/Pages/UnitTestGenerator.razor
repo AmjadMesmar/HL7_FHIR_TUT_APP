@@ -1,0 +1,277 @@
+@page "/test-generator"
+@rendermode InteractiveServer
+@inject IJSRuntime JS
+
+<PageTitle>C# xUnit Test Generator - Healthcare Unit Testing</PageTitle>
+
+<div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
+    <!-- Hero Header -->
+    <div class="p-4 mb-4 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #198754 0%, #20c997 100%);">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <span class="badge bg-light text-dark mb-2 px-3 py-1 fw-semibold">Quality Engineering &amp; CI/CD</span>
+                <h1 class="h2 fw-bold mb-1">C# xUnit Unit Test Generator</h1>
+                <p class="mb-0 text-white-50">
+                    Instantly generate production-grade xUnit test fixtures with assertions for FHIR R4 models and HL7 v2 parsing in .NET 10.
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <span class="badge bg-dark align-self-center px-3 py-2 fw-semibold">
+                    <i class="bi bi-check2-all me-1"></i> Ready for CI/CD
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Selector Bar -->
+    <div class="card shadow-sm mb-3 border">
+        <div class="card-body p-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <span class="fw-semibold small text-muted"><i class="bi bi-ui-checks text-success"></i> Select Unit Test Suite:</span>
+                <div class="btn-group btn-group-sm">
+                    @for (int t = 0; t < TestSuites.Count; t++)
+                    {
+                        var idx = t;
+                        var item = TestSuites[idx];
+                        <button class="btn @(selectedSuiteIndex == idx ? "btn-success shadow-sm" : "btn-outline-secondary")"
+                                @onclick="() => selectedSuiteIndex = idx">
+                            @item.Title
+                        </button>
+                    }
+                </div>
+            </div>
+            <div>
+                <button class="btn btn-outline-success btn-sm" @onclick="CopyTestCode">
+                    @if (copied)
+                    {
+                        <i class="bi bi-check-circle-fill text-success"></i> <span class="text-success fw-bold">Copied Test Class!</span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-clipboard"></i> <span>Copy Test Class</span>
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Test Class View -->
+    @{
+        var curSuite = TestSuites[selectedSuiteIndex];
+    }
+    <div class="card shadow-sm border mb-4">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+            <div>
+                <strong class="text-dark">@curSuite.FileName</strong>
+                <span class="text-muted small ms-2">&bull; @curSuite.Description</span>
+            </div>
+            <span class="badge bg-secondary font-monospace">xUnit .NET 10</span>
+        </div>
+        <div class="card-body p-0">
+            <pre class="bg-dark text-light p-3 m-0 font-monospace small overflow-auto" 
+                 style="max-height: 550px; tab-size: 4; white-space: pre-wrap; word-break: break-all; border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius);"><code>@curSuite.TestCode</code></pre>
+        </div>
+    </div>
+</div>
+
+@code {
+    private int selectedSuiteIndex = 0;
+    private bool copied = false;
+
+    private record TestSuiteItem(string Title, string FileName, string Description, string TestCode);
+
+    private static readonly List<TestSuiteItem> TestSuites = new()
+    {
+        // 1. Patient Demographics Test
+        new(
+            Title: "1. Patient Demographics & MRN",
+            FileName: "PatientSerializationTests.cs",
+            Description: "Verifies that Patient identifier, official HumanName parts, and ISO birthdate serialize and deserialize correctly.",
+            TestCode:
+@"using Xunit;
+using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
+
+namespace HealthcareSystem.Tests;
+
+public class PatientSerializationTests
+{
+    private readonly FhirJsonSerializer _serializer = new();
+    private readonly FhirJsonDeserializer _deserializer = new();
+
+    [Fact]
+    public void Patient_WithOfficialNameAndMrn_SerializesAndDeserializesAccurately()
+    {
+        // Arrange
+        var originalPatient = new Patient
+        {
+            Id = Guid.NewGuid().ToString(),
+            Active = true,
+            Gender = AdministrativeGender.Female,
+            BirthDate = ""1985-06-14""
+        };
+
+        originalPatient.Identifier.Add(new Identifier
+        {
+            System = ""http://hospital.example.org/mrn"",
+            Value = ""MRN982341""
+        });
+
+        var name = new HumanName
+        {
+            Use = HumanName.NameUse.Official,
+            Family = ""Smith""
+        };
+        name.GivenElement.Add(new FhirString(""Eleanor""));
+        name.GivenElement.Add(new FhirString(""Jane""));
+        originalPatient.Name.Add(name);
+
+        // Act
+        string json = _serializer.SerializeToString(originalPatient);
+        var parsed = _deserializer.Deserialize<Patient>(json);
+
+        // Assert
+        Assert.NotNull(parsed);
+        Assert.Equal(AdministrativeGender.Female, parsed.Gender);
+        Assert.Equal(""1985-06-14"", parsed.BirthDate);
+        
+        // Assert Identifier
+        Assert.Single(parsed.Identifier);
+        Assert.Equal(""MRN982341"", parsed.Identifier[0].Value);
+        Assert.Equal(""http://hospital.example.org/mrn"", parsed.Identifier[0].System);
+
+        // Assert Name Parts
+        Assert.Single(parsed.Name);
+        Assert.Equal(""Smith"", parsed.Name[0].Family);
+        Assert.Equal(2, parsed.Name[0].Given.Count());
+        Assert.Equal(""Eleanor"", parsed.Name[0].Given.First());
+    }
+}"
+        ),
+
+        // 2. Quantitative Observation Test
+        new(
+            Title: "2. Lab Observation & UCUM Unit",
+            FileName: "ObservationValidationTests.cs",
+            Description: "Verifies quantitative lab measurement (Glucose 142 mg/dL), LOINC code binding, and abnormal interpretation.",
+            TestCode:
+@"using Xunit;
+using Hl7.Fhir.Model;
+
+namespace HealthcareSystem.Tests;
+
+public class ObservationValidationTests
+{
+    [Fact]
+    public void Observation_GlucoseMeasurement_ContainsValidLoincAndQuantity()
+    {
+        // Arrange
+        var obs = new Observation
+        {
+            Status = ObservationStatus.Final,
+            Subject = new ResourceReference(""Patient/10042"")
+        };
+
+        // LOINC 2345-7 (Glucose)
+        obs.Code = new CodeableConcept(""http://loinc.org"", ""2345-7"", ""Glucose [Mass/volume] in Serum or Plasma"");
+
+        // Value: 142 mg/dL
+        obs.Value = new Quantity
+        {
+            Value = 142m,
+            Unit = ""mg/dL"",
+            System = ""http://unitsofmeasure.org"",
+            Code = ""mg/dL""
+        };
+
+        // Reference range: 70 - 99 mg/dL
+        obs.ReferenceRange.Add(new Observation.ReferenceRangeComponent
+        {
+            Low = new Quantity(70m, ""mg/dL""),
+            High = new Quantity(99m, ""mg/dL"")
+        });
+
+        // Interpretation: 'H' (High)
+        obs.Interpretation.Add(new CodeableConcept(
+            ""http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation"", 
+            ""H"", 
+            ""High""));
+
+        // Assert
+        Assert.Equal(ObservationStatus.Final, obs.Status);
+        Assert.Equal(""2345-7"", obs.Code.Coding[0].Code);
+        
+        var quantity = Assert.IsType<Quantity>(obs.Value);
+        Assert.Equal(142m, quantity.Value);
+        Assert.Equal(""mg/dL"", quantity.Unit);
+        Assert.Equal(""http://unitsofmeasure.org"", quantity.System);
+
+        // Assert that the measured value exceeds upper reference range
+        Assert.True(quantity.Value > obs.ReferenceRange[0].High.Value);
+        Assert.Equal(""H"", obs.Interpretation[0].Coding[0].Code);
+    }
+}"
+        ),
+
+        // 3. HL7 v2 Parser Test
+        new(
+            Title: "3. HL7 v2 ER7 Pipe Parser",
+            FileName: "Hl7V2ParserTests.cs",
+            Description: "Tests that raw ER7 pipe-and-hat string deconstructs correctly into MSH, PID, and PV1 segments.",
+            TestCode:
+@"using Xunit;
+using System.Linq;
+
+namespace HealthcareSystem.Tests;
+
+public class Hl7V2ParserTests
+{
+    [Fact]
+    public void Hl7Message_WithMshAndPid_ExtractsCorrectDelimitersAndFields()
+    {
+        // Arrange
+        string rawMessage =
+            ""MSH|^~\\&|EPIC|HOSP|EHR|HOSP|202610111100||ADT^A01|MSG9901|P|2.5\n"" +
+            ""PID|1||MRN12345^^^HOSP^MR||Doe^John^A||19800520|M\n"" +
+            ""PV1|1|I|ICU_CARDIO^ROOM_101^BED_A"";
+
+        // Act
+        var lines = rawMessage.Split('\n');
+        var mshFields = lines[0].Split('|');
+        var pidFields = lines[1].Split('|');
+        var pv1Fields = lines[2].Split('|');
+
+        // Assert MSH
+        Assert.Equal(""MSH"", mshFields[0]);
+        Assert.Equal(""ADT^A01"", mshFields[8]); // Message Type
+        Assert.Equal(""MSG9901"", mshFields[9]); // Control ID
+
+        // Assert PID
+        Assert.Equal(""PID"", pidFields[0]);
+        var mrnParts = pidFields[3].Split('^');
+        Assert.Equal(""MRN12345"", mrnParts[0]); // MRN
+        Assert.Equal(""HOSP"", mrnParts[3]);     // Assigning Authority
+
+        var nameParts = pidFields[5].Split('^');
+        Assert.Equal(""Doe"", nameParts[0]);      // Family Name
+        Assert.Equal(""John"", nameParts[1]);     // Given Name
+
+        // Assert PV1 Inpatient
+        Assert.Equal(""PV1"", pv1Fields[0]);
+        Assert.Equal(""I"", pv1Fields[2]);        // Inpatient Class
+        Assert.Contains(""ICU_CARDIO"", pv1Fields[3]);
+    }
+}"
+        )
+    };
+
+    private async Task CopyTestCode()
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", TestSuites[selectedSuiteIndex].TestCode);
+        copied = true;
+        StateHasChanged();
+        await Task.Delay(2000);
+        copied = false;
+        StateHasChanged();
+    }
+}

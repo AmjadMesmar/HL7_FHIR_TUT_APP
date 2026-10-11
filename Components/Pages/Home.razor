@@ -1,0 +1,195 @@
+@page "/"
+@rendermode InteractiveServer
+
+<PageTitle>HL7 v2 & FHIR Teaching Workbench</PageTitle>
+
+<div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
+    <!-- Header Hero Banner -->
+    <div class="p-4 mb-4 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #0d6efd 0%, #084298 100%);">
+        <div class="row align-items-center g-3">
+            <div class="col-lg-8">
+                <span class="badge bg-light text-primary mb-2 px-3 py-1 fw-semibold">.NET 10 • Blazor Server • SignalR</span>
+                <h1 class="h2 fw-bold mb-2">HL7 v2 & FHIR Interoperability Workbench</h1>
+                <p class="mb-3 text-white-50">
+                    A lightweight, hands-on teaching laboratory comparing legacy pipe-and-hat ER7 messaging against modern FHIR R4 JSON RESTful architecture.
+                </p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="get-started" class="btn btn-light fw-bold px-3 text-primary shadow-sm">
+                        <i class="bi bi-book-half me-1"></i> Get Started Guide
+                    </a>
+                    <a href="bridge" class="btn btn-warning fw-bold px-3 shadow-sm">
+                        <i class="bi bi-play-circle-fill me-1"></i> Interactive Bridge
+                    </a>
+                    <a href="hl7-inspector" class="btn btn-outline-light px-3">
+                        <i class="bi bi-code-slash me-1"></i> HL7 v2 Inspector
+                    </a>
+                    <a href="fhir-explorer" class="btn btn-outline-light px-3">
+                        <i class="bi bi-filetype-json me-1"></i> FHIR Explorer
+                    </a>
+                    <a href="rest-playground" class="btn btn-outline-light px-3">
+                        <i class="bi bi-cloud-arrow-down me-1"></i> REST Playground
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 text-end d-none d-lg-block">
+                <div class="card bg-white text-dark shadow-sm border-0 text-start p-3">
+                    <h6 class="fw-bold text-muted text-uppercase mb-2" style="font-size: 0.75rem;">Environment Specs</h6>
+                    <div class="d-flex justify-content-between py-1 border-bottom small">
+                        <span class="text-muted">Target:</span>
+                        <span class="fw-bold text-primary">.NET 10 (`net10.0`)</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-1 border-bottom small">
+                        <span class="text-muted">Architecture:</span>
+                        <span class="badge bg-success">Blazor Server</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-1 border-bottom small">
+                        <span class="text-muted">FHIR SDK:</span>
+                        <span class="fw-semibold">Firely R4 (v6.6)</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-1 small">
+                        <span class="text-muted">RAM Footprint:</span>
+                        <span class="badge bg-info text-dark">~140 MB (Ultra-Light)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUICK START: 3-STEP GUIDED LEARNING PATH -->
+    <div class="card border-primary mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white py-2 d-flex justify-content-between align-items-center">
+            <span class="fw-bold"><i class="bi bi-compass me-2"></i> How to Use This App: 3-Step Guided Learning Path</span>
+            <span class="badge bg-white text-primary">Beginner Friendly</span>
+        </div>
+        <div class="card-body p-3">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="p-3 rounded bg-light border h-100 d-flex flex-column">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-warning text-dark fs-6 me-2">Step 1</span>
+                            <h6 class="fw-bold mb-0">Open the Interop Bridge</h6>
+                        </div>
+                        <p class="small text-muted flex-grow-1">
+                            This is the main interactive lab. You'll see a legacy HL7 message on the left and the modern FHIR JSON on the right.
+                            <strong>Click any HL7 field button</strong> to see where it lands in FHIR and learn why!
+                        </p>
+                        <a href="bridge" class="btn btn-sm btn-warning fw-semibold mt-2 w-100">
+                            Launch Step 1: Open Bridge &rarr;
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="p-3 rounded bg-light border h-100 d-flex flex-column">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-primary fs-6 me-2">Step 2</span>
+                            <h6 class="fw-bold mb-0">Deconstruct HL7 Syntax</h6>
+                        </div>
+                        <p class="small text-muted flex-grow-1">
+                            Go to the <strong>HL7 v2 Inspector</strong> to understand the pipe-and-hat delimiters (<code>|</code>, <code>^</code>, <code>~</code>), 
+                            message headers (<code>MSH</code>), patient demographics (<code>PID</code>), visits (<code>PV1</code>), and labs (<code>OBR/OBX</code>).
+                        </p>
+                        <a href="hl7-inspector" class="btn btn-sm btn-outline-primary mt-2 w-100">
+                            Launch Step 2: HL7 Inspector &rarr;
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="p-3 rounded bg-light border h-100 d-flex flex-column">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-success fs-6 me-2">Step 3</span>
+                            <h6 class="fw-bold mb-0">Try FHIR REST Queries</h6>
+                        </div>
+                        <p class="small text-muted flex-grow-1">
+                            Visit the <strong>REST Playground</strong> to learn how modern health apps query clinical records with HTTP verbs (<code>GET /Patient?name=Smith</code>) instead of socket connections.
+                        </p>
+                        <a href="rest-playground" class="btn btn-sm btn-outline-success mt-2 w-100">
+                            Launch Step 3: REST Playground &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Architectural Comparison Card -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm border-primary border-top border-4">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-primary fs-6 me-2">v2</span>
+                        <h6 class="card-title mb-0 fw-bold">HL7 Version 2 (Legacy Standard)</h6>
+                    </div>
+                    <p class="text-muted small mb-2">The standard powering hospital interface engines (Cloverleaf, Mirth, Rhapsody) for 35+ years.</p>
+                    <ul class="list-group list-group-flush small">
+                        <li class="list-group-item px-0 py-1">
+                            <strong>Mental Model:</strong> Event-driven message broadcasting ("A patient was admitted").
+                        </li>
+                        <li class="list-group-item px-0 py-1">
+                            <strong>Encoding:</strong> Custom ER7 delimited text (<code>|</code> fields, <code>^</code> components, <code>~</code> repeats).
+                        </li>
+                        <li class="list-group-item px-0 py-1">
+                            <strong>Transport:</strong> MLLP over persistent raw TCP sockets.
+                        </li>
+                        <li class="list-group-item px-0 py-1">
+                            <strong>Challenge:</strong> Heavy hospital-specific customization; each hospital's ADT differs.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm border-success border-top border-4">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-success fs-6 me-2">FHIR</span>
+                        <h6 class="card-title mb-0 fw-bold">HL7 FHIR R4 (Modern Standard)</h6>
+                    </div>
+                    <p class="text-muted small mb-2">Fast Healthcare Interoperability Resources: Web-native RESTful APIs built on modern developer primitives.</p>
+                    <ul class="list-group list-group-flush small">
+                        <li class="list-group-item px-0 py-1">
+                            <strong>Mental Model:</strong> Modular Resources (<code>Patient</code>, <code>Encounter</code>, <code>Observation</code>) linked via URIs.
+                        </li>
+                        <li class="list-group-item px-0 py-1">
+                            <strong>Encoding:</strong> Standard JSON or XML with strict schema validation.
+                        </li>
+                        <li class="list-group-item px-0 py-1">
+                            <strong>Transport:</strong> Stateless HTTP REST (<code>GET /Patient/123</code>), OAuth2 (SMART on FHIR).
+                        </li>
+                        <li class="list-group-item px-0 py-1">
+                            <strong>Advantage:</strong> Standardized vocabularies (LOINC, SNOMED) out of the box.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4 Clinical Scenarios Grid -->
+    <h5 class="fw-bold mb-3"><i class="bi bi-journal-medical text-primary"></i> 4 Pre-Configured Clinical Scenarios to Explore</h5>
+    <div class="row g-3">
+        @foreach (var preset in ClinicalPresets.All)
+        {
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+                        <span class="badge bg-dark">@preset.TriggerEvent</span>
+                        <small class="text-muted">@preset.Category</small>
+                    </div>
+                    <div class="card-body d-flex flex-column p-3">
+                        <h6 class="card-title fw-bold mb-1">@preset.Title</h6>
+                        <p class="card-text text-muted small flex-grow-1 mb-2">@preset.Summary</p>
+                        <div class="mt-2 pt-2 border-top">
+                            <a href="bridge?preset=@preset.Id" class="btn btn-sm btn-outline-primary w-100">
+                                Explore in Bridge &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

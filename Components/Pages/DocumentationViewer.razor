@@ -1,0 +1,191 @@
+@page "/docs"
+@rendermode InteractiveServer
+@using Markdig
+@inject IWebHostEnvironment Env
+@inject IJSRuntime JS
+
+<PageTitle>Living Documentation - HL7 &amp; FHIR Workbench</PageTitle>
+
+<div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
+    <!-- Hero Header -->
+    <div class="p-4 mb-4 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #0f5132 0%, #0d6efd 100%);">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <span class="badge bg-light text-dark mb-2 px-3 py-1 fw-semibold">Docs-as-Code Engine</span>
+                <h1 class="h2 fw-bold mb-1">Living Documentation &amp; Resources</h1>
+                <p class="mb-0 text-white-50">
+                    In-app documentation reader rendering version-controlled Markdown files directly from the project root.
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <span class="badge bg-success align-self-center px-3 py-2 fw-semibold">
+                    <i class="bi bi-markdown-fill me-1"></i> Markdig .NET Engine
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Picker Bar -->
+    <div class="card shadow-sm mb-3 border">
+        <div class="card-body p-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <span class="fw-semibold small text-muted"><i class="bi bi-file-earmark-text text-primary"></i> Select Document:</span>
+                <div class="btn-group btn-group-sm">
+                    @foreach (var doc in AvailableDocs)
+                    {
+                        <button class="btn @(selectedDocFile == doc.FileName ? "btn-primary shadow-sm" : "btn-outline-secondary")"
+                                @onclick="() => LoadDocument(doc.FileName)">
+                            <i class="bi @doc.Icon me-1"></i> @doc.Title
+                        </button>
+                    }
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary btn-sm" @onclick="CopyRawMarkdown">
+                    @if (copied)
+                    {
+                        <i class="bi bi-check-circle-fill text-success"></i> <span class="text-success fw-bold">Copied Markdown!</span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-clipboard"></i> <span>Copy Raw Markdown</span>
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Reader Card -->
+    <div class="card shadow-sm border mb-4">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+            <span class="small font-monospace text-muted">Docs/@selectedDocFile</span>
+            <span class="badge bg-secondary">Living Markdown</span>
+        </div>
+        <div class="card-body p-4 bg-white markdown-body">
+            @if (!string.IsNullOrEmpty(renderedHtml))
+            {
+                @((MarkupString)renderedHtml)
+            }
+            else
+            {
+                <div class="text-center py-5 text-muted">
+                    <div class="spinner-border spinner-border-sm mb-2"></div>
+                    <div>Loading document...</div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .markdown-body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        line-height: 1.6;
+        color: #24292f;
+    }
+    .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+        margin-top: 24px;
+        margin-bottom: 16px;
+        font-weight: 600;
+        line-height: 1.25;
+        border-bottom: 1px solid #d0d7de;
+        padding-bottom: 0.3em;
+    }
+    .markdown-body code {
+        padding: 0.2em 0.4em;
+        margin: 0;
+        font-size: 85%;
+        background-color: rgba(175, 184, 193, 0.2);
+        border-radius: 6px;
+    }
+    .markdown-body pre {
+        padding: 16px;
+        overflow: auto;
+        font-size: 85%;
+        line-height: 1.45;
+        background-color: #f6f8fa;
+        border-radius: 6px;
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+    .markdown-body pre code {
+        background-color: transparent;
+        padding: 0;
+    }
+    .markdown-body table {
+        border-spacing: 0;
+        border-collapse: collapse;
+        margin-top: 10px;
+        margin-bottom: 16px;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        display: block;
+    }
+    .markdown-body table th, .markdown-body table td {
+        padding: 6px 13px;
+        border: 1px solid #d0d7de;
+    }
+    .markdown-body table tr:nth-child(2n) {
+        background-color: #f6f8fa;
+    }
+    .markdown-body blockquote {
+        padding: 0 1em;
+        color: #57606a;
+        border-left: 0.25em solid #d0d7de;
+        margin: 0 0 16px 0;
+    }
+</style>
+
+@code {
+    private record DocMeta(string Title, string FileName, string Icon);
+
+    private static readonly List<DocMeta> AvailableDocs = new()
+    {
+        new("Architecture & Tech Rationale", "ARCHITECTURE_RATIONALE.md", "bi-layers-fill"),
+        new("Walkthrough & Verification", "WALKTHROUGH.md", "bi-check2-circle"),
+        new("HL7 & FHIR Cheat Sheet", "HL7_FHIR_CHEATSHEET.md", "bi-card-checklist")
+    };
+
+    private string selectedDocFile = "ARCHITECTURE_RATIONALE.md";
+    private string rawMarkdown = string.Empty;
+    private string renderedHtml = string.Empty;
+    private bool copied = false;
+
+    private static readonly Markdig.MarkdownPipeline Pipeline = new Markdig.MarkdownPipelineBuilder()
+        .UseAdvancedExtensions()
+        .Build();
+
+    protected override void OnInitialized()
+    {
+        LoadDocument("ARCHITECTURE_RATIONALE.md");
+    }
+
+    private void LoadDocument(string fileName)
+    {
+        selectedDocFile = fileName;
+        var docsDir = Path.Combine(Env.ContentRootPath, "Docs");
+        var filePath = Path.Combine(docsDir, fileName);
+
+        if (File.Exists(filePath))
+        {
+            rawMarkdown = File.ReadAllText(filePath);
+            renderedHtml = Markdig.Markdown.ToHtml(rawMarkdown, Pipeline);
+        }
+        else
+        {
+            rawMarkdown = $"# Document not found\n\nCould not locate `{filePath}`.";
+            renderedHtml = Markdig.Markdown.ToHtml(rawMarkdown, Pipeline);
+        }
+    }
+
+    private async Task CopyRawMarkdown()
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", rawMarkdown);
+        copied = true;
+        StateHasChanged();
+        await Task.Delay(2000);
+        copied = false;
+        StateHasChanged();
+    }
+}

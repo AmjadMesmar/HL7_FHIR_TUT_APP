@@ -1,0 +1,361 @@
+@page "/data-factory"
+@rendermode InteractiveServer
+@inject IJSRuntime JS
+
+<PageTitle>Synthetic Patient &amp; Clinical Data Factory</PageTitle>
+
+<div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
+    <!-- Hero Header -->
+    <div class="p-4 mb-4 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%);">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <span class="badge bg-light text-primary mb-2 px-3 py-1 fw-semibold">Test Fixture Generator</span>
+                <h1 class="h2 fw-bold mb-1">Synthetic Patient &amp; Clinical Data Factory</h1>
+                <p class="mb-0 text-white-50">
+                    Generate realistic, HIPAA-safe test patients, vitals, and lab results in both HL7 v2 ER7 and FHIR R4 JSON for your unit tests and staging databases.
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-warning fw-bold px-3 shadow-sm" @onclick="GenerateData">
+                    <i class="bi bi-arrow-repeat me-1"></i> Regenerate Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Controls Bar -->
+    <div class="card shadow-sm mb-3 border">
+        <div class="card-body p-3">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-4">
+                    <label class="form-label small text-muted mb-1 fw-semibold">Select Clinical Persona Profile:</label>
+                    <select class="form-select form-select-sm" @bind="selectedProfile" @bind:after="GenerateData">
+                        <option value="diabetic">Diabetic Outpatient (High Glucose &amp; HbA1c)</option>
+                        <option value="cardiac">Acute Inpatient Cardiac (STEMI &amp; Troponin)</option>
+                        <option value="pediatric">Pediatric Outpatient (Child Demographics &amp; Vitals)</option>
+                        <option value="routine">Routine Checkup (Normal Metabolic Panel)</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small text-muted mb-1 fw-semibold">Assigning Hospital Facility:</label>
+                    <input type="text" class="form-control form-control-sm font-monospace" @bind="facilityName" @bind:after="GenerateData" />
+                </div>
+                <div class="col-md-4 align-self-end">
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary btn-sm flex-grow-1" @onclick="GenerateData">
+                            <i class="bi bi-magic me-1"></i> Synthesize New Patient
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generated Patient Summary Banner -->
+    <div class="card bg-light border mb-3 shadow-sm">
+        <div class="card-body p-3">
+            <div class="row g-3 small align-items-center">
+                <div class="col-md-3">
+                    <span class="text-muted d-block">Patient Name:</span>
+                    <strong class="fs-6 text-dark">@generatedName</strong>
+                </div>
+                <div class="col-md-2">
+                    <span class="text-muted d-block">MRN:</span>
+                    <code class="fs-6 text-primary fw-bold">@generatedMrn</code>
+                </div>
+                <div class="col-md-2">
+                    <span class="text-muted d-block">DOB &amp; Gender:</span>
+                    <strong>@generatedDob (@generatedGender)</strong>
+                </div>
+                <div class="col-md-3">
+                    <span class="text-muted d-block">Clinical Condition:</span>
+                    <span class="badge bg-danger-subtle text-danger border border-danger">@generatedDiagnosis</span>
+                </div>
+                <div class="col-md-2 text-end">
+                    <span class="badge bg-success">HIPAA Safe (Synthetic)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dual Output Panel -->
+    <div class="row g-3 mb-4">
+        <!-- HL7 v2 ER7 Output -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100 border-primary border-top border-3">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+                    <div>
+                        <span class="badge bg-primary me-2">HL7 v2 ER7</span>
+                        <strong>@er7MessageType Message</strong>
+                    </div>
+                    <div class="d-flex gap-1">
+                        <button class="btn btn-outline-secondary btn-sm py-0" @onclick="CopyEr7">
+                            @if (copiedEr7) { <span class="text-success fw-bold"><i class="bi bi-check"></i> Copied!</span> }
+                            else { <span><i class="bi bi-clipboard"></i> Copy</span> }
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm py-0" @onclick='() => DownloadFile(er7Output, $"{generatedMrn}.hl7", "text/plain")'>
+                            <i class="bi bi-download"></i> .hl7
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <pre class="bg-dark text-light p-3 m-0 font-monospace small overflow-auto" 
+                         style="max-height: 480px; tab-size: 2; white-space: pre-wrap; word-break: break-all; border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius);"><code>@er7Output</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- FHIR R4 JSON Output -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100 border-success border-top border-3">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+                    <div>
+                        <span class="badge bg-success me-2">FHIR R4</span>
+                        <strong>Bundle (Transaction)</strong>
+                    </div>
+                    <div class="d-flex gap-1">
+                        <button class="btn btn-outline-secondary btn-sm py-0" @onclick="CopyFhir">
+                            @if (copiedFhir) { <span class="text-success fw-bold"><i class="bi bi-check"></i> Copied!</span> }
+                            else { <span><i class="bi bi-clipboard"></i> Copy</span> }
+                        </button>
+                        <button class="btn btn-outline-success btn-sm py-0" @onclick='() => DownloadFile(fhirJsonOutput, $"{generatedMrn}_fhir.json", "application/json")'>
+                            <i class="bi bi-download"></i> .json
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <pre class="bg-dark text-light p-3 m-0 font-monospace small overflow-auto" 
+                         style="max-height: 480px; tab-size: 2; white-space: pre-wrap; word-break: break-all; border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius);"><code>@fhirJsonOutput</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string selectedProfile = "diabetic";
+    private string facilityName = "METRO_HEALTH";
+
+    private string generatedName = "Smith, Eleanor J";
+    private string generatedMrn = "MRN-10092";
+    private string generatedDob = "1985-06-14";
+    private string generatedGender = "Female";
+    private string generatedDiagnosis = "Type 2 Diabetes Mellitus";
+
+    private string er7MessageType = "ORU^R01";
+    private string er7Output = string.Empty;
+    private string fhirJsonOutput = string.Empty;
+
+    private bool copiedEr7 = false;
+    private bool copiedFhir = false;
+
+    private readonly Random rng = new();
+
+    protected override void OnInitialized()
+    {
+        GenerateData();
+    }
+
+    private void GenerateData()
+    {
+        var timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+        var isoTimestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+        var controlId = $"MSG{rng.Next(100000, 999999)}";
+        var idNum = rng.Next(10000, 99999);
+        generatedMrn = $"MRN-{idNum}";
+
+        if (selectedProfile == "diabetic")
+        {
+            generatedName = "Taylor, Jordan Alex";
+            generatedDob = "1978-04-12";
+            generatedGender = "Male";
+            generatedDiagnosis = "Type 2 Diabetes (HbA1c 8.4%)";
+            er7MessageType = "ORU^R01";
+
+            er7Output = $@"MSH|^~\&|LIS_LAB|{facilityName}|CENTRAL_EHR|{facilityName}|{timestamp}||ORU^R01|{controlId}|P|2.5
+PID|1||{generatedMrn}^^^{facilityName}^MR||Taylor^Jordan^Alex||19780412|M|||742 Evergreen Terr^^Denver^CO^80201^USA||3035550188
+PV1|1|O|ENDOCRINE_CLINIC^ROOM_2^^HOSPITAL||||DOC102^Endo^David^M
+OBR|1|ORD-{idNum}|FILL-{idNum}|24323-8^Basic Metabolic Panel^LN|||{timestamp}
+OBX|1|NM|2345-7^Glucose [Mass/volume] in Serum or Plasma^LN||168|mg/dL|70-99|H|||F|||{timestamp}
+OBX|2|NM|4548-4^Hemoglobin A1c [Mass fraction] in Blood^LN||8.4|%|4.0-5.6|H|||F|||{timestamp}";
+
+            fhirJsonOutput = $@"{{
+  ""resourceType"": ""Bundle"",
+  ""type"": ""transaction"",
+  ""entry"": [
+    {{
+      ""fullUrl"": ""urn:uuid:patient-{idNum}"",
+      ""resource"": {{
+        ""resourceType"": ""Patient"",
+        ""id"": ""patient-{idNum}"",
+        ""identifier"": [{{ ""system"": ""http://{facilityName.ToLowerInvariant()}.org/mrn"", ""value"": ""{generatedMrn}"" }}],
+        ""name"": [{{ ""family"": ""Taylor"", ""given"": [""Jordan"", ""Alex""] }}],
+        ""gender"": ""male"",
+        ""birthDate"": ""1978-04-12""
+      }},
+      ""request"": {{ ""method"": ""POST"", ""url"": ""Patient"" }}
+    }},
+    {{
+      ""fullUrl"": ""urn:uuid:obs-glucose-{idNum}"",
+      ""resource"": {{
+        ""resourceType"": ""Observation"",
+        ""status"": ""final"",
+        ""code"": {{ ""coding"": [{{ ""system"": ""http://loinc.org"", ""code"": ""2345-7"", ""display"": ""Glucose in Serum"" }}] }},
+        ""subject"": {{ ""reference"": ""urn:uuid:patient-{idNum}"" }},
+        ""valueQuantity"": {{ ""value"": 168, ""unit"": ""mg/dL"", ""system"": ""http://unitsofmeasure.org"", ""code"": ""mg/dL"" }},
+        ""interpretation"": [{{ ""coding"": [{{ ""system"": ""http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation"", ""code"": ""H"", ""display"": ""High"" }}] }}]
+      }},
+      ""request"": {{ ""method"": ""POST"", ""url"": ""Observation"" }}
+    }}
+  ]
+}}";
+        }
+        else if (selectedProfile == "cardiac")
+        {
+            generatedName = "Vance, Marcus T";
+            generatedDob = "1972-03-25";
+            generatedGender = "Male";
+            generatedDiagnosis = "STEMI (Elevated Troponin 1.82 ng/mL)";
+            er7MessageType = "ADT^A01";
+
+            er7Output = $@"MSH|^~\&|EPIC_ADT|{facilityName}|CENTRAL_EHR|{facilityName}|{timestamp}||ADT^A01|{controlId}|P|2.5
+EVN|A01|{timestamp}
+PID|1||{generatedMrn}^^^{facilityName}^MR||Vance^Marcus^T||19720325|M|||404 River Rd^^Denver^CO^80203^USA||3035550144
+PV1|1|I|CARD_ICU^ROOM_402^BED_B^{facilityName}||||DOC881^Cardio^Sarah^B|||CARD||||1||||VISIT-{idNum}
+DG1|1|ICD10|I21.0|ST-Elevation Myocardial Infarction|{timestamp}|A
+OBR|1|ORD-{idNum}||49563-0^Troponin I [Mass/volume] in Serum or Plasma^LN|||{timestamp}
+OBX|1|NM|49563-0^Troponin I^LN||1.82|ng/mL|0.00-0.04|H|||F";
+
+            fhirJsonOutput = $@"{{
+  ""resourceType"": ""Bundle"",
+  ""type"": ""transaction"",
+  ""entry"": [
+    {{
+      ""fullUrl"": ""urn:uuid:patient-{idNum}"",
+      ""resource"": {{
+        ""resourceType"": ""Patient"",
+        ""id"": ""patient-{idNum}"",
+        ""identifier"": [{{ ""system"": ""http://{facilityName.ToLowerInvariant()}.org/mrn"", ""value"": ""{generatedMrn}"" }}],
+        ""name"": [{{ ""family"": ""Vance"", ""given"": [""Marcus"", ""T""] }}],
+        ""gender"": ""male"",
+        ""birthDate"": ""1972-03-25""
+      }},
+      ""request"": {{ ""method"": ""POST"", ""url"": ""Patient"" }}
+    }},
+    {{
+      ""fullUrl"": ""urn:uuid:enc-{idNum}"",
+      ""resource"": {{
+        ""resourceType"": ""Encounter"",
+        ""status"": ""in-progress"",
+        ""class"": {{ ""code"": ""IMP"", ""display"": ""inpatient encounter"" }},
+        ""subject"": {{ ""reference"": ""urn:uuid:patient-{idNum}"" }},
+        ""location"": [{{ ""location"": {{ ""display"": ""Cardiology ICU / Room 402 / Bed B"" }}, ""status"": ""active"" }}]
+      }},
+      ""request"": {{ ""method"": ""POST"", ""url"": ""Encounter"" }}
+    }}
+  ]
+}}";
+        }
+        else if (selectedProfile == "pediatric")
+        {
+            generatedName = "Miller, Sophia Grace";
+            generatedDob = "2020-09-18";
+            generatedGender = "Female";
+            generatedDiagnosis = "Pediatric Asthma / Reactive Airway";
+            er7MessageType = "ADT^A04";
+
+            er7Output = $@"MSH|^~\&|PEDS_REG|{facilityName}|CENTRAL_EHR|{facilityName}|{timestamp}||ADT^A04|{controlId}|P|2.5
+PID|1||{generatedMrn}^^^{facilityName}^MR||Miller^Sophia^Grace||20200918|F|||120 Sunshine Lane^^Austin^TX^78704^USA||5125550911
+PV1|1|O|PEDS_CLINIC^ROOM_101^^HOSPITAL||||DOC331^Peds^Emily^C
+OBX|1|NM|2708-6^Oxygen saturation in Arterial blood by Pulse oximetry^LN||94|%|95-100|L|||F";
+
+            fhirJsonOutput = $@"{{
+  ""resourceType"": ""Bundle"",
+  ""type"": ""transaction"",
+  ""entry"": [
+    {{
+      ""fullUrl"": ""urn:uuid:patient-{idNum}"",
+      ""resource"": {{
+        ""resourceType"": ""Patient"",
+        ""id"": ""patient-{idNum}"",
+        ""identifier"": [{{ ""system"": ""http://{facilityName.ToLowerInvariant()}.org/mrn"", ""value"": ""{generatedMrn}"" }}],
+        ""name"": [{{ ""family"": ""Miller"", ""given"": [""Sophia"", ""Grace""] }}],
+        ""gender"": ""female"",
+        ""birthDate"": ""2020-09-18""
+      }},
+      ""request"": {{ ""method"": ""POST"", ""url"": ""Patient"" }}
+    }}
+  ]
+}}";
+        }
+        else
+        {
+            generatedName = "Adams, Samuel Clark";
+            generatedDob = "1990-11-05";
+            generatedGender = "Male";
+            generatedDiagnosis = "Annual Health Screening (All Normal)";
+            er7MessageType = "ORU^R01";
+
+            er7Output = $@"MSH|^~\&|WELLNESS_SYS|{facilityName}|CENTRAL_EHR|{facilityName}|{timestamp}||ORU^R01|{controlId}|P|2.5
+PID|1||{generatedMrn}^^^{facilityName}^MR||Adams^Samuel^Clark||19901105|M|||500 Oak Hill Rd^^Austin^TX^78745^USA||5125559981
+PV1|1|O|WELLNESS_CENTER^SUITE_A^^HOSPITAL||||DOC442^Adams^John^M
+OBR|1|ORD-{idNum}||24323-8^Basic Metabolic Panel^LN|||{timestamp}
+OBX|1|NM|2345-7^Glucose^LN||88|mg/dL|70-99|N|||F
+OBX|2|NM|2823-3^Potassium^LN||4.1|mmol/L|3.5-5.1|N|||F
+OBX|3|NM|2951-2^Sodium^LN||140|mmol/L|135-145|N|||F";
+
+            fhirJsonOutput = $@"{{
+  ""resourceType"": ""Bundle"",
+  ""type"": ""transaction"",
+  ""entry"": [
+    {{
+      ""fullUrl"": ""urn:uuid:patient-{idNum}"",
+      ""resource"": {{
+        ""resourceType"": ""Patient"",
+        ""id"": ""patient-{idNum}"",
+        ""identifier"": [{{ ""system"": ""http://{facilityName.ToLowerInvariant()}.org/mrn"", ""value"": ""{generatedMrn}"" }}],
+        ""name"": [{{ ""family"": ""Adams"", ""given"": [""Samuel"", ""Clark""] }}],
+        ""gender"": ""male"",
+        ""birthDate"": ""1990-11-05""
+      }},
+      ""request"": {{ ""method"": ""POST"", ""url"": ""Patient"" }}
+    }}
+  ]
+}}";
+        }
+    }
+
+    private async Task CopyEr7()
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", er7Output);
+        copiedEr7 = true;
+        StateHasChanged();
+        await Task.Delay(2000);
+        copiedEr7 = false;
+        StateHasChanged();
+    }
+
+    private async Task CopyFhir()
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", fhirJsonOutput);
+        copiedFhir = true;
+        StateHasChanged();
+        await Task.Delay(2000);
+        copiedFhir = false;
+        StateHasChanged();
+    }
+
+    private async Task DownloadFile(string content, string filename, string contentType)
+    {
+        var bytes = System.Text.Encoding.UTF8.GetBytes(content);
+        var base64 = Convert.ToBase64String(bytes);
+        await JS.InvokeVoidAsync("eval", $@"
+            var a = document.createElement('a');
+            a.href = 'data:{contentType};base64,{base64}';
+            a.download = '{filename}';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        ");
+    }
+}

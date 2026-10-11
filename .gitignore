@@ -1,4 +1,17 @@
+# .NET Core / C# Build Artifacts
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+.vscode/
+
 # Logs
+logs
 logs
 *.log
 npm-debug.log*

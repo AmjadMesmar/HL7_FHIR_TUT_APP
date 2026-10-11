@@ -1,0 +1,137 @@
+@page "/terminology"
+@rendermode InteractiveServer
+
+<PageTitle>Clinical Terminology Browser - LOINC, ICD-10 &amp; HL7 Tables</PageTitle>
+
+<div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
+    <!-- Hero Header -->
+    <div class="p-4 mb-4 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #491217 0%, #d63384 100%);">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <span class="badge bg-light text-dark mb-2 px-3 py-1 fw-semibold">Clinical Vocabularies</span>
+                <h1 class="h2 fw-bold mb-1">Clinical Terminology &amp; Standard Tables Browser</h1>
+                <p class="mb-0 text-white-50">
+                    Rapid in-app lookup for LOINC laboratory test codes, ICD-10 diagnoses, and HL7 standard tables.
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <span class="badge bg-white text-dark align-self-center px-3 py-2 fw-semibold">
+                    <i class="bi bi-search me-1"></i> Quick Reference
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search & Filter Controls -->
+    <div class="card shadow-sm mb-3 border">
+        <div class="card-body p-3">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-7">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control" placeholder="Search by name, code, or description (e.g. Glucose, I21.0, Inpatient, 2345-7)..." 
+                               @bind="searchTerm" @bind:event="oninput" />
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="btn-group btn-group-sm w-100">
+                        <button class="btn @(activeCategory == "All" ? "btn-dark" : "btn-outline-secondary")" @onclick='() => activeCategory = "All"'>All</button>
+                        <button class="btn @(activeCategory == "LOINC" ? "btn-primary" : "btn-outline-primary")" @onclick='() => activeCategory = "LOINC"'>LOINC (Labs)</button>
+                        <button class="btn @(activeCategory == "ICD-10" ? "btn-danger" : "btn-outline-danger")" @onclick='() => activeCategory = "ICD-10"'>ICD-10 (Diagnoses)</button>
+                        <button class="btn @(activeCategory == "HL7 Tables" ? "btn-warning text-dark" : "btn-outline-warning")" @onclick='() => activeCategory = "HL7 Tables"'>HL7 Tables</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="card shadow-sm border mb-4">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+            <span class="fw-semibold small">Showing @FilteredEntries.Count() Terminology Entries</span>
+            <span class="badge bg-secondary">Universal Vocabularies</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover table-sm mb-0 small text-nowrap">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 15%;">Standard Code</th>
+                        <th style="width: 15%;">Category</th>
+                        <th style="width: 35%;">Official Name / Meaning</th>
+                        <th style="width: 35%;">Clinical Context / Units / Reference</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in FilteredEntries)
+                    {
+                        <tr>
+                            <td class="font-monospace fw-bold text-primary">@item.Code</td>
+                            <td><span class="badge @GetCategoryBadge(item.Category)">@item.Category</span></td>
+                            <td class="text-wrap" style="max-width: 320px;">
+                                <strong class="text-dark">@item.Name</strong>
+                                @if (!string.IsNullOrEmpty(item.Description))
+                                {
+                                    <div class="text-muted" style="font-size: 0.78rem;">@item.Description</div>
+                                }
+                            </td>
+                            <td class="text-wrap text-muted" style="max-width: 320px;">@item.ClinicalDetails</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string searchTerm = string.Empty;
+    private string activeCategory = "All";
+
+    private record TerminologyEntry(string Code, string Category, string Name, string Description, string ClinicalDetails);
+
+    private static readonly List<TerminologyEntry> AllEntries = new()
+    {
+        // LOINC LAB CODES
+        new("2345-7", "LOINC", "Glucose [Mass/volume] in Serum or Plasma", "Blood sugar level", "Units: mg/dL. Normal Adult Range: 70 - 99 mg/dL. Specimen: Serum/Plasma."),
+        new("4548-4", "LOINC", "Hemoglobin A1c [Mass fraction] in Blood", "Glycated hemoglobin 3-month average", "Units: %. Normal Range: 4.0 - 5.6%. Diabetic target: < 7.0%."),
+        new("2823-3", "LOINC", "Potassium [Moles/volume] in Serum or Plasma", "Serum electrolyte potassium", "Units: mmol/L. Normal Range: 3.5 - 5.1 mmol/L. Critical < 3.0 or > 6.0!"),
+        new("2951-2", "LOINC", "Sodium [Moles/volume] in Serum or Plasma", "Serum electrolyte sodium", "Units: mmol/L. Normal Range: 135 - 145 mmol/L."),
+        new("49563-0", "LOINC", "Troponin I.cardiac [Mass/volume] in Serum or Plasma", "Cardiac muscle damage marker", "Units: ng/mL. Normal: 0.00 - 0.04 ng/mL. Elevated (>0.40) indicates MI!"),
+        new("718-7", "LOINC", "Hemoglobin [Mass/volume] in Blood", "Red blood cell oxygen carrier", "Units: g/dL. Normal Male: 13.8 - 17.2, Female: 12.1 - 15.1 g/dL."),
+        new("6690-2", "LOINC", "Leukocytes [#/volume] in Blood", "White Blood Cell Count (WBC)", "Units: 10*3/uL. Normal Range: 4.5 - 11.0 10*3/uL. Elevated indicates infection."),
+        new("24323-8", "LOINC", "Basic Metabolic Panel (BMP)", "Universal chemistry battery order", "Orders Glucose, Calcium, Sodium, Potassium, CO2, Chloride, BUN, Creatinine."),
+
+        // ICD-10 DIAGNOSES
+        new("I21.0", "ICD-10", "ST elevation (STEMI) myocardial infarction", "Acute anterior wall heart attack", "Category: Diseases of the circulatory system. Admitting diagnosis in ADT^A01."),
+        new("E11.9", "ICD-10", "Type 2 diabetes mellitus without complications", "Adult-onset diabetes", "Category: Endocrine, nutritional and metabolic diseases."),
+        new("I10", "ICD-10", "Essential (primary) hypertension", "High blood pressure", "Common comorbidity in adult outpatient encounters."),
+        new("J45.909", "ICD-10", "Unspecified asthma, uncomplicated", "Reactive airway disease", "Common in pediatric admissions and emergency visits."),
+        new("N17.9", "ICD-10", "Acute kidney injury, unspecified", "Rapid decline in renal function", "Common inpatient complication tracked with Creatinine labs."),
+
+        // HL7 TABLES
+        new("Table 0004 (I)", "HL7 Tables", "Patient Class: Inpatient", "PV1-2 Patient Class", "Patient admitted to a hospital bed for overnight stay."),
+        new("Table 0004 (O)", "HL7 Tables", "Patient Class: Outpatient", "PV1-2 Patient Class", "Clinic visit, ambulatory care, or day procedure (no overnight stay)."),
+        new("Table 0004 (E)", "HL7 Tables", "Patient Class: Emergency", "PV1-2 Patient Class", "Emergency department evaluation."),
+        new("Table 0078 (H)", "HL7 Tables", "Abnormal Flag: High", "OBX-8 Abnormal Flag", "Test result exceeds physiological upper reference boundary."),
+        new("Table 0078 (L)", "HL7 Tables", "Abnormal Flag: Low", "OBX-8 Abnormal Flag", "Test result falls below physiological lower reference boundary."),
+        new("Table 0078 (N)", "HL7 Tables", "Abnormal Flag: Normal", "OBX-8 Abnormal Flag", "Result is within safe expected parameters."),
+        new("Table 0112 (01)", "HL7 Tables", "Discharge Disposition: Discharged to Home", "PV1-36 Discharge Status", "Patient cleared by attending doctor to return home."),
+        new("Table 0112 (20)", "HL7 Tables", "Discharge Disposition: Expired", "PV1-36 Discharge Status", "Patient deceased during encounter."),
+        new("Table 0119 (NW)", "HL7 Tables", "Order Control: New Order", "ORC-1 Order Control", "Transmits a newly created clinical test or imaging order.")
+    };
+
+    private IEnumerable<TerminologyEntry> FilteredEntries => AllEntries
+        .Where(e => activeCategory == "All" || e.Category == activeCategory)
+        .Where(e => string.IsNullOrWhiteSpace(searchTerm) ||
+                    e.Code.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    e.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    e.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    e.ClinicalDetails.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+
+    private string GetCategoryBadge(string category) => category switch
+    {
+        "LOINC" => "bg-primary",
+        "ICD-10" => "bg-danger",
+        _ => "bg-warning text-dark"
+    };
+}

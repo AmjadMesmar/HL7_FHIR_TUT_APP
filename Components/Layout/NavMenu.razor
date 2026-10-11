@@ -1,0 +1,102 @@
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="">
+            <i class="bi bi-heart-pulse text-danger me-2"></i>HL7 &amp; FHIR Portal
+        </a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="nav flex-column">
+        <!-- 1. LEARNING & CURRICULUM -->
+        <div class="px-3 py-1 text-uppercase text-white-50 fw-bold" style="font-size: 0.68rem; letter-spacing: 0.05rem;">
+            Curriculum &amp; Docs
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link py-1" href="" Match="NavLinkMatch.All">
+                <i class="bi bi-speedometer2 me-2"></i> Overview
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link py-1" href="get-started">
+                <i class="bi bi-book-half me-2 text-info"></i> Master Guide
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link py-1" href="docs">
+                <i class="bi bi-journal-bookmark-fill me-2 text-success"></i> Living Docs
+            </NavLink>
+        </div>
+
+        <hr class="my-2 border-secondary" />
+
+        <!-- 2. INTEROPERABILITY LABS -->
+        <div class="px-3 py-1 text-uppercase text-white-50 fw-bold" style="font-size: 0.68rem; letter-spacing: 0.05rem;">
+            Interactive Labs
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link py-1" href="bridge">
+                <i class="bi bi-shuffle me-2 text-warning"></i> Interop Bridge
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link py-1" href="hl7-inspector">
+                <i class="bi bi-code-slash me-2 text-primary"></i> HL7 v2 &amp; Linter
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link py-1" href="fhir-explorer">
+                <i class="bi bi-filetype-json me-2 text-success"></i> FHIR Explorer
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link py-1" href="rest-playground">
+                <i class="bi bi-cloud-arrow-down me-2 text-info"></i> REST Playground
+            </NavLink>
+        </div>
+
+        <hr class="my-2 border-secondary" />
+
+        <!-- 3. DEVELOPER & QA TOOLS -->
+        <div class="px-3 py-1 text-uppercase text-white-50 fw-bold" style="font-size: 0.68rem; letter-spacing: 0.05rem;">
+            Engineering &amp; QA Tools
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link py-1" href="data-factory">
+                <i class="bi bi-magic me-2 text-primary"></i> Data Factory
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link py-1" href="mllp-simulator">
+                <i class="bi bi-hdd-network me-2 text-success"></i> MLLP &amp; ACK Sim
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link py-1" href="terminology">
+                <i class="bi bi-search me-2 text-danger"></i> Terminology Lookup
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link py-1" href="code-recipes">
+                <i class="bi bi-filetype-cs me-2 text-warning"></i> C# Code Recipes
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link py-1" href="test-generator">
+                <i class="bi bi-check2-all me-2 text-info"></i> xUnit Test Gen
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link py-1" href="war-room">
+                <i class="bi bi-shield-slash-fill me-2 text-danger"></i> War Room (Bugs)
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link py-1" href="project-info">
+                <i class="bi bi-info-circle-fill me-2 text-light"></i> Tech &amp; Specs
+            </NavLink>
+        </div>
+    </nav>
+</div>

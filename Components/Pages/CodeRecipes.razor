@@ -1,0 +1,410 @@
+@page "/code-recipes"
+@rendermode InteractiveServer
+@inject IJSRuntime JS
+
+<PageTitle>C# Developer Code Recipes - HL7 & FHIR</PageTitle>
+
+<div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
+    <!-- Hero Header -->
+    <div class="p-4 mb-4 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #491217 0%, #0d6efd 100%);">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <span class="badge bg-danger mb-2 px-3 py-1 fw-semibold">.NET 10 Developer Recipes</span>
+                <h1 class="h2 fw-bold mb-1">C# &amp; .NET Healthcare Code Recipes</h1>
+                <p class="mb-0 text-white-50">
+                    Production-ready, copy-paste snippets for your engineering department. Built with the official Firely FHIR SDK.
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <span class="badge bg-light text-dark align-self-center px-3 py-2 fw-semibold">
+                    <i class="bi bi-filetype-cs me-1"></i> Ready for Production
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Filter / Jump Buttons -->
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        @for (int r = 0; r < Recipes.Count; r++)
+        {
+            var idx = r;
+            var item = Recipes[idx];
+            <button class="btn btn-sm @(selectedRecipeIndex == idx ? "btn-primary fw-bold text-white shadow-sm" : "btn-outline-secondary")"
+                    @onclick="() => selectedRecipeIndex = idx">
+                <i class="bi bi-code me-1"></i> @item.Title
+            </button>
+        }
+    </div>
+
+    <!-- Active Code Recipe Card -->
+    @{
+        var curRecipe = Recipes[selectedRecipeIndex];
+    }
+    <div class="card shadow-sm border">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+            <div>
+                <span class="badge bg-dark me-2">Recipe #@(selectedRecipeIndex + 1)</span>
+                <strong class="text-dark">@curRecipe.Title</strong>
+            </div>
+            <button class="btn btn-sm btn-outline-primary" @onclick="() => CopyRecipeCode(curRecipe.Code)">
+                @if (copiedRecipeId == curRecipe.Title)
+                {
+                    <i class="bi bi-check-circle-fill text-success"></i> <span class="text-success fw-bold">Copied!</span>
+                }
+                else
+                {
+                    <i class="bi bi-clipboard"></i> <span>Copy Snippet</span>
+                }
+            </button>
+        </div>
+        <div class="card-body p-3">
+            <p class="small text-muted mb-2">@curRecipe.Description</p>
+            <div class="alert alert-secondary py-1 px-2 small mb-2">
+                <strong><i class="bi bi-info-circle"></i> NuGet Namespace:</strong> <code>@curRecipe.Namespace</code>
+            </div>
+            <pre class="bg-dark text-light p-3 rounded font-monospace small mb-0 overflow-auto" style="max-height: 450px; tab-size: 4; white-space: pre-wrap; word-break: break-all;"><code>@curRecipe.Code</code></pre>
+        </div>
+    </div>
+</div>
+
+@code {
+    private int selectedRecipeIndex = 0;
+    private string? copiedRecipeId;
+
+    private record CodeRecipeItem(string Title, string Namespace, string Description, string Code);
+
+    private static readonly List<CodeRecipeItem> Recipes = new()
+    {
+        // 1. Constructing Patient
+        new(
+            Title: "1. Build FHIR Patient in C#",
+            Namespace: "using Hl7.Fhir.Model;",
+            Description: "Creates a strongly-typed Patient resource with MRN identifier, official name, DOB, gender, phone, and home address.",
+            Code:
+@"using Hl7.Fhir.Model;
+
+public Patient CreateFhirPatient()
+{
+    var patient = new Patient
+    {
+        Id = Guid.NewGuid().ToString(),
+        Active = true,
+        Gender = AdministrativeGender.Female,
+        BirthDate = ""1985-06-14""
+    };
+
+    // 1. Assign Medical Record Number (MRN)
+    patient.Identifier.Add(new Identifier
+    {
+        System = ""http://hospital.example.org/mrn"",
+        Value = ""MRN982341"",
+        Type = new CodeableConcept(""http://terminology.hl7.org/CodeSystem/v2-0203"", ""MR"", ""Medical Record Number"")
+    });
+
+    // 2. Add Official Human Name (Family & Given parts)
+    var name = new HumanName
+    {
+        Use = HumanName.NameUse.Official,
+        Family = ""Smith""
+    };
+    name.GivenElement.Add(new FhirString(""Eleanor""));
+    name.GivenElement.Add(new FhirString(""Jane""));
+    patient.Name.Add(name);
+
+    // 3. Add Phone Telecom
+    patient.Telecom.Add(new ContactPoint
+    {
+        System = ContactPoint.ContactPointSystem.Phone,
+        Value = ""512-555-0199"",
+        Use = ContactPoint.ContactPointUse.Home
+    });
+
+    // 4. Add Residential Address
+    patient.Address.Add(new Address
+    {
+        Use = Address.AddressUse.Home,
+        Line = new[] { ""1244 Healthcare Blvd"" },
+        City = ""Austin"",
+        State = ""TX"",
+        PostalCode = ""78701"",
+        Country = ""USA""
+    });
+
+    return patient;
+}"
+        ),
+
+        // 2. Constructing Inpatient Encounter
+        new(
+            Title: "2. Build Inpatient Encounter in C#",
+            Namespace: "using Hl7.Fhir.Model;",
+            Description: "Creates an Inpatient Encounter with ActCode 'IMP', links to a Patient, assigns ICU Bed location, and sets start timestamp.",
+            Code:
+@"using Hl7.Fhir.Model;
+
+public Encounter CreateInpatientEncounter(string patientId)
+{
+    var encounter = new Encounter
+    {
+        Id = Guid.NewGuid().ToString(),
+        Status = Encounter.EncounterStatus.InProgress,
+        
+        // Class: Inpatient (ActCode: IMP)
+        Class = new Coding(""http://terminology.hl7.org/CodeSystem/v3-ActCode"", ""IMP"", ""inpatient encounter""),
+        
+        // Subject Reference pointing to Patient
+        Subject = new ResourceReference($""Patient/{patientId}"")
+        {
+            Display = ""Eleanor Smith""
+        },
+
+        // Admission Period Start
+        Period = new Period
+        {
+            Start = DateTimeOffset.UtcNow.ToString(""o"")
+        }
+    };
+
+    // Hospital Visit Account Number
+    encounter.Identifier.Add(new Identifier
+    {
+        System = ""http://hospital.example.org/visit-number"",
+        Value = ""VISIT-77391"",
+        Type = new CodeableConcept(""http://terminology.hl7.org/CodeSystem/v2-0203"", ""VN"", ""Visit Number"")
+    });
+
+    // Physical Bed & Room Assignment
+    encounter.Location.Add(new Encounter.LocationComponent
+    {
+        Location = new ResourceReference
+        {
+            Display = ""Cardiology ICU / Room 402 / Bed B""
+        },
+        Status = Encounter.EncounterLocationStatus.Active
+    });
+
+    return encounter;
+}"
+        ),
+
+        // 3. Lab Observation with LOINC
+        new(
+            Title: "3. Build Lab Observation (LOINC + UCUM)",
+            Namespace: "using Hl7.Fhir.Model;",
+            Description: "Creates a quantitative lab test observation (Glucose 142 mg/dL) with LOINC code, UCUM unit, reference range, and abnormal interpretation.",
+            Code:
+@"using Hl7.Fhir.Model;
+
+public Observation CreateGlucoseObservation(string patientId)
+{
+    var obs = new Observation
+    {
+        Id = Guid.NewGuid().ToString(),
+        Status = ObservationStatus.Final,
+        Subject = new ResourceReference($""Patient/{patientId}""),
+        Effective = new FhirDateTime(DateTimeOffset.UtcNow)
+    };
+
+    // Category: Laboratory
+    obs.Category.Add(new CodeableConcept(
+        ""http://terminology.hl7.org/CodeSystem/observation-category"", 
+        ""laboratory"", 
+        ""Laboratory""));
+
+    // Code: LOINC 2345-7 (Glucose in Serum/Plasma)
+    obs.Code = new CodeableConcept(
+        ""http://loinc.org"", 
+        ""2345-7"", 
+        ""Glucose [Mass/volume] in Serum or Plasma"");
+
+    // Value: Quantitative UCUM Quantity (142 mg/dL)
+    obs.Value = new Quantity
+    {
+        Value = 142m,
+        Unit = ""mg/dL"",
+        System = ""http://unitsofmeasure.org"",
+        Code = ""mg/dL""
+    };
+
+    // Normal Reference Range (70-99 mg/dL)
+    obs.ReferenceRange.Add(new Observation.ReferenceRangeComponent
+    {
+        Low = new Quantity(70m, ""mg/dL""),
+        High = new Quantity(99m, ""mg/dL""),
+        Text = ""70-99 mg/dL""
+    });
+
+    // Interpretation Flag: 'H' (High)
+    obs.Interpretation.Add(new CodeableConcept(
+        ""http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation"",
+        ""H"",
+        ""High""));
+
+    return obs;
+}"
+        ),
+
+        // 4. Bundling Resources
+        new(
+            Title: "4. Bundle Multiple Resources for REST API",
+            Namespace: "using Hl7.Fhir.Model;",
+            Description: "Packages a Patient, Encounter, and Observations together into a FHIR transaction bundle.",
+            Code:
+@"using Hl7.Fhir.Model;
+
+public Bundle PackageTransactionBundle(Patient patient, Encounter encounter, List<Observation> observations)
+{
+    var bundle = new Bundle
+    {
+        Id = Guid.NewGuid().ToString(),
+        Type = Bundle.BundleType.Transaction,
+        Timestamp = DateTimeOffset.UtcNow
+    };
+
+    // 1. Add Patient Entry with POST interaction
+    bundle.Entry.Add(new Bundle.EntryComponent
+    {
+        FullUrl = $""urn:uuid:{patient.Id}"",
+        Resource = patient,
+        Request = new Bundle.RequestComponent
+        {
+            Method = Bundle.HTTPVerb.POST,
+            Url = ""Patient""
+        }
+    });
+
+    // 2. Add Encounter Entry with POST interaction
+    bundle.Entry.Add(new Bundle.EntryComponent
+    {
+        FullUrl = $""urn:uuid:{encounter.Id}"",
+        Resource = encounter,
+        Request = new Bundle.RequestComponent
+        {
+            Method = Bundle.HTTPVerb.POST,
+            Url = ""Encounter""
+        }
+    });
+
+    // 3. Add each Observation
+    foreach (var obs in observations)
+    {
+        bundle.Entry.Add(new Bundle.EntryComponent
+        {
+            FullUrl = $""urn:uuid:{obs.Id}"",
+            Resource = obs,
+            Request = new Bundle.RequestComponent
+            {
+                Method = Bundle.HTTPVerb.POST,
+                Url = ""Observation""
+            }
+        });
+    }
+
+    return bundle;
+}"
+        ),
+
+        // 5. Dependency Injection for FhirClient
+        new(
+            Title: "5. Register FhirClient in ASP.NET Core DI",
+            Namespace: "using Hl7.Fhir.Rest;",
+            Description: "How to register and inject Firely's FhirClient or HttpClient in Program.cs for your backend API or Blazor Server.",
+            Code:
+@"// In Program.cs (ASP.NET Core / Blazor Server):
+using Hl7.Fhir.Rest;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Register HttpClient with timeout & headers
+builder.Services.AddHttpClient(""FhirServer"", client =>
+{
+    client.BaseAddress = new Uri(""https://hapi.fhir.org/baseR4"");
+    client.DefaultRequestHeaders.Add(""Accept"", ""application/fhir+json"");
+    client.Timeout = TimeSpan.FromSeconds(15);
+});
+
+// Register typed FhirClient wrapper
+builder.Services.AddScoped<FhirClient>(sp =>
+{
+    var settings = new FhirClientSettings
+    {
+        Timeout = 15000,
+        PreferredFormat = ResourceFormat.Json,
+        VerifyFhirVersion = true
+    };
+    return new FhirClient(""https://hapi.fhir.org/baseR4"", settings);
+});
+
+// Consuming in any Service or Controller:
+public class PatientSyncService
+{
+    private readonly FhirClient _client;
+
+    public PatientSyncService(FhirClient client)
+    {
+        _client = client;
+    }
+
+    public async Task<Patient?> FetchPatientAsync(string id)
+    {
+        return await _client.ReadAsync<Patient>($""Patient/{id}"");
+    }
+}"
+        ),
+
+        // 6. Zero-Dependency HL7 v2 Parser
+        new(
+            Title: "6. Lightweight HL7 v2 Pipe Parser in C#",
+            Namespace: "using System.Collections.Generic;",
+            Description: "A fast, pure C# ER7 string parser with zero external dependencies, perfect for internal interface engines.",
+            Code:
+@"public static class LightweightHl7Parser
+{
+    public static Dictionary<string, List<string[]>> ParseMessage(string rawEr7)
+    {
+        var result = new Dictionary<string, List<string[]>>(StringComparer.OrdinalIgnoreCase);
+        if (string.IsNullOrWhiteSpace(rawEr7)) return result;
+
+        var lines = rawEr7.Replace(""\r\n"", ""\n"").Replace(""\r"", ""\n"")
+                          .Split('\n', StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var line in lines)
+        {
+            var trimmed = line.Trim();
+            if (string.IsNullOrWhiteSpace(trimmed)) continue;
+
+            // Split by field delimiter (|)
+            var fields = trimmed.Split('|');
+            var segmentId = fields[0].Trim().ToUpperInvariant();
+
+            if (!result.ContainsKey(segmentId))
+            {
+                result[segmentId] = new List<string[]>();
+            }
+            result[segmentId].Add(fields);
+        }
+
+        return result;
+    }
+
+    // Helper: Safely get field value
+    public static string GetField(List<string[]> segments, int segmentIndex, int fieldIndex)
+    {
+        if (segments == null || segmentIndex >= segments.Count) return string.Empty;
+        var fields = segments[segmentIndex];
+        return fieldIndex < fields.Length ? fields[fieldIndex] : string.Empty;
+    }
+}"
+        )
+    };
+
+    private async Task CopyRecipeCode(string code)
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", code);
+        copiedRecipeId = Recipes[selectedRecipeIndex].Title;
+        StateHasChanged();
+        await Task.Delay(2000);
+        copiedRecipeId = null;
+        StateHasChanged();
+    }
+}

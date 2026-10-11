@@ -1,0 +1,982 @@
+@page "/get-started"
+@rendermode InteractiveServer
+
+<PageTitle>Get Started - The Master Healthcare Interoperability Guide</PageTitle>
+
+<div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
+    <!-- Hero Header -->
+    <div class="p-4 mb-4 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #198754 0%, #0d6efd 100%);">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <span class="badge bg-light text-dark mb-2 px-3 py-1 fw-semibold">In-Depth Healthcare Engineering Curriculum</span>
+                <h1 class="h2 fw-bold mb-1">HL7 v2 & FHIR: The Master Educational Guide</h1>
+                <p class="mb-0 text-white-50">
+                    Comprehensive deep-dive covering body formats (JSON vs XML vs ER7), delimiters and escape operators, 5 surgical message dissections, and interactive tools.
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="bridge" class="btn btn-warning fw-bold px-3">
+                    <i class="bi bi-shuffle me-1"></i> Open Live Bridge
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Navigation Bar -->
+    <div class="card shadow-sm mb-4 border-0 bg-light">
+        <div class="card-body p-3">
+            <div class="d-flex flex-wrap gap-2 align-items-center small">
+                <span class="fw-bold text-muted me-1"><i class="bi bi-compass"></i> Jump to Topic:</span>
+                <a href="get-started#topic-formats" class="btn btn-sm btn-outline-primary py-0">1. JSON vs XML vs ER7</a>
+                <a href="get-started#topic-operators" class="btn btn-sm btn-outline-primary py-0">2. HL7 Delimiters &amp; Operators</a>
+                <a href="get-started#topic-messages" class="btn btn-sm btn-outline-primary py-0">3. 5 Deep-Dive Messages</a>
+                <a href="get-started#topic-journey" class="btn btn-sm btn-outline-primary py-0">4. Patient Journey Simulator</a>
+                <a href="get-started#topic-jargon" class="btn btn-sm btn-outline-primary py-0">5. Jargon Buster Dictionary</a>
+                <a href="get-started#topic-quiz" class="btn btn-sm btn-outline-primary py-0">6. Practice Quiz &amp; Specs</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOPIC 1: WHEN TO USE DATA BODY TYPES (JSON vs XML vs ER7 vs RDF) -->
+    <div id="topic-formats" class="card shadow-sm mb-4 border-primary border-top border-3">
+        <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-primary">
+                <i class="bi bi-file-earmark-binary-fill me-2"></i> Topic 1: When to Use Payload Formats (JSON vs XML vs ER7 vs RDF)
+            </h5>
+            <span class="badge bg-primary">Architecture Decision Guide</span>
+        </div>
+        <div class="card-body p-3">
+            <p class="small text-muted mb-3">
+                Healthcare software interchanges clinical data across four primary formats. Knowing <em>which</em> format to select is essential for architectural planning:
+            </p>
+
+            <div class="row g-3 mb-3">
+                <!-- JSON Card -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border shadow-sm">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+                            <span class="fw-bold text-success">JSON (JavaScript Object Notation)</span>
+                            <span class="badge bg-success">FHIR Standard</span>
+                        </div>
+                        <div class="card-body p-2 small d-flex flex-column">
+                            <p class="text-muted mb-2 flex-grow-1">
+                                <strong>When to use:</strong> Modern web apps, mobile apps, RESTful FHIR APIs (SMART on FHIR), cloud microservices, and public health data exchanges.
+                            </p>
+                            <ul class="list-unstyled text-muted mb-0" style="font-size: 0.78rem;">
+                                <li><strong>Pros:</strong> Compact, no closing tags, parsed natively by browsers, .NET <code>System.Text.Json</code>, Python, and TypeScript.</li>
+                                <li><strong>Cons:</strong> Lacks native schema validation out of the box (requires FHIR JSON Schemas).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- XML Card -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border shadow-sm">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+                            <span class="fw-bold text-primary">XML (eXtensible Markup)</span>
+                            <span class="badge bg-primary">C-CDA / Enterprise</span>
+                        </div>
+                        <div class="card-body p-2 small d-flex flex-column">
+                            <p class="text-muted mb-2 flex-grow-1">
+                                <strong>When to use:</strong> Document-based exchanges like <strong>C-CDA (Continuity of Care Documents)</strong>, enterprise SOAP/ESB feeds, and legal medical records archiving.
+                            </p>
+                            <ul class="list-unstyled text-muted mb-0" style="font-size: 0.78rem;">
+                                <li><strong>Pros:</strong> Strict validation via XSD and Schematron rules; native digital signatures (XML-DSig).</li>
+                                <li><strong>Cons:</strong> Verbose closing tags inflate payload size by 30-50%; heavier memory footprint.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ER7 Card -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border shadow-sm">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+                            <span class="fw-bold text-warning text-dark">ER7 (Pipe-and-Hat)</span>
+                            <span class="badge bg-warning text-dark">HL7 v2 Legacy</span>
+                        </div>
+                        <div class="card-body p-2 small d-flex flex-column">
+                            <p class="text-muted mb-2 flex-grow-1">
+                                <strong>When to use:</strong> Real-time hospital interface engines (Mirth, Cloverleaf, Rhapsody), bedside medical devices, and internal EHR-to-LIS socket feeds.
+                            </p>
+                            <ul class="list-unstyled text-muted mb-0" style="font-size: 0.78rem;">
+                                <li><strong>Pros:</strong> Ultra-lightweight ASCII byte stream; tiny bandwidth footprint; instantaneous parsing on older hardware.</li>
+                                <li><strong>Cons:</strong> Cryptic syntax; position-dependent; difficult for web browsers to consume directly.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Turtle / RDF Card -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border shadow-sm">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+                            <span class="fw-bold text-info text-dark">Turtle / RDF</span>
+                            <span class="badge bg-info text-dark">Knowledge Graphs</span>
+                        </div>
+                        <div class="card-body p-2 small d-flex flex-column">
+                            <p class="text-muted mb-2 flex-grow-1">
+                                <strong>When to use:</strong> Academic biomedical research, clinical ontologies (SNOMED/OBO graph traversals), and AI reasoning systems.
+                            </p>
+                            <ul class="list-unstyled text-muted mb-0" style="font-size: 0.78rem;">
+                                <li><strong>Pros:</strong> Native semantic triple structure (Subject &rarr; Predicate &rarr; Object).</li>
+                                <li><strong>Cons:</strong> Very complex; rarely supported for operational clinical feeds.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Architectural Comparison Matrix -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm small mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Scenario</th>
+                            <th>Recommended Format</th>
+                            <th>Transport Layer</th>
+                            <th>Rationale</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Patient Mobile Portal / App</strong></td>
+                            <td><span class="badge bg-success">FHIR JSON</span></td>
+                            <td>HTTPS REST / OAuth2</td>
+                            <td>Fastest parsing on iOS/Android; smallest payload; native web serialization.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hospital-to-Hospital Record Transfer (USCDI)</strong></td>
+                            <td><span class="badge bg-primary">C-CDA XML</span></td>
+                            <td>Direct Secure Messaging / XCA</td>
+                            <td>Federally mandated for legal clinical summary documents with Schematron validation.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>In-Hospital Lab Analyzer Machine &rarr; LIS</strong></td>
+                            <td><span class="badge bg-warning text-dark">HL7 v2 ER7</span></td>
+                            <td>MLLP over raw TCP Sockets</td>
+                            <td>Runs on embedded microcontrollers with minimal RAM; stream-oriented delivery.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Biomedical Knowledge Graph &amp; Pharmacogenomics</strong></td>
+                            <td><span class="badge bg-info text-dark">RDF / Turtle</span></td>
+                            <td>SPARQL / Graph Endpoints</td>
+                            <td>Enables ontological reasoning across drug-drug interaction databases.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOPIC 2: HL7 DELIMITERS, OPERATORS, & ESCAPE SEQUENCES -->
+    <div id="topic-operators" class="card shadow-sm mb-4 border-warning border-top border-3">
+        <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-code-slash me-2"></i> Topic 2: Masterclass on HL7 v2 Operators, Delimiters &amp; Escapes
+            </h5>
+            <span class="badge bg-warning text-dark">Syntax Deep Dive</span>
+        </div>
+        <div class="card-body p-3">
+            <p class="small text-muted mb-3">
+                HL7 v2 does not use quotes or curly braces. Everything is controlled by <strong>5 primary structural operators</strong> declared dynamically in the <code>MSH</code> segment:
+            </p>
+
+            <div class="p-2 mb-3 bg-dark text-light rounded font-monospace small">
+                <span class="text-warning">MSH</span><span class="text-danger">|</span><span class="text-info">^~\&amp;</span><span class="text-danger">|</span>HIS<span class="text-danger">|</span>HOSPITAL_A<span class="text-danger">|</span>...
+                <div class="text-muted mt-1" style="font-size: 0.78rem;">
+                    &bull; Byte 4 is <code>|</code> (Field Delimiter)<br />
+                    &bull; Bytes 5-8 are <code>^~\&amp;</code> (Component, Repetition, Escape, Subcomponent)
+                </div>
+            </div>
+
+            <!-- The 5 Primary Delimiters Table -->
+            <div class="table-responsive mb-4">
+                <table class="table table-bordered table-sm small mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 10%;">Operator</th>
+                            <th style="width: 20%;">Name</th>
+                            <th style="width: 30%;">Purpose &amp; Hierarchy</th>
+                            <th style="width: 40%;">Real-World ER7 Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-monospace text-center fs-5 text-danger fw-bold">|</td>
+                            <td><strong>Field Delimiter</strong></td>
+                            <td>Separates major clinical fields in a segment. (Highest structural level).</td>
+                            <td><code>PID|1||MRN1002||Smith^Eleanor</code><br /><span class="text-muted">Splits Set ID, IDs, and Names.</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-monospace text-center fs-5 text-primary fw-bold">^</td>
+                            <td><strong>Component Delimiter</strong></td>
+                            <td>Separates sub-parts of a composite datatype (e.g. Family^Given, or Code^Text^System).</td>
+                            <td><code>PID-5: Smith^Eleanor^Jane</code><br /><span class="text-muted">Family (Smith) ^ Given (Eleanor) ^ Middle (Jane).</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-monospace text-center fs-5 text-warning fw-bold">~</td>
+                            <td><strong>Repetition Character</strong></td>
+                            <td>Allows a field to repeat multiple times without creating a new segment (e.g. multiple phone numbers).</td>
+                            <td><code>PID-13: 5125550199~5125559876</code><br /><span class="text-muted">Patient has two registered phone numbers.</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-monospace text-center fs-5 text-info fw-bold">\</td>
+                            <td><strong>Escape Character</strong></td>
+                            <td>Flags that the following character is an escape sequence, preventing literal delimiters from breaking the parser.</td>
+                            <td><code>OBX-5: Severe \F\ Acute Pain</code><br /><span class="text-muted"><code>\F\</code> inserts a literal pipe character inside clinical text.</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-monospace text-center fs-5 text-success fw-bold">&amp;</td>
+                            <td><strong>Subcomponent Delimiter</strong></td>
+                            <td>Separates micro-parts within a component (lowest structural hierarchy level).</td>
+                            <td><code>PID-3: 12345^^^HOSP&amp;MAIN_CAMPUS^MR</code><br /><span class="text-muted">Assigning Authority has sub-facility <code>HOSP&amp;MAIN_CAMPUS</code>.</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Escape Sequences Cheat Sheet -->
+            <h6 class="fw-bold text-dark mb-2"><i class="bi bi-shield-exclamation text-warning me-1"></i> The Official HL7 Escape Sequences Cheat Sheet</h6>
+            <p class="small text-muted mb-2">
+                What happens if a doctor types <code>"Blood pressure elevated | Patient dizzy"</code>? If you send a literal pipe <code>|</code>, the parser thinks it is a new field and crashes!
+                You must escape it using the official HL7 escape table:
+            </p>
+
+            <div class="row g-2 small">
+                <div class="col-md-4">
+                    <div class="p-2 border rounded bg-light">
+                        <code class="fw-bold text-danger">\F\</code> &rarr; <strong>Field Separator (<code>|</code>)</strong><br />
+                        <span class="text-muted">Example: <code>Chest \F\ Lung Pain</code> becomes <code>Chest | Lung Pain</code>.</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-2 border rounded bg-light">
+                        <code class="fw-bold text-primary">\S\</code> &rarr; <strong>Component Separator (<code>^</code>)</strong><br />
+                        <span class="text-muted">Example: <code>Smith \S\ Jones Clinic</code> becomes <code>Smith ^ Jones Clinic</code>.</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-2 border rounded bg-light">
+                        <code class="fw-bold text-warning">\R\</code> &rarr; <strong>Repetition Separator (<code>~</code>)</strong><br />
+                        <span class="text-muted">Example: <code>Approx \R\ 5 days</code> becomes <code>Approx ~ 5 days</code>.</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-2 border rounded bg-light">
+                        <code class="fw-bold text-info">\E\</code> &rarr; <strong>Escape Character (<code>\</code>)</strong><br />
+                        <span class="text-muted">Example: <code>Dose: 5mg\E\day</code> becomes <code>Dose: 5mg\day</code>.</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-2 border rounded bg-light">
+                        <code class="fw-bold text-success">\T\</code> &rarr; <strong>Subcomponent (<code>&amp;</code>)</strong><br />
+                        <span class="text-muted">Example: <code>Research \T\ Development</code> becomes <code>Research &amp; Development</code>.</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-2 border rounded bg-light">
+                        <code class="fw-bold text-dark">\.br\</code> &rarr; <strong>Hard Line Break</strong><br />
+                        <span class="text-muted">Used in doctor notes (<code>NTE</code>, <code>TX</code>) to start a new paragraph line.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOPIC 3: 5 REAL-WORLD HL7 MESSAGES WITH SURGERY-LEVEL DISSECTIONS -->
+    <div id="topic-messages" class="card shadow-sm mb-4 border-danger border-top border-3">
+        <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-danger">
+                <i class="bi bi-heart-pulse-fill me-2"></i> Topic 3: 5 Real-World Messages with "Surgery-Level" Dissection
+            </h5>
+            <span class="badge bg-danger">Clinical Anatomy</span>
+        </div>
+        <div class="card-body p-3">
+            <p class="small text-muted mb-3">
+                These 5 message families represent over <strong>90% of all hospital interface engine traffic</strong> worldwide. 
+                Select any message below to inspect its raw stream and segment-by-segment clinical anatomy:
+            </p>
+
+            <!-- Message Selector Tabs -->
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                @for (int m = 0; m < SurgicalMessages.Count; m++)
+                {
+                    var msgIndex = m;
+                    var item = SurgicalMessages[msgIndex];
+                    <button class="btn btn-sm @(selectedMessageIndex == msgIndex ? "btn-danger fw-bold text-white shadow-sm" : "btn-outline-secondary")"
+                            @onclick="() => selectedMessageIndex = msgIndex">
+                        <span class="badge bg-dark me-1">@item.EventCode</span> @item.Title
+                    </button>
+                }
+            </div>
+
+            <!-- Active Message Deep Dive View -->
+            @{
+                var activeMsg = SurgicalMessages[selectedMessageIndex];
+            }
+            <div class="card border bg-light shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
+                    <div>
+                        <span class="badge bg-danger fs-6 me-2">@activeMsg.EventCode</span>
+                        <strong class="text-dark">@activeMsg.Title</strong>
+                    </div>
+                    <span class="text-muted small">@activeMsg.Category</span>
+                </div>
+                <div class="card-body p-3">
+                    <!-- Clinical Context Story -->
+                    <div class="alert alert-info py-2 px-3 small mb-3">
+                        <strong><i class="bi bi-hospital"></i> Clinical Context &amp; Significance:</strong>
+                        <div>@activeMsg.ClinicalStory</div>
+                    </div>
+
+                    <!-- Raw ER7 Block -->
+                    <h6 class="fw-bold small text-muted mb-1">Raw HL7 v2 ER7 Stream:</h6>
+                    <pre class="bg-dark text-light p-3 rounded font-monospace small mb-3 overflow-auto" style="max-height: 220px; white-space: pre-wrap; word-break: break-all;"><code>@activeMsg.RawEr7</code></pre>
+
+                    <!-- Surgery-Level Segment-by-Segment Dissection -->
+                    <h6 class="fw-bold text-dark mb-2"><i class="bi bi-tools text-danger me-1"></i> Segment-by-Segment "Surgery-Level" Breakdown:</h6>
+                    <div class="accordion" id="surgicalSegmentsAccordion">
+                        @for (int s = 0; s < activeMsg.Segments.Count; s++)
+                        {
+                            var segIndex = s;
+                            var seg = activeMsg.Segments[segIndex];
+                            var collapseId = $"collapseSurgSeg_{selectedMessageIndex}_{segIndex}";
+                            var isFirst = segIndex == 0;
+
+                            <div class="accordion-item mb-2 border rounded">
+                                <h2 class="accordion-header" id="@($"headingSurgSeg_{segIndex}")">
+                                    <button class="accordion-button @(isFirst ? "" : "collapsed") py-2 px-3 bg-white" 
+                                            type="button" 
+                                            data-bs-toggle="collapse" 
+                                            data-bs-target="#@collapseId">
+                                        <span class="badge bg-dark me-2 font-monospace">@seg.SegmentId</span>
+                                        <strong class="me-2 small">@seg.Name</strong>
+                                        <span class="text-muted small ms-auto me-3 font-monospace">@seg.RawLine</span>
+                                    </button>
+                                </h2>
+                                <div id="@collapseId" class="accordion-collapse collapse @(isFirst ? "show" : "")">
+                                    <div class="accordion-body p-2 bg-light">
+                                        <div class="table-responsive bg-white rounded border">
+                                            <table class="table table-sm table-hover mb-0 small">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th style="width: 15%;">Field Position</th>
+                                                        <th style="width: 25%;">Field Name &amp; Spec</th>
+                                                        <th style="width: 25%;">Raw Value</th>
+                                                        <th style="width: 35%;">Clinical Meaning &amp; Engineering Gotcha</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var field in seg.Fields)
+                                                    {
+                                                        <tr>
+                                                            <td class="font-monospace fw-bold text-primary">@field.Position</td>
+                                                            <td class="text-dark fw-semibold">@field.Name</td>
+                                                            <td class="font-monospace text-danger">@field.Value</td>
+                                                            <td class="text-muted">@field.ClinicalMeaning</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOPIC 4: PATIENT JOURNEY SIMULATOR -->
+    <div id="topic-journey" class="card shadow-sm mb-4 border-success border-top border-3">
+        <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-success">
+                <i class="bi bi-clock-history me-2"></i> Topic 4: The Patient Journey Simulator (24-Hour Hospital Flow)
+            </h5>
+            <span class="badge bg-success">Interactive Stepper</span>
+        </div>
+        <div class="card-body p-3">
+            <p class="small text-muted mb-3">
+                Step through Eleanor Smith's 24-hour hospitalization to see how each clinical event triggers corresponding v2 messages and FHIR resources:
+            </p>
+
+            <!-- Stepper Buttons -->
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <button class="btn btn-sm @(currentJourneyStep == 1 ? "btn-success fw-bold text-white shadow-sm" : "btn-outline-secondary")"
+                        @onclick="() => currentJourneyStep = 1">
+                    <span class="badge bg-dark me-1">1</span> 10:00 AM: Outpatient Arrival
+                </button>
+                <button class="btn btn-sm @(currentJourneyStep == 2 ? "btn-success fw-bold text-white shadow-sm" : "btn-outline-secondary")"
+                        @onclick="() => currentJourneyStep = 2">
+                    <span class="badge bg-dark me-1">2</span> 10:45 AM: Inpatient Bed Admission
+                </button>
+                <button class="btn btn-sm @(currentJourneyStep == 3 ? "btn-success fw-bold text-white shadow-sm" : "btn-outline-secondary")"
+                        @onclick="() => currentJourneyStep = 3">
+                    <span class="badge bg-dark me-1">3</span> 11:30 AM: Blood Test (Lab Results)
+                </button>
+                <button class="btn btn-sm @(currentJourneyStep == 4 ? "btn-success fw-bold text-white shadow-sm" : "btn-outline-secondary")"
+                        @onclick="() => currentJourneyStep = 4">
+                    <span class="badge bg-dark me-1">4</span> 02:00 PM: Discharge Home
+                </button>
+            </div>
+
+            <!-- Milestone Details Card -->
+            <div class="card border bg-light shadow-sm">
+                <div class="card-body p-3">
+                    @if (currentJourneyStep == 1)
+                    {
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-primary fs-6 me-2">Milestone 1</span>
+                            <h6 class="fw-bold mb-0 text-dark">10:00 AM – Patient Arrival &amp; Demographic Registration</h6>
+                        </div>
+                        <p class="small text-muted mb-3">
+                            Eleanor arrives at the clinic check-in desk. The receptionist collects her legal name, date of birth, address, phone number, and assigns her a Medical Record Number (MRN).
+                        </p>
+                        <div class="row g-2 small">
+                            <div class="col-md-6">
+                                <div class="p-2 bg-white rounded border h-100">
+                                    <div class="fw-bold text-primary mb-1">HL7 v2 Message: <code>ADT^A04</code> (Register Outpatient)</div>
+                                    <p class="text-muted mb-1">Fires the <strong>PID</strong> (Patient Identification) segment containing demographics:</p>
+                                    <code class="d-block p-1 bg-dark text-info rounded font-monospace small">
+                                        PID|1||MRN982341^^^HOSP^MR||Smith^Eleanor^J||19850614|F|||1244 Healthcare Blvd^^Austin^TX^78701
+                                    </code>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-2 bg-white rounded border h-100">
+                                    <div class="fw-bold text-success mb-1">FHIR Target: <code>Patient</code> Resource</div>
+                                    <p class="text-muted mb-1">Creates an independent demographic identity object with typed properties:</p>
+                                    <code class="d-block p-1 bg-dark text-success rounded font-monospace small">
+                                        { "resourceType": "Patient", "name": [{ "family": "Smith", "given": ["Eleanor"] }] }
+                                    </code>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (currentJourneyStep == 2)
+                    {
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-primary fs-6 me-2">Milestone 2</span>
+                            <h6 class="fw-bold mb-0 text-dark">10:45 AM – Emergency Inpatient Admission to Bed &amp; Ward</h6>
+                        </div>
+                        <p class="small text-muted mb-3">
+                            The triage physician detects abnormal symptoms and officially admits Eleanor to the Cardiology ICU ward, assigning her Room 402, Bed B under attending doctor Sarah Cardio.
+                        </p>
+                        <div class="row g-2 small">
+                            <div class="col-md-6">
+                                <div class="p-2 bg-white rounded border h-100">
+                                    <div class="fw-bold text-primary mb-1">HL7 v2 Message: <code>ADT^A01</code> (Admit Inpatient)</div>
+                                    <p class="text-muted mb-1">Fires the <strong>PV1</strong> (Patient Visit) segment with patient class <code>I</code> (Inpatient) and bed location:</p>
+                                    <code class="d-block p-1 bg-dark text-info rounded font-monospace small">
+                                        PV1|1|I|ICU_CARDIO^ROOM_402^BED_B||||DOC881^Cardio^Sarah||||||||||||VISIT-77391
+                                    </code>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-2 bg-white rounded border h-100">
+                                    <div class="fw-bold text-success mb-1">FHIR Target: <code>Encounter</code> Resource</div>
+                                    <p class="text-muted mb-1">Creates an <code>Encounter</code> with <code>class = IMP</code>, linked to the Patient via <code>subject</code>:</p>
+                                    <code class="d-block p-1 bg-dark text-success rounded font-monospace small">
+                                        { "resourceType": "Encounter", "status": "in-progress", "class": { "code": "IMP" } }
+                                    </code>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (currentJourneyStep == 3)
+                    {
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-primary fs-6 me-2">Milestone 3</span>
+                            <h6 class="fw-bold mb-0 text-dark">11:30 AM – Laboratory Blood Test (Metabolic Panel Analyzed)</h6>
+                        </div>
+                        <p class="small text-muted mb-3">
+                            A blood sample is sent to the lab. The lab analyzer measures Eleanor's Glucose (142 mg/dL - abnormally High) and Potassium (4.2 mmol/L - Normal).
+                        </p>
+                        <div class="row g-2 small">
+                            <div class="col-md-6">
+                                <div class="p-2 bg-white rounded border h-100">
+                                    <div class="fw-bold text-primary mb-1">HL7 v2 Message: <code>ORU^R01</code> (Observational Results)</div>
+                                    <p class="text-muted mb-1"><strong>OBR</strong> is the lab panel header; <strong>OBX</strong> holds the discrete test values and flags:</p>
+                                    <code class="d-block p-1 bg-dark text-info rounded font-monospace small">
+                                        OBR|1|||24323-8^Basic Metabolic Panel^LN<br />
+                                        OBX|1|NM|2345-7^Glucose^LN||142|mg/dL|70-99|H
+                                    </code>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-2 bg-white rounded border h-100">
+                                    <div class="fw-bold text-success mb-1">FHIR Target: <code>Observation</code> Resources</div>
+                                    <p class="text-muted mb-1">Each test result becomes an <code>Observation</code> with LOINC code, UCUM units, and interpretation flag:</p>
+                                    <code class="d-block p-1 bg-dark text-success rounded font-monospace small">
+                                        { "resourceType": "Observation", "code": "2345-7", "valueQuantity": { "value": 142 }, "interpretation": ["H"] }
+                                    </code>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (currentJourneyStep == 4)
+                    {
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-primary fs-6 me-2">Milestone 4</span>
+                            <h6 class="fw-bold mb-0 text-dark">02:00 PM – Patient Stabilized &amp; Discharged Home</h6>
+                        </div>
+                        <p class="small text-muted mb-3">
+                            Eleanor responds well to medication, receives her care plan instructions, and is discharged to home in good condition.
+                        </p>
+                        <div class="row g-2 small">
+                            <div class="col-md-6">
+                                <div class="p-2 bg-white rounded border h-100">
+                                    <div class="fw-bold text-primary mb-1">HL7 v2 Message: <code>ADT^A03</code> (Discharge Event)</div>
+                                    <p class="text-muted mb-1">Fires PV1 with discharge date (PV1-45) and disposition code <code>01</code> (home):</p>
+                                    <code class="d-block p-1 bg-dark text-info rounded font-monospace small">
+                                        PV1|1|I|...||||||||||||||||||||||||||||||||||||||01||||||20261011104500|20261011140000
+                                    </code>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-2 bg-white rounded border h-100">
+                                    <div class="fw-bold text-success mb-1">FHIR Target: <code>Encounter</code> State Update</div>
+                                    <p class="text-muted mb-1">The existing Encounter transitions to <code>finished</code> with an end timestamp:</p>
+                                    <code class="d-block p-1 bg-dark text-success rounded font-monospace small">
+                                        { "resourceType": "Encounter", "status": "finished", "period": { "end": "2026-10-11T14:00:00Z" } }
+                                    </code>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOPIC 5: JARGON BUSTER DICTIONARY -->
+    <div id="topic-jargon" class="card shadow-sm mb-4 border-info border-top border-3">
+        <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-info">
+                <i class="bi bi-search me-2"></i> Topic 5: "Jargon Buster" – Searchable Acronym Dictionary
+            </h5>
+            <span class="badge bg-info text-dark">Glossary</span>
+        </div>
+        <div class="card-body p-3">
+            <p class="small text-muted mb-3">
+                Search or filter any unfamiliar healthcare terminology:
+            </p>
+
+            <div class="row g-2 mb-3">
+                <div class="col-md-8">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control" placeholder="Search any term (e.g. ADT, LOINC, PID, MLLP, MRN, OBR, OBX)..." 
+                               @bind="jargonSearch" @bind:event="oninput" />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select form-select-sm" @bind="selectedJargonCategory">
+                        <option value="All">All Categories</option>
+                        <option value="HL7 v2">HL7 v2 Terms</option>
+                        <option value="FHIR">FHIR Terms</option>
+                        <option value="Terminology">Coding &amp; Terminologies</option>
+                        <option value="Hospital">Hospital Concepts</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Terms Grid -->
+            <div class="row g-2">
+                @foreach (var term in FilteredJargon)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border shadow-sm">
+                            <div class="card-body p-2 d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <span class="font-monospace fw-bold text-primary">@term.Term</span>
+                                    <span class="badge bg-light text-dark border" style="font-size: 0.7rem;">@term.Category</span>
+                                </div>
+                                <h6 class="card-title fw-semibold small mb-1">@term.FullName</h6>
+                                <p class="card-text text-muted small flex-grow-1 mb-0" style="font-size: 0.8rem;">@term.Definition</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- TOPIC 6: INTERACTIVE PRACTICE QUIZ & REFS -->
+    <div id="topic-quiz" class="card shadow-sm mb-4 border-secondary border-top border-3">
+        <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-award-fill me-2"></i> Topic 6: Knowledge Check &amp; Official References
+            </h5>
+            <span class="badge bg-secondary">Self-Assessment</span>
+        </div>
+        <div class="card-body p-3">
+            <p class="small text-muted mb-3">
+                Test your understanding with these real-world decoding questions:
+            </p>
+
+            <div class="row g-3 mb-4">
+                @for (int i = 0; i < QuizQuestions.Count; i++)
+                {
+                    var qIndex = i;
+                    var q = QuizQuestions[qIndex];
+                    <div class="col-md-6">
+                        <div class="card h-100 border shadow-sm">
+                            <div class="card-header bg-light py-2 fw-semibold small d-flex justify-content-between align-items-center">
+                                <span>Question @(qIndex + 1) of @QuizQuestions.Count</span>
+                                @if (userAnswers.ContainsKey(qIndex))
+                                {
+                                    if (userAnswers[qIndex] == q.CorrectOptionIndex)
+                                    {
+                                        <span class="badge bg-success"><i class="bi bi-check-circle"></i> Correct!</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Try Again</span>
+                                    }
+                                }
+                            </div>
+                            <div class="card-body p-3 small">
+                                <p class="fw-bold mb-2">@q.QuestionText</p>
+                                @if (!string.IsNullOrEmpty(q.Snippet))
+                                {
+                                    <div class="p-1 mb-2 bg-dark text-info rounded font-monospace small" style="font-size: 0.75rem;">
+                                        @q.Snippet
+                                    </div>
+                                }
+                                <div class="d-grid gap-1 mb-2">
+                                    @for (int opt = 0; opt < q.Options.Count; opt++)
+                                    {
+                                        var optIndex = opt;
+                                        var isSelected = userAnswers.ContainsKey(qIndex) && userAnswers[qIndex] == optIndex;
+                                        var isCorrect = optIndex == q.CorrectOptionIndex;
+                                        string btnClass = "btn-outline-secondary";
+
+                                        if (userAnswers.ContainsKey(qIndex))
+                                        {
+                                            if (isCorrect) btnClass = "btn-success text-white fw-bold";
+                                            else if (isSelected) btnClass = "btn-danger text-white";
+                                        }
+
+                                        <button class="btn btn-sm text-start py-1 px-2 @btnClass"
+                                                @onclick="() => AnswerQuestion(qIndex, optIndex)">
+                                            <span class="me-1">@((char)('A' + optIndex)).</span> @q.Options[optIndex]
+                                        </button>
+                                    }
+                                </div>
+                                @if (userAnswers.ContainsKey(qIndex))
+                                {
+                                    <div class="alert @(userAnswers[qIndex] == q.CorrectOptionIndex ? "alert-success" : "alert-warning") p-2 mb-0 mt-2" style="font-size: 0.8rem;">
+                                        <strong>Explanation:</strong> @q.Explanation
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Official Documentation Links -->
+            <h6 class="fw-bold text-dark mb-2"><i class="bi bi-bookmark-star text-primary me-1"></i> Authoritative Documentation References</h6>
+            <div class="row g-2 small">
+                <div class="col-md-3">
+                    <a href="https://hl7.org/fhir/R4/" target="_blank" class="btn btn-outline-primary btn-sm w-100 text-truncate">
+                        HL7 FHIR R4 Spec <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="https://docs.fire.ly/projects/Firely-NET-SDK/" target="_blank" class="btn btn-outline-success btn-sm w-100 text-truncate">
+                        Firely C# SDK Docs <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="https://loinc.org/" target="_blank" class="btn btn-outline-warning btn-sm text-dark w-100 text-truncate">
+                        Regenstrief LOINC <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="https://smarthealthit.org/" target="_blank" class="btn btn-outline-info btn-sm text-dark w-100 text-truncate">
+                        SMART Health IT OAuth2 <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private int currentJourneyStep = 1;
+    private int selectedMessageIndex = 0;
+    private string jargonSearch = string.Empty;
+    private string selectedJargonCategory = "All";
+
+    public record SurgicalField(string Position, string Name, string Value, string ClinicalMeaning);
+    public record SurgicalSegment(string SegmentId, string Name, string RawLine, List<SurgicalField> Fields);
+    public record SurgicalMessageDoc(string EventCode, string Title, string Category, string ClinicalStory, string RawEr7, List<SurgicalSegment> Segments);
+
+    private static readonly List<SurgicalMessageDoc> SurgicalMessages = new()
+    {
+        // 1. ADT^A01 Inpatient Admission
+        new(
+            EventCode: "ADT^A01",
+            Title: "Inpatient Hospital Admission",
+            Category: "Patient Administration (PAS)",
+            ClinicalStory: "A 54-year-old male with severe chest pain is admitted to the Cardiology Inpatient ward after being evaluated in the Emergency Room. Bed 402-B is assigned, an attending physician takes charge, and a preliminary ICD-10 diagnosis of acute myocardial infarction is logged for insurance billing.",
+            RawEr7:
+@"MSH|^~\&|EPIC_ADT|METRO_HOSPITAL|CENTRAL_EHR|METRO_HEALTH|20261011110000||ADT^A01|MSG20261011_001|P|2.5
+EVN|A01|20261011110000|||DOC881^Cardio^Sarah
+PID|1||MRN450192^^^METRO_HOSPITAL^MR||Vance^Marcus^T||19720325|M|||404 River Rd^^Denver^CO^80203^USA||3035550144||ENG|M
+PV1|1|I|CARD_ICU^ROOM_402^BED_B^METRO||||DOC881^Cardio^Sarah^B|||CARD||||1||||VISIT-77391|||||||||||||||||||||||||20261011110000
+DG1|1|ICD10|I21.0|ST-Elevation Myocardial Infarction|20261011110000|A
+IN1|1|BCBS|BLUE_CROSS_CO|Blue Cross Blue Shield|PO BOX 901^^Denver^CO^80201||||||||||POLICY-99210",
+            Segments: new()
+            {
+                new("MSH", "Message Header", "MSH|^~\\&|EPIC_ADT|METRO_HOSPITAL|CENTRAL_EHR|METRO_HEALTH|20261011110000||ADT^A01|MSG20261011_001|P|2.5", new()
+                {
+                    new("MSH-1 & 2", "Delimiters", "|^~\\&", "Declares field delimiter (|) and encoding chars (^ component, ~ repeat, \\ escape, & subcomponent)."),
+                    new("MSH-3 & 4", "Sending App / Facility", "EPIC_ADT / METRO_HOSPITAL", "Originating EHR system and hospital division. Used by interface routers for message filtering."),
+                    new("MSH-9", "Message Type", "ADT^A01", "Message trigger event. Tells receiving systems this is a physical inpatient bed admission."),
+                    new("MSH-10", "Message Control ID", "MSG20261011_001", "Unique message tracking ID. Crucial for matching ACK/NACK responses and preventing duplicate processing."),
+                    new("MSH-12", "HL7 Version", "2.5", "Schema version governing standard tables and allowed fields.")
+                }),
+                new("PID", "Patient Identification", "PID|1||MRN450192^^^METRO_HOSPITAL^MR||Vance^Marcus^T||19720325|M|||404 River Rd^^Denver^CO^80203^USA||3035550144||ENG|M", new()
+                {
+                    new("PID-3.1", "Medical Record Number", "MRN450192", "The master enterprise patient ID. Critical: If corrupted, clinical data links to the wrong human chart!"),
+                    new("PID-3.4", "Assigning Authority", "METRO_HOSPITAL", "Namespace owner of the MRN. Prevents ID collisions when merging clinic networks."),
+                    new("PID-5", "Patient Legal Name", "Vance^Marcus^T", "XPN datatype (Family^Given^Middle). Maps to FHIR HumanName (family='Vance', given=['Marcus','T'])."),
+                    new("PID-7", "Date of Birth", "19720325", "Format YYYYMMDD (March 25, 1972). Used for biometric identification verification."),
+                    new("PID-8", "Administrative Sex", "M", "HL7 Table 0001 (M=Male, F=Female, O=Other, U=Unknown)."),
+                    new("PID-11", "Patient Address", "404 River Rd^^Denver^CO^80203^USA", "XAD composite format (Street^Other^City^State^Zip^Country).")
+                }),
+                new("PV1", "Patient Visit Information", "PV1|1|I|CARD_ICU^ROOM_402^BED_B^METRO||||DOC881^Cardio^Sarah^B|||CARD||||1||||VISIT-77391|||||||||||||||||||||||||20261011110000", new()
+                {
+                    new("PV1-2", "Patient Class", "I", "Table 0004: 'I' = Inpatient. (O=Outpatient, E=Emergency). Governs bed billing and nursing protocols."),
+                    new("PV1-3", "Assigned Location", "CARD_ICU^ROOM_402^BED_B^METRO", "Hierarchical physical location: Point of Care (CARD_ICU) ^ Room (402) ^ Bed (B) ^ Facility (METRO)."),
+                    new("PV1-7", "Attending Doctor", "DOC881^Cardio^Sarah^B", "Physician legally responsible for the patient stay. Component 1 is Provider NPI/ID, followed by name."),
+                    new("PV1-19", "Visit Number", "VISIT-77391", "Encounter Account ID generated for this specific hospital stay. Different from permanent MRN!"),
+                    new("PV1-44", "Admit Date/Time", "20261011110000", "Official admission timestamp (October 11, 2026 at 11:00:00).")
+                }),
+                new("DG1", "Admitting Diagnosis", "DG1|1|ICD10|I21.0|ST-Elevation Myocardial Infarction|20261011110000|A", new()
+                {
+                    new("DG1-2", "Diagnosis Coding Method", "ICD10", "Identifies coding system (International Classification of Diseases 10th Revision)."),
+                    new("DG1-3", "Diagnosis Code", "I21.0", "Specific medical diagnosis code (Acute anterior transmural myocardial infarction)."),
+                    new("DG1-4", "Diagnosis Description", "ST-Elevation Myocardial Infarction", "Human-readable clinical description."),
+                    new("DG1-6", "Diagnosis Type", "A", "Table 0052: 'A' = Admitting diagnosis (vs 'F' = Final discharge diagnosis).")
+                }),
+                new("IN1", "Insurance Coverage", "IN1|1|BCBS|BLUE_CROSS_CO|Blue Cross Blue Shield|PO BOX 901^^Denver^CO^80201||||||||||POLICY-99210", new()
+                {
+                    new("IN1-2", "Insurance Plan ID", "BCBS", "Identifier of the payer benefit plan."),
+                    new("IN1-4", "Insurance Company Name", "Blue Cross Blue Shield", "Health insurance carrier name."),
+                    new("IN1-36", "Policy Number", "POLICY-99210", "Subscriber insurance policy number used for billing claims.")
+                })
+            }
+        ),
+
+        // 2. ADT^A08 Update Patient Information
+        new(
+            EventCode: "ADT^A08",
+            Title: "Patient Information Update",
+            Category: "Master Patient Index (MPI)",
+            ClinicalStory: "Patient Eleanor Smith gets married and moves to a new house. The registration clerk updates her legal surname from Smith to Vance-Smith, enters her new residential address, and logs her updated mobile telephone number. An ADT^A08 is broadcast so downstream lab, pharmacy, and billing systems synchronize instantly.",
+            RawEr7:
+@"MSH|^~\&|REG_DESK|CLINIC_A|CENTRAL_EHR|METRO_HEALTH|20261011111500||ADT^A08|MSG20261011_002|P|2.5
+EVN|A08|20261011111500|||OPER_991^Admin^Clerk
+PID|1||MRN982341^^^HOSPITAL_A^MR||Vance-Smith^Eleanor^Jane||19850614|F||2106-3|789 Maple Grove Way^^Austin^TX^78704^USA||5125550299||ENG|M||ACC-449102
+PV1|1|O|CLINIC_OUTPATIENT^EXAM_3^^HOSPITAL_A||||DOC442^Adams^John^M||||||||||||VISIT-90182|",
+            Segments: new()
+            {
+                new("MSH", "Message Header", "MSH|^~\\&|REG_DESK|CLINIC_A|CENTRAL_EHR|METRO_HEALTH|20261011111500||ADT^A08|MSG20261011_002|P|2.5", new()
+                {
+                    new("MSH-9", "Trigger Event", "ADT^A08", "A08 signals 'Update Patient Information'. Signals receivers to update existing database records rather than creating duplicates.")
+                }),
+                new("PID", "Updated Demographics", "PID|1||MRN982341^^^HOSPITAL_A^MR||Vance-Smith^Eleanor^Jane||19850614|F||2106-3|789 Maple Grove Way^^Austin^TX^78704^USA||5125550299||ENG|M||ACC-449102", new()
+                {
+                    new("PID-3.1", "Patient MRN", "MRN982341", "Matches existing patient master record."),
+                    new("PID-5.1", "New Surname", "Vance-Smith", "Updated legal family name (replaces previous surname 'Smith')."),
+                    new("PID-11", "New Address", "789 Maple Grove Way^^Austin^TX^78704", "Updated patient physical domicile address."),
+                    new("PID-13", "New Phone Number", "5125550299", "Updated primary mobile contact number.")
+                }),
+                new("PV1", "Active Visit Context", "PV1|1|O|CLINIC_OUTPATIENT^EXAM_3^^HOSPITAL_A||||DOC442^Adams^John^M||||||||||||VISIT-90182|", new()
+                {
+                    new("PV1-2", "Patient Class", "O", "Outpatient visit context active at the time demographic changes were recorded.")
+                })
+            }
+        ),
+
+        // 3. ADT^A03 Discharge
+        new(
+            EventCode: "ADT^A03",
+            Title: "Patient Discharge & Disposition",
+            Category: "Bed Management & Discharge",
+            ClinicalStory: "Marcus Vance has completed his inpatient stay. Dr. Sarah Cardio writes the discharge summary and clears the patient to go home. The system fires ADT^A03 with discharge timestamp and disposition code 01 (Discharged Home), freeing up Bed 402-B for incoming emergency patients.",
+            RawEr7:
+@"MSH|^~\&|EPIC_ADT|METRO_HOSPITAL|CENTRAL_EHR|METRO_HEALTH|20261011140000||ADT^A03|MSG20261011_003|P|2.5
+EVN|A03|20261011140000
+PID|1||MRN450192^^^METRO_HOSPITAL^MR||Vance^Marcus^T||19720325|M|||404 River Rd^^Denver^CO^80203^USA||3035550144
+PV1|1|I|CARD_ICU^ROOM_402^BED_B^METRO||||DOC881^Cardio^Sarah^B||||||||||||VISIT-77391||||||||||||||||||01||||||20261011110000|20261011140000",
+            Segments: new()
+            {
+                new("MSH", "Message Header", "MSH|^~\\&|EPIC_ADT|METRO_HOSPITAL|CENTRAL_EHR|METRO_HEALTH|20261011140000||ADT^A03|MSG20261011_003|P|2.5", new()
+                {
+                    new("MSH-9", "Trigger Event", "ADT^A03", "Signals 'Patient Discharge'. Triggers billing account closure, census decrement, and bed sanitization alerts.")
+                }),
+                new("PV1", "Visit Discharge Details", "PV1|1|I|CARD_ICU^ROOM_402^BED_B^METRO||||DOC881^Cardio^Sarah^B||||||||||||VISIT-77391||||||||||||||||||01||||||20261011110000|20261011140000", new()
+                {
+                    new("PV1-36", "Discharge Disposition", "01", "HL7 Table 0112: '01' = Discharged to home or self care. Other codes: '02' = Transferred to other hospital, '20' = Expired."),
+                    new("PV1-44", "Admit Date/Time", "20261011110000", "Original admission timestamp (Oct 11, 11:00 AM)."),
+                    new("PV1-45", "Discharge Date/Time", "20261011140000", "Official release timestamp (Oct 11, 02:00 PM). Used to calculate Length of Stay (LOS).")
+                })
+            }
+        ),
+
+        // 4. ORM^O01 Lab / Radiology Order
+        new(
+            EventCode: "ORM^O01",
+            Title: "Diagnostic Order (Lab / Radiology Request)",
+            Category: "Order Entry (CPOE)",
+            ClinicalStory: "Dr. Adams suspects diabetes or metabolic derangement and submits an order for a STAT Basic Metabolic Panel (BMP) blood test. An ORM^O01 message is transmitted to the Laboratory Information System (LIS) with a Placer Order Number to print barcode tube labels.",
+            RawEr7:
+@"MSH|^~\&|CPOE_EHR|METRO_HOSPITAL|LIS_LAB|REGIONAL_LAB|20261011113000||ORM^O01|MSG20261011_004|P|2.5
+PID|1||MRN982341^^^HOSPITAL_A^MR||Smith^Eleanor^Jane||19850614|F
+PV1|1|O|CLINIC_OUTPATIENT^EXAM_3^^HOSPITAL_A||||DOC442^Adams^John^M
+ORC|NW|ORD-2026-901|||||1^STAT||20261011113000|||DOC442^Adams^John^M
+OBR|1|ORD-2026-901||24323-8^Basic Metabolic Panel^LN|||20261011113000||||||||DOC442^Adams^John^M|||||||||O",
+            Segments: new()
+            {
+                new("ORC", "Common Order Segment", "ORC|NW|ORD-2026-901|||||1^STAT||20261011113000|||DOC442^Adams^John^M", new()
+                {
+                    new("ORC-1", "Order Control Code", "NW", "Table 0119: 'NW' = New Order. Other values: 'CA' = Cancel, 'RP' = Replace, 'DC' = Discontinue."),
+                    new("ORC-2", "Placer Order Number", "ORD-2026-901", "Unique order ID generated by the hospital EHR placing the request."),
+                    new("ORC-7.2", "Priority / Timing", "STAT", "Test urgency. STAT indicates immediate emergency turnaround required."),
+                    new("ORC-12", "Ordering Provider", "DOC442^Adams^John^M", "Doctor requesting the laboratory analysis.")
+                }),
+                new("OBR", "Observation Request Details", "OBR|1|ORD-2026-901||24323-8^Basic Metabolic Panel^LN|||20261011113000||||||||DOC442^Adams^John^M|||||||||O", new()
+                {
+                    new("OBR-4", "Universal Service Identifier", "24323-8^Basic Metabolic Panel^LN", "Standard LOINC code (24323-8) specifying the clinical test battery requested."),
+                    new("OBR-25", "Order Result Status", "O", "Table 0123: 'O' = Order received; specimen not yet analyzed.")
+                })
+            }
+        ),
+
+        // 5. ORU^R01 Observational Lab Results
+        new(
+            EventCode: "ORU^R01",
+            Title: "Laboratory Result Report (Discrete Observations)",
+            Category: "Diagnostic Laboratory (LIS)",
+            ClinicalStory: "The automated Beckman Coulter lab analyzer finishes processing Eleanor Smith's blood serum. It transmits an unsolicited ORU^R01 back to the EHR with discrete test values for Glucose, Potassium, and Sodium. The Glucose is flagged as 'H' (High: 142 mg/dL vs normal 70-99).",
+            RawEr7:
+@"MSH|^~\&|LIS_LAB|REGIONAL_LAB|CENTRAL_EHR|METRO_HOSPITAL|20261011121500||ORU^R01|MSG20261011_005|P|2.5
+PID|1||MRN982341^^^HOSPITAL_A^MR||Smith^Eleanor^Jane||19850614|F
+OBR|1|ORD-2026-901|FILL-9821|24323-8^Basic Metabolic Panel^LN|||20261011113000||||||||DOC442^Adams^John^M||||||20261011121500|||F
+OBX|1|NM|2345-7^Glucose [Mass/volume] in Serum or Plasma^LN||142|mg/dL|70-99|H|||F|||20261011113000
+OBX|2|NM|2823-3^Potassium [Moles/volume] in Serum or Plasma^LN||4.2|mmol/L|3.5-5.1|N|||F|||20261011113000
+OBX|3|NM|2951-2^Sodium [Moles/volume] in Serum or Plasma^LN||138|mmol/L|135-145|N|||F|||20261011113000",
+            Segments: new()
+            {
+                new("OBR", "Observation Report Header", "OBR|1|ORD-2026-901|FILL-9821|24323-8^Basic Metabolic Panel^LN|||20261011113000||||||||DOC442^Adams^John^M||||||20261011121500|||F", new()
+                {
+                    new("OBR-2", "Placer Order Number", "ORD-2026-901", "Echoes back the EHR's original order ID so results attach to the right order."),
+                    new("OBR-3", "Filler Order Number", "FILL-9821", "The LIS's internal accession number tracking the physical blood tube."),
+                    new("OBR-4", "Battery / Panel Code", "24323-8^Basic Metabolic Panel^LN", "LOINC code for the complete test panel."),
+                    new("OBR-25", "Result Status", "F", "Table 0123: 'F' = Final results. (P=Preliminary, C=Corrected).")
+                }),
+                new("OBX #1", "Glucose Result", "OBX|1|NM|2345-7^Glucose^LN||142|mg/dL|70-99|H|||F", new()
+                {
+                    new("OBX-2", "Value Type", "NM", "Table 0125: 'NM' = Numeric. Governs how EHR parses OBX-5."),
+                    new("OBX-3", "Observation Identifier", "2345-7^Glucose^LN", "Universal LOINC code (2345-7) for Glucose in serum/plasma."),
+                    new("OBX-5", "Observation Value", "142", "The quantitative lab measurement result."),
+                    new("OBX-6", "Units", "mg/dL", "UCUM unit of measure (milligrams per deciliter)."),
+                    new("OBX-7", "Reference Range", "70-99", "Physiological normal interval for healthy adults."),
+                    new("OBX-8", "Abnormal Flag", "H", "Table 0078: 'H' = High. Triggers red alert warnings in the doctor's EHR view!")
+                }),
+                new("OBX #2", "Potassium Result", "OBX|2|NM|2823-3^Potassium^LN||4.2|mmol/L|3.5-5.1|N|||F", new()
+                {
+                    new("OBX-3", "LOINC Code", "2823-3", "Potassium in serum/plasma."),
+                    new("OBX-5 & 6", "Value & Units", "4.2 mmol/L", "Measured level."),
+                    new("OBX-7 & 8", "Range & Flag", "3.5-5.1 (Flag: N)", "'N' = Normal. Value falls squarely inside safe reference range.")
+                }),
+                new("OBX #3", "Sodium Result", "OBX|3|NM|2951-2^Sodium^LN||138|mmol/L|135-145|N|||F", new()
+                {
+                    new("OBX-3", "LOINC Code", "2951-2", "Sodium in serum/plasma."),
+                    new("OBX-5 & 6", "Value & Units", "138 mmol/L", "Measured level within 135-145 normal range.")
+                })
+            }
+        )
+    };
+
+    private record JargonItem(string Term, string FullName, string Category, string Definition);
+
+    private static readonly List<JargonItem> AllJargon = new()
+    {
+        new("ADT", "Admission, Discharge, Transfer", "HL7 v2", "The most common HL7 v2 message family. Tracks patient demographic events and movement within the hospital."),
+        new("ORU", "Observational Results (Unsolicited)", "HL7 v2", "The standard message sent by laboratories and diagnostic devices containing test results."),
+        new("ORM", "Order Message", "HL7 v2", "General order message sent by physicians to request clinical actions (labs, imaging, medication orders)."),
+        new("MSH", "Message Header", "HL7 v2", "The very first segment of every HL7 v2 message. Defines delimiters, sending system, receiving system, and timestamp."),
+        new("PID", "Patient Identification", "HL7 v2", "The core segment containing patient demographics: MRN, Name, Date of Birth, Gender, Address, Phone."),
+        new("PV1", "Patient Visit", "HL7 v2", "The segment tracking patient visit details: Inpatient/Outpatient class, Assigned Bed/Room, Attending Doctor."),
+        new("OBR", "Observation Request", "HL7 v2", "The header for an ordered test panel (e.g. Basic Metabolic Panel) ordered by a physician."),
+        new("OBX", "Observation / Result", "HL7 v2", "The segment holding a single discrete test result (e.g. Glucose = 142 mg/dL) with units and abnormal flags."),
+        new("DG1", "Diagnosis", "HL7 v2", "Segment reporting clinical diagnoses associated with a patient visit, typically coded in ICD-10."),
+        new("IN1", "Insurance", "HL7 v2", "Segment detailing patient health insurance policy information for claims processing."),
+        new("MLLP", "Minimal Lower Layer Protocol", "HL7 v2", "The framing protocol used over raw TCP sockets to send HL7 v2 messages between hospital servers."),
+        new("MRN", "Medical Record Number", "Hospital", "A unique permanent identification number assigned to a patient by a healthcare organization."),
+        new("Resource", "FHIR Core Building Block", "FHIR", "The basic granular unit in FHIR (e.g. Patient, Observation, Encounter) serialized as JSON or XML."),
+        new("Bundle", "FHIR Collection Container", "FHIR", "A container resource grouping multiple resources together for search results, batch transactions, or message transfers."),
+        new("LOINC", "Logical Observation Identifiers Names and Codes", "Terminology", "The universal standard vocabulary for identifying medical laboratory observations and diagnostic tests."),
+        new("SNOMED CT", "Systematized Nomenclature of Medicine", "Terminology", "The comprehensive clinical healthcare terminology used worldwide for clinical findings and diagnoses."),
+        new("SMART on FHIR", "Substitutable Medical Applications, Reusable Technologies", "FHIR", "An open healthcare standard built on OAuth 2.0 enabling web apps to securely launch inside EHRs like Epic and Cerner."),
+        new("UCUM", "Unified Code for Units of Measure", "Terminology", "The standard system for expressing units of measurement (e.g. mg/dL, mmol/L) in healthcare software.")
+    };
+
+    private IEnumerable<JargonItem> FilteredJargon => AllJargon
+        .Where(j => selectedJargonCategory == "All" || j.Category == selectedJargonCategory)
+        .Where(j => string.IsNullOrWhiteSpace(jargonSearch) ||
+                    j.Term.Contains(jargonSearch, StringComparison.OrdinalIgnoreCase) ||
+                    j.FullName.Contains(jargonSearch, StringComparison.OrdinalIgnoreCase) ||
+                    j.Definition.Contains(jargonSearch, StringComparison.OrdinalIgnoreCase));
+
+    private record QuizItem(string QuestionText, string? Snippet, List<string> Options, int CorrectOptionIndex, string Explanation);
+
+    private static readonly List<QuizItem> QuizQuestions = new()
+    {
+        new(
+            QuestionText: "In an HL7 v2 message, what escape sequence must you use if patient notes contain a literal pipe symbol (|)?",
+            Snippet: null,
+            Options: new() { "\\P\\", "\\F\\", "\\S\\", "\\PIPE\\" },
+            CorrectOptionIndex: 1,
+            Explanation: "\\F\\ represents the Field Separator (|). Using a literal pipe without escaping would cause the parser to treat it as a new field and break the message."
+        ),
+        new(
+            QuestionText: "In this OBX lab segment, what does the 'H' in OBX-8 indicate?",
+            Snippet: "OBX|1|NM|2345-7^Glucose^LN||142|mg/dL|70-99|H",
+            Options: new() { "Hospital Result", "High (Abnormal)", "Hematology", "Hour" },
+            CorrectOptionIndex: 1,
+            Explanation: "OBX-8 holds abnormal flags. 'H' indicates the test result (142 mg/dL) exceeds the normal reference range (70-99)."
+        ),
+        new(
+            QuestionText: "Which data payload format is the modern standard for SMART on FHIR web & mobile apps?",
+            Snippet: null,
+            Options: new() { "C-CDA XML", "ER7 Pipe-and-Hat", "FHIR JSON", "RDF Turtle" },
+            CorrectOptionIndex: 2,
+            Explanation: "FHIR JSON is the standard wire format for modern RESTful APIs, native to browsers, mobile frameworks, and modern languages like .NET."
+        ),
+        new(
+            QuestionText: "In an ORM^O01 order message, what does order control code ORC-1='NW' mean?",
+            Snippet: "ORC|NW|ORD-2026-901|||||1^STAT...",
+            Options: new() { "Network Order", "New Order", "No Wait", "Night Ward" },
+            CorrectOptionIndex: 1,
+            Explanation: "In Table 0119, 'NW' signifies 'New Order'. Other codes include 'CA' (Cancel), 'RP' (Replace), and 'DC' (Discontinue)."
+        )
+    };
+
+    private Dictionary<int, int> userAnswers = new();
+
+    private void AnswerQuestion(int questionIndex, int optionIndex)
+    {
+        userAnswers[questionIndex] = optionIndex;
+    }
+}

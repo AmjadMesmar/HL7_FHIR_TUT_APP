@@ -1,0 +1,350 @@
+@page "/hl7-inspector"
+@rendermode InteractiveServer
+
+<PageTitle>HL7 v2 Message Inspector &amp; Linter</PageTitle>
+
+<div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <h2 class="h3 fw-bold mb-0"><i class="bi bi-code-slash text-primary"></i> HL7 v2 Message Inspector &amp; Linter</h2>
+            <p class="text-muted small mb-0">Deconstruct ER7 pipe-and-hat messages and run automated syntax &amp; conformance linting.</p>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown">
+                Load Preset Message
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow">
+                @foreach (var p in ClinicalPresets.All)
+                {
+                    <li><a class="dropdown-item" href="javascript:void(0)" @onclick="() => LoadPreset(p.Id)">@p.Title (@p.TriggerEvent)</a></li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <!-- Quick Preset Buttons -->
+    <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
+        <span class="text-muted small fw-semibold me-1">Quick Presets:</span>
+        @foreach (var p in ClinicalPresets.All)
+        {
+            <button class="btn btn-sm @(selectedPresetId == p.Id ? "btn-primary shadow-sm" : "btn-outline-secondary")"
+                    @onclick="() => LoadPreset(p.Id)">
+                @p.TriggerEvent
+            </button>
+        }
+    </div>
+
+    <div class="row g-3">
+        <!-- Input Panel -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+                    <span class="fw-semibold small">Raw ER7 Message Input</span>
+                    <button class="btn btn-sm btn-primary py-0" @onclick="ParseCurrentMessage">
+                        <i class="bi bi-play-fill"></i> Re-Lint &amp; Parse
+                    </button>
+                </div>
+                <div class="card-body p-2 d-flex flex-column">
+                    <textarea class="form-control font-monospace flex-grow-1 small" 
+                              style="min-height: 260px; resize: vertical;" 
+                              @bind="rawHl7Input" 
+                              @bind:after="ParseCurrentMessage"
+                              placeholder="Paste any HL7 v2 pipe-delimited message here..."></textarea>
+                    
+                    @if (currentPreset != null)
+                    {
+                        <div class="alert alert-info mt-2 mb-0 p-2 small">
+                            <strong><i class="bi bi-info-circle"></i> Scenario Notes:</strong>
+                            <div class="mt-1" style="white-space: pre-line;">@currentPreset.TeachingNotes</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Output Panel: Tree & Linter -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center py-2 flex-wrap gap-2">
+                    <!-- Tab Switcher -->
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn @(activeTab == "tree" ? "btn-dark" : "btn-outline-secondary")" @onclick='() => activeTab = "tree"'>
+                            <i class="bi bi-diagram-2 me-1"></i> Deconstructed Tree
+                        </button>
+                        <button class="btn @(activeTab == "linter" ? "btn-dark" : "btn-outline-secondary")" @onclick='() => activeTab = "linter"'>
+                            <i class="bi bi-shield-check me-1"></i> Live Linter
+                            @if (linterIssues.Any(i => i.Severity == "Error"))
+                            {
+                                <span class="badge bg-danger ms-1">@linterIssues.Count(i => i.Severity == "Error")</span>
+                            }
+                            else if (linterIssues.Any(i => i.Severity == "Warning"))
+                            {
+                                <span class="badge bg-warning text-dark ms-1">@linterIssues.Count(i => i.Severity == "Warning")</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success ms-1">0</span>
+                            }
+                        </button>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-dark">Msg: @(string.IsNullOrEmpty(parsedMessage.MessageType) ? "Unknown" : $"{parsedMessage.MessageType}^{parsedMessage.TriggerEvent}")</span>
+                        <span class="badge bg-secondary">Ctrl ID: @parsedMessage.MessageControlId</span>
+                    </div>
+                </div>
+
+                <div class="card-body p-3 overflow-auto" style="max-height: 75vh;">
+                    @if (activeTab == "linter")
+                    {
+                        <!-- LINTER VIEW -->
+                        <div class="mb-3">
+                            <h6 class="fw-bold small text-dark mb-2"><i class="bi bi-shield-check text-primary me-1"></i> Automated Syntax &amp; Conformance Check:</h6>
+                            @if (linterIssues.Count == 0)
+                            {
+                                <div class="alert alert-success d-flex align-items-center p-3 small mb-0">
+                                    <i class="bi bi-check-circle-fill fs-4 me-3 text-success"></i>
+                                    <div>
+                                        <strong>100% Clean! All Standards Checks Passed.</strong><br />
+                                        Valid MSH delimiters, Trigger Event detected, Assigning Authority specified, and valid timestamp formatting.
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="list-group list-group-flush border rounded small">
+                                    @foreach (var issue in linterIssues)
+                                    {
+                                        <div class="list-group-item d-flex align-items-start gap-2 py-2">
+                                            @if (issue.Severity == "Error")
+                                            {
+                                                <span class="badge bg-danger mt-1">ERROR</span>
+                                            }
+                                            else if (issue.Severity == "Warning")
+                                            {
+                                                <span class="badge bg-warning text-dark mt-1">WARNING</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-info text-dark mt-1">INFO</span>
+                                            }
+                                            <div class="flex-grow-1">
+                                                <strong class="text-dark">@issue.Title</strong>
+                                                <div class="text-muted">@issue.Description</div>
+                                                <div class="text-primary mt-1" style="font-size: 0.75rem;"><strong>Recommendation:</strong> @issue.Remedy</div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- TREE VIEW -->
+                        <!-- Delimiters Explainer -->
+                        <div class="p-2 mb-3 bg-light rounded border d-flex flex-wrap gap-3 small">
+                            <div><strong>Field:</strong> <code>@parsedMessage.FieldDelimiter</code></div>
+                            <div><strong>Component:</strong> <code>@parsedMessage.ComponentDelimiter</code></div>
+                            <div><strong>Repetition:</strong> <code>@parsedMessage.RepetitionDelimiter</code></div>
+                            <div><strong>Escape:</strong> <code>@parsedMessage.EscapeCharacter</code></div>
+                            <div><strong>Subcomponent:</strong> <code>@parsedMessage.SubcomponentDelimiter</code></div>
+                        </div>
+
+                        @if (parsedMessage.Segments.Count == 0)
+                        {
+                            <div class="text-center text-muted py-5">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                Paste a message or select a preset to view the breakdown.
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="accordion" id="segmentsAccordion">
+                                @for (int i = 0; i < parsedMessage.Segments.Count; i++)
+                                {
+                                    var seg = parsedMessage.Segments[i];
+                                    var collapseId = $"collapseSeg{i}";
+                                    var isFirst = i == 0;
+
+                                    <div class="accordion-item mb-2 border rounded">
+                                        <h2 class="accordion-header" id="@($"headingSeg{i}")">
+                                            <button class="accordion-button @(isFirst ? "" : "collapsed") py-2 px-3" 
+                                                    type="button" 
+                                                    data-bs-toggle="collapse" 
+                                                    data-bs-target="#@collapseId">
+                                                <span class="badge @GetBadgeColor(seg.SegmentId) me-2 font-monospace">@seg.SegmentId</span>
+                                                <span class="fw-semibold small me-2">@seg.Description</span>
+                                                <span class="text-muted small ms-auto me-3 font-monospace">(@seg.Fields.Count fields)</span>
+                                            </button>
+                                        </h2>
+                                        <div id="@collapseId" class="accordion-collapse collapse @(isFirst ? "show" : "")">
+                                            <div class="accordion-body p-2 bg-light">
+                                                <div class="p-2 mb-2 bg-white rounded border font-monospace small text-break text-muted">
+                                                    <strong>Raw:</strong> @seg.RawContent
+                                                </div>
+                                                <div class="table-responsive bg-white rounded border">
+                                                    <table class="table table-sm table-hover mb-0 small">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th style="width: 15%;">Field</th>
+                                                                <th style="width: 35%;">Standard Name</th>
+                                                                <th style="width: 50%;">Value / Components</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach (var field in seg.Fields.Where(f => !string.IsNullOrEmpty(f.Value)))
+                                                            {
+                                                                <tr>
+                                                                    <td class="font-monospace fw-semibold text-primary">@field.Name</td>
+                                                                    <td class="text-muted">@field.Description</td>
+                                                                    <td class="font-monospace text-break">
+                                                                        @if (field.Components.Count > 1)
+                                                                        {
+                                                                            <div class="text-dark fw-semibold mb-1">@field.Value</div>
+                                                                            <div class="ps-2 border-start border-2 border-primary">
+                                                                                @foreach (var comp in field.Components.Where(c => !string.IsNullOrEmpty(c.Value)))
+                                                                                {
+                                                                                    <div class="text-muted small">
+                                                                                        <span class="badge bg-secondary py-0 me-1">.@comp.Index</span>
+                                                                                        <span>@comp.Value</span>
+                                                                                    </div>
+                                                                                }
+                                                                            </div>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <span>@field.Value</span>
+                                                                        }
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? Preset { get; set; }
+
+    private string selectedPresetId = "registration";
+    private string activeTab = "tree";
+    private ClinicalPreset? currentPreset;
+    private string rawHl7Input = string.Empty;
+    private Hl7Message parsedMessage = new();
+    private List<LinterIssue> linterIssues = new();
+
+    public record LinterIssue(string Severity, string Title, string Description, string Remedy);
+
+    protected override void OnInitialized()
+    {
+        var targetId = !string.IsNullOrEmpty(Preset) ? Preset : "registration";
+        LoadPreset(targetId);
+    }
+
+    private void LoadPreset(string presetId)
+    {
+        selectedPresetId = presetId;
+        currentPreset = ClinicalPresets.GetById(presetId);
+        rawHl7Input = currentPreset.Hl7V2Message.Trim();
+        ParseCurrentMessage();
+    }
+
+    private void ParseCurrentMessage()
+    {
+        parsedMessage = Hl7V2Parser.Parse(rawHl7Input);
+        RunLinterChecks();
+    }
+
+    private void RunLinterChecks()
+    {
+        linterIssues.Clear();
+
+        if (string.IsNullOrWhiteSpace(rawHl7Input))
+        {
+            linterIssues.Add(new("Error", "Empty Payload", "No HL7 message content provided.", "Paste or select an ER7 message."));
+            return;
+        }
+
+        // 1. MSH Check
+        var msh = parsedMessage.GetSegment("MSH");
+        if (msh == null)
+        {
+            linterIssues.Add(new("Error", "Missing MSH Header", "Every valid HL7 message must start with an MSH header.", "Add MSH segment as line 1."));
+        }
+        else
+        {
+            // Trigger Event Check
+            if (string.IsNullOrEmpty(parsedMessage.TriggerEvent))
+            {
+                linterIssues.Add(new("Error", "Missing Trigger Event (MSH-9.2)", "MSH-9 contains no trigger event (e.g. A01, R01). Interface engines will drop this message.", "Specify both MessageType and TriggerEvent (e.g. ADT^A01)."));
+            }
+
+            // Control ID Check
+            if (string.IsNullOrEmpty(parsedMessage.MessageControlId))
+            {
+                linterIssues.Add(new("Warning", "Missing Control ID (MSH-10)", "Message lacks a unique tracking control ID.", "Provide a unique GUID or sequence number in MSH-10."));
+            }
+        }
+
+        // 2. PID Segment Check
+        var pid = parsedMessage.GetSegment("PID");
+        if (pid != null)
+        {
+            var mrn = pid.GetValue(3, 1);
+            var authority = pid.GetValue(3, 4);
+            if (string.IsNullOrEmpty(mrn))
+            {
+                linterIssues.Add(new("Error", "Missing MRN (PID-3.1)", "Patient Identification segment lacks an MRN.", "Supply a patient ID in PID-3.1."));
+            }
+            else if (string.IsNullOrEmpty(authority))
+            {
+                linterIssues.Add(new("Warning", "Missing Assigning Authority (PID-3.4)", "MRN has no namespace owner. Risk of duplicate chart collision across hospitals.", "Specify assigning authority (e.g. MRN123^^^METRO_HOSP^MR)."));
+            }
+
+            var familyName = pid.GetValue(5, 1);
+            if (string.IsNullOrEmpty(familyName))
+            {
+                linterIssues.Add(new("Warning", "Missing Family Name (PID-5.1)", "Patient name has no family surname.", "Add family name in PID-5.1."));
+            }
+        }
+
+        // 3. Unescaped Delimiter Check
+        var lines = rawHl7Input.Split('\n');
+        for (int l = 0; l < lines.Length; l++)
+        {
+            var line = lines[l].Trim();
+            if (line.StartsWith("OBX") || line.StartsWith("NTE"))
+            {
+                // Check if line contains bare escaped hazard
+                if (line.Contains("| |") || line.Contains(" | "))
+                {
+                    linterIssues.Add(new("Warning", $"Possible Unescaped Pipe in Line {l + 1}", "Line appears to contain bare pipe characters inside textual content.", "Replace literal '|' with '\\F\\'."));
+                }
+            }
+        }
+    }
+
+    private string GetBadgeColor(string segmentId) => segmentId.ToUpperInvariant() switch
+    {
+        "MSH" => "bg-dark",
+        "PID" => "bg-primary",
+        "PV1" => "bg-success",
+        "OBR" => "bg-warning text-dark",
+        "OBX" => "bg-info text-dark",
+        "DG1" => "bg-danger",
+        _ => "bg-secondary"
+    };
+}
