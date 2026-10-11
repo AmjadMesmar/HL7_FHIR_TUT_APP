@@ -6,7 +6,7 @@
 [![FHIR R4](https://img.shields.io/badge/FHIR-Release_4.0.1-FF5A36?logo=fire)](https://hl7.org/fhir/R4/)
 [![Firely SDK](https://img.shields.io/badge/Firely_SDK-6.6.0-orange)](https://fire.ly/)
 [![Author](https://img.shields.io/badge/Author-Amjad_Mesmar-005691?logo=github)](https://github.com/AmjadMesmar)
-[![Role](https://img.shields.io/badge/Role-Senior_Software_Engineer_&_Full_Stack_Developer-purple)]()
+[![Role](https://img.shields.io/badge/Role-Senior_Software_Engineer-512BD4)]()
 [![Zero External DB](https://img.shields.io/badge/Database-Zero_Config_In--Memory-success)]()
 [![Hardware Friendly](https://img.shields.io/badge/Memory_Footprint-~140_MB_RAM-brightgreen)]()
 
@@ -142,13 +142,15 @@ HL7_FHIR_TUT_APP/
 ## 👨‍💻 Author & Engineering Lead
 
 **Amjad Mesmar**  
-*Senior Software Engineer and Full Stack Developer*  
+*Senior Software Engineer*  
 * GitHub: [@AmjadMesmar](https://github.com/AmjadMesmar)
+
+Senior Software Engineer with extensive experience designing and deploying high-stakes systems across healthcare interoperability (HL7 v2 / FHIR R4), enterprise ERPs, commercial platforms, and governmental infrastructure. Core expertise in system architecture, security & cryptography (AES-256, ACLs, multi-tenant licensing), and full-lifecycle engineering from requirements analysis to production IIS deployment. Outside enterprise systems, actively passionate about reverse engineering, systems architecture, and video game modding (*Mount & Blade II: Bannerlord*, *Stardew Valley*, *Age of Empires II: DE*).
 
 ---
 
 ## 📄 License & Attribution
 
 This project is open-source and created for educational, training, and department onboarding purposes.
-* **Architect & Developer:** [Amjad Mesmar](https://github.com/AmjadMesmar) (Senior Software Engineer and Full Stack Developer).
+* **Architect & Developer:** [Amjad Mesmar](https://github.com/AmjadMesmar) (Senior Software Engineer).
 * HL7® and FHIR® are registered trademarks of [Health Level Seven International](https://www.hl7.org/).
