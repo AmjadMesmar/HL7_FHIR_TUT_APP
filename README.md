@@ -2,6 +2,7 @@
 
 [![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![Blazor Server](https://img.shields.io/badge/Blazor-Server-512BD4?logo=blazor)](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-hl7--fhir--tut--app.onrender.com-00C7B7?logo=render&logoColor=white)](https://hl7-fhir-tut-app.onrender.com/)
 [![HL7 v2](https://img.shields.io/badge/HL7-v2.3_|_v2.5_|_v2.7-005691)](https://www.hl7.org/)
 [![FHIR R4](https://img.shields.io/badge/FHIR-Release_4.0.1-FF5A36?logo=fire)](https://hl7.org/fhir/R4/)
 [![Firely SDK](https://img.shields.io/badge/Firely_SDK-6.6.0-orange)](https://fire.ly/)
@@ -9,6 +10,8 @@
 [![Role](https://img.shields.io/badge/Role-Senior_Software_Engineer-512BD4)]()
 [![Zero External DB](https://img.shields.io/badge/Database-Zero_Config_In--Memory-success)]()
 [![Hardware Friendly](https://img.shields.io/badge/Memory_Footprint-~140_MB_RAM-brightgreen)]()
+
+> 🌐 **Live Interactive App**: [https://hl7-fhir-tut-app.onrender.com/](https://hl7-fhir-tut-app.onrender.com/)
 
 An interactive, zero-overhead training portal and clinical interoperability workbench designed for hospital integration engineers, software developers, and QA teams. Built with **Blazor Server** on **.NET 10**, this application runs natively in-memory without requiring heavy database installations, Docker containers, or high-end workstations.
 
