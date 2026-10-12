@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: hl7-fhir-workbench
+    runtime: docker
+    plan: free
+    region: frankfurt
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production

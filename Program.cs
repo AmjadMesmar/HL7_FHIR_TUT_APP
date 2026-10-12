@@ -2,6 +2,13 @@ using Hl7FhirWorkbench.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Support dynamic cloud hosting port (e.g., Render, Railway, Fly.io, Cloud Run)
+var cloudPort = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrEmpty(cloudPort))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{cloudPort}");
+}
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
