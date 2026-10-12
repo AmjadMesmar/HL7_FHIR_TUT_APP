@@ -28,6 +28,7 @@
             <div class="d-flex flex-wrap gap-2 align-items-center small">
                 <span class="fw-bold text-muted me-1"><i class="bi bi-compass"></i> Jump to Topic:</span>
                 <a href="get-started#topic-formats" class="btn btn-sm btn-outline-primary py-0">1. JSON vs XML vs ER7</a>
+                <a href="get-started#topic-rosetta" class="btn btn-sm btn-outline-warning py-0 fw-semibold">The Rosetta Stone &amp; 1989 Origins</a>
                 <a href="get-started#topic-operators" class="btn btn-sm btn-outline-primary py-0">2. HL7 Delimiters &amp; Operators</a>
                 <a href="get-started#topic-messages" class="btn btn-sm btn-outline-primary py-0">3. 5 Deep-Dive Messages</a>
                 <a href="get-started#topic-journey" class="btn btn-sm btn-outline-primary py-0">4. Patient Journey Simulator</a>
@@ -163,6 +164,106 @@
                             <td><span class="badge bg-info text-dark">RDF / Turtle</span></td>
                             <td>SPARQL / Graph Endpoints</td>
                             <td>Enables ontological reasoning across drug-drug interaction databases.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- THE ROSETTA STONE & 1989 HISTORICAL ORIGINS -->
+    <div id="topic-rosetta" class="card shadow-sm mb-4 border-warning border-top border-3">
+        <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-translate text-warning me-2"></i> The Rosetta Stone &amp; 1989 Historical Origins
+            </h5>
+            <span class="badge bg-warning text-dark">Conceptual Translation</span>
+        </div>
+        <div class="card-body p-3">
+            <!-- 1989 vs Modern Web Infographic -->
+            <div class="p-3 mb-4 rounded bg-dark text-light border">
+                <h6 class="fw-bold text-warning mb-2"><i class="bi bi-clock-history me-1"></i> Why Does HL7 v2 Look Like Pipes &amp; Hats? (The 1989 Wire Reality)</h6>
+                <div class="row g-3 small">
+                    <div class="col-md-6 border-end border-secondary pe-3">
+                        <strong class="text-info d-block mb-1">1989: The Genesis of HL7 v2</strong>
+                        <ul class="text-white-50 ps-3 mb-0" style="font-size: 0.8rem;">
+                            <li><strong>Hardware Constraints:</strong> Computers ran Intel 80286/80386 chips with 640 KB RAM.</li>
+                            <li><strong>Networking:</strong> Raw RS-232 serial cables and 1200-baud modems; bandwidth was exceptionally scarce.</li>
+                            <li><strong>Why Delimiters?</strong> By omitting XML/JSON property tags (like <code>"patientName": "Smith"</code>), ER7 stripped out 90% of wire bytes. An entire admission message fit in 300 bytes!</li>
+                            <li><strong>Cost of Parsing:</strong> Microcontrollers could split on ASCII <code>0x7C</code> (<code>|</code>) in microseconds with zero string allocations.</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6 ps-3">
+                        <strong class="text-success d-block mb-1">2014 &rarr; 2026: The FHIR REST Era</strong>
+                        <ul class="text-white-50 ps-3 mb-0" style="font-size: 0.8rem;">
+                            <li><strong>Modern Environment:</strong> Smartphones, cloud microservices, and 5G gigabit networks.</li>
+                            <li><strong>Why JSON?</strong> Bandwidth is cheap; developer ergonomics, JSON schema validation, and RESTful verbs are far more valuable.</li>
+                            <li><strong>Web-Native:</strong> Web developers can consume <code>GET /Patient/123</code> using native JavaScript <code>fetch()</code> without specialized telecom parsing engines.</li>
+                            <li><strong>SMART Authorization:</strong> Backed by standard OAuth2 tokens rather than unauthenticated raw TCP streams.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- The Rosetta Stone Translation Table -->
+            <h6 class="fw-bold text-dark mb-2"><i class="bi bi-arrow-left-right text-primary me-1"></i> The Healthcare Developer's Rosetta Stone</h6>
+            <p class="small text-muted mb-2">
+                Translating mental models between HL7 v2's event-driven segment trees and FHIR's resource-oriented graph:
+            </p>
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm small mb-0 table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 25%;">Clinical Concept</th>
+                            <th style="width: 35%;">HL7 v2 ER7 Equivalent</th>
+                            <th style="width: 40%;">FHIR R4 Resource Equivalent</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Patient Demographics &amp; MRN</strong></td>
+                            <td><code>PID-3</code> (MRN) &bull; <code>PID-5</code> (Family^Given) &bull; <code>PID-7</code> (DOB)</td>
+                            <td><span class="badge bg-success">Patient</span> (<code>.identifier[]</code>, <code>.name.family</code>, <code>.birthDate</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hospital Stay / Clinic Visit</strong></td>
+                            <td><code>PV1-2</code> (Patient Class) &bull; <code>PV1-3</code> (Room/Bed) &bull; <code>PV1-44</code> (Admit)</td>
+                            <td><span class="badge bg-success">Encounter</span> (<code>.class</code>, <code>.location[]</code>, <code>.period.start</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Attending Doctor</strong></td>
+                            <td><code>PV1-7</code> (ID^Family^Given)</td>
+                            <td><span class="badge bg-success">Practitioner</span> referenced via <code>Encounter.participant</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Diagnostic Lab / Radiology Order</strong></td>
+                            <td><code>ORC-2</code> / <code>OBR-2</code> (Placer #) &bull; <code>OBR-4</code> (LOINC Code)</td>
+                            <td><span class="badge bg-success">ServiceRequest</span> (<code>.identifier</code>, <code>.code</code>, <code>.intent</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Laboratory Panel / Radiology Report</strong></td>
+                            <td><code>OBR</code> Segment &bull; <code>OBR-25</code> (Status: F=Final)</td>
+                            <td><span class="badge bg-success">DiagnosticReport</span> (<code>.status</code>, <code>.code</code>, <code>.result[]</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Individual Lab Result / Vital Sign</strong></td>
+                            <td><code>OBX-2</code> (NM/ST) &bull; <code>OBX-3</code> (LOINC) &bull; <code>OBX-5</code> (Val) &bull; <code>OBX-6</code> (Units)</td>
+                            <td><span class="badge bg-success">Observation</span> (<code>.code</code>, <code>.valueQuantity</code>, <code>.interpretation</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Clinical Diagnosis / Problem</strong></td>
+                            <td><code>DG1-3</code> (ICD-10 Code) &bull; <code>DG1-6</code> (Type: A=Admit)</td>
+                            <td><span class="badge bg-success">Condition</span> linked via <code>Encounter.diagnosis</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Complete Message Package</strong></td>
+                            <td>Whole ER7 stream (MSH &rarr; PID &rarr; PV1 &rarr; OBR &rarr; OBX)</td>
+                            <td><span class="badge bg-success">Bundle</span> (type = <code>collection</code> or <code>transaction</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Acknowledgment / Response</strong></td>
+                            <td><code>MSA-1</code> (<code>AA</code>=Accept, <code>AE</code>=Error, <code>AR</code>=Reject)</td>
+                            <td><span class="badge bg-success">OperationOutcome</span> (<code>.issue.severity</code>, <code>.issue.code</code>)</td>
                         </tr>
                     </tbody>
                 </table>

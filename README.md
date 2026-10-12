@@ -26,32 +26,34 @@ Connecting these two worlds requires bridging two radically different philosophi
 
 ## 🚀 Key Features & Interactive Labs
 
-The workbench includes **13 interactive modules** categorized into three core engineering areas:
+The workbench includes **14 interactive modules** categorized into three core engineering areas:
 
 ### 1. Curriculum & Docs
 | Tool | Route | What It Does |
 | :--- | :--- | :--- |
-| **Overview & Paths** | `/` | 3-step structured learning journey, scenario selector, and architectural comparison table. |
-| **Master Curriculum** | `/get-started` | 6 in-depth modules: Data body comparisons (JSON vs XML vs ER7 vs RDF), Delimiters & Escape characters, 5 surgery-level messages (`ADT^A01`, `A08`, `A03`, `ORM^O01`, `ORU^R01`), 24h patient journey simulator, searchable jargon buster, and knowledge check quiz. |
+| **Overview & Paths** | `/` | 3-Day Mastery Pathway checklist, interactive learning journey, scenario selector, and architectural comparison table. |
+| **Master Curriculum** | `/get-started` | 1989 Historical Hardware Constraints infographic, The Rosetta Stone Concept Translation Matrix (v2 vs FHIR vs Modern equivalents), Data body comparisons (JSON vs XML vs ER7 vs RDF), Delimiters & Escape characters, 5 surgery-level messages (`ADT^A01`, `A08`, `A03`, `ORM^O01`, `ORU^R01`), 24h patient journey simulator, and knowledge check quiz. |
 | **Living Documentation** | `/docs` | In-app Markdown document reader powered by `Markdig`, rendering version-controlled markdown guides directly from the `Docs/` directory. |
+| **Jargon Glossary** | Global Modal | Global header search modal with 22+ clinical/interop dictionary definitions across Core Protocols, v2 Standards, FHIR Terminology, and Hospital IT. |
 
 ### 2. Interactive Labs
 | Tool | Route | What It Does |
 | :--- | :--- | :--- |
+| **Hospital Flow Simulator** | `/hospital-flow` | Interactive multi-system hospital sequence simulator (EHR, Integration Engine, LIS, FHIR Gateway) with step-by-step trace inspection and wire formats. |
 | **Interop Bridge** | `/bridge` | Real-time bidirectional HL7 v2 to FHIR R4 transformation engine with interactive field-level trace inspection and Firely JSON output. |
-| **HL7 Inspector & Linter** | `/hl7-inspector` | Visual ER7 syntax deconstructor + automated live syntax linter flagging malformed timestamps, missing delimiters, and header errors in real time. |
-| **FHIR Resource Explorer** | `/fhir-explorer` | Interactive Firely SDK serialization sandbox and visual guide to core clinical datatypes (`HumanName`, `Identifier`, `CodeableConcept`, `Quantity`). |
-| **REST Playground** | `/rest-playground` | Visual FHIR Search Builder (`_include`, comparator prefixes, summary modes) with live HAPI FHIR query sandbox and mock fallback. |
+| **HL7 Inspector & Linter** | `/hl7-inspector` | Visual ER7 syntax deconstructor + Visual Delimiter Microscope (coordinate inspector) + Form-based ER7 Message Builder with live preview + live syntax linter. |
+| **FHIR Resource Explorer** | `/fhir-explorer` | Interactive Firely SDK serialization sandbox, Resource Reference Graph visualizer, US Core Conformance Validator, and datatypes guide. |
+| **REST Playground** | `/rest-playground` | Visual FHIR Search Builder (`_include`, comparator prefixes, summary modes) with live Plain-English Query Explainer and HAPI FHIR query sandbox. |
 
 ### 3. Engineering & QA Tools
 | Tool | Route | What It Does |
 | :--- | :--- | :--- |
 | **Synthetic Data Factory** | `/data-factory` | Generates realistic clinical scenarios (Diabetic Outpatient, Acute Cardiac STEMI, Trauma ICU) in matched ER7 and FHIR formats with 1-click clipboard copy and `.hl7` / `.json` downloads. |
-| **MLLP & ACK Simulator** | `/mllp-simulator` | Packet frame viewer displaying start block `0x0B`, payload, and end block `0x1C 0x0D`, plus automated `AA`, `AE`, and `AR` acknowledgment generator. |
+| **MLLP & ACK Simulator** | `/mllp-simulator` | Interactive TCP 3-way handshake & MLLP framing byte stepper (`<0x0B>` ... `<0x1C><0x0D>`) plus automated `AA`, `AE`, and `AR` acknowledgment generator. |
 | **Terminology Lookup** | `/terminology` | Searchable clinical dictionary covering LOINC lab codes, ICD-10 clinical diagnoses, and HL7 administrative tables with bidirectional v2-to-FHIR concept mapping. |
 | **C# Code Recipes** | `/code-recipes` | Battle-tested, copy-pasteable C# .NET 10 recipes (MLLP listener, Firely serializer, HAPI REST client, custom v2 parser) with 1-click clipboard copy. |
 | **xUnit Test Generator** | `/test-generator` | Generates ready-to-run C# unit test classes for ER7 delimiter parsing, PID extraction, FHIR validation, and edge cases with copy and `.cs` download. |
-| **Hospital War Room** | `/war-room` | 5 real-world hospital integration crisis scenarios (MLLP hang, duplicate MRN, negative observation value, missing timezone, truncated identifier) with diagnostic checklists and fix recipes. |
+| **Hospital War Room** | `/war-room` | 5 real-world hospital integration crisis scenarios + Interactive Fix-the-Bug Challenge Arena with 5 puzzles, instant validation, and hint assistance. |
 | **Tech Stack & Specs** | `/project-info` | Engineering specs, NuGet bill of materials, rationale behind each dependency, and architectural justifications for low-spec hardware. |
 
 ---
@@ -70,9 +72,11 @@ HL7_FHIR_TUT_APP/
 │   │       └── ClinicalPresets.cs  # 4 real-world clinical scenarios
 │   ├── Fhir/
 │   │   └── FhirService.cs          # Firely SDK serializer, deserializer, and HAPI client
-│   └── Mapping/
-│       ├── MappingModels.cs        # FieldMappingLink & TransformationResult records
-│       └── Hl7ToFhirMapper.cs      # Core converter: PID->Patient, PV1->Encounter, OBX->Observation
+│   ├── Mapping/
+│   │   ├── MappingModels.cs        # FieldMappingLink & TransformationResult records
+│   │   └── Hl7ToFhirMapper.cs      # Core converter: PID->Patient, PV1->Encounter, OBX->Observation
+│   └── Glossary/
+│       └── GlossaryData.cs         # Clinical & Interop dictionary with category classification
 ├── Docs/                           # Living documentation (Docs-as-Code)
 │   ├── WALKTHROUGH.md              # Test plan & verification report
 │   ├── ARCHITECTURE_RATIONALE.md   # Deep architectural explanations of tech stack
@@ -80,8 +84,9 @@ HL7_FHIR_TUT_APP/
 └── Components/
     ├── Layout/
     │   ├── MainLayout.razor        # Responsive layout with healthcare branding (no horizontal scroll)
-    │   └── NavMenu.razor           # Interactive navigation sidebar with 3 organized sections
-    └── Pages/                      # 13 interactive pages & developer tools
+    │   ├── NavMenu.razor           # Interactive navigation sidebar with 3 organized sections
+    │   └── GlossaryModal.razor     # Global search modal for clinical interoperability terms
+    └── Pages/                      # 14 interactive pages & developer tools
 ```
 
 ### Architectural Decisions

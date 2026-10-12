@@ -69,10 +69,16 @@
                     <!-- Tab Switcher -->
                     <div class="btn-group btn-group-sm">
                         <button class="btn @(activeTab == "tree" ? "btn-dark" : "btn-outline-secondary")" @onclick='() => activeTab = "tree"'>
-                            <i class="bi bi-diagram-2 me-1"></i> Deconstructed Tree
+                            <i class="bi bi-diagram-2 me-1"></i> Tree
+                        </button>
+                        <button class="btn @(activeTab == "microscope" ? "btn-dark" : "btn-outline-secondary")" @onclick='() => activeTab = "microscope"'>
+                            <i class="bi bi-zoom-in me-1"></i> Microscope
+                        </button>
+                        <button class="btn @(activeTab == "builder" ? "btn-dark" : "btn-outline-secondary")" @onclick='() => activeTab = "builder"'>
+                            <i class="bi bi-pencil-square me-1"></i> Builder
                         </button>
                         <button class="btn @(activeTab == "linter" ? "btn-dark" : "btn-outline-secondary")" @onclick='() => activeTab = "linter"'>
-                            <i class="bi bi-shield-check me-1"></i> Live Linter
+                            <i class="bi bi-shield-check me-1"></i> Linter
                             @if (linterIssues.Any(i => i.Severity == "Error"))
                             {
                                 <span class="badge bg-danger ms-1">@linterIssues.Count(i => i.Severity == "Error")</span>
@@ -137,6 +143,183 @@
                                     }
                                 </div>
                             }
+                        </div>
+                    }
+                    else if (activeTab == "microscope")
+                    {
+                        <!-- DELIMITER MICROSCOPE VIEW -->
+                        <div class="mb-3">
+                            <div class="alert alert-primary p-2 small mb-3 d-flex align-items-center gap-2">
+                                <i class="bi bi-zoom-in fs-4 text-primary"></i>
+                                <div>
+                                    <strong>Interactive Delimiter Microscope:</strong> Click any token in the breakdown below to inspect its exact hierarchy tier, coordinate, and clinical meaning.
+                                </div>
+                            </div>
+
+                            <!-- Legend -->
+                            <div class="d-flex flex-wrap gap-2 mb-3 small">
+                                <span class="badge bg-danger">| Field Separator</span>
+                                <span class="badge bg-primary">^ Component</span>
+                                <span class="badge bg-warning text-dark">~ Repetition</span>
+                                <span class="badge bg-info text-dark">&amp; Subcomponent</span>
+                                <span class="badge bg-dark">\ Escape</span>
+                                <span class="badge bg-secondary">Segment Tag</span>
+                            </div>
+
+                            <!-- Active Token Inspector Card -->
+                            @if (selectedMicroscopeToken != null)
+                            {
+                                <div class="card border-primary mb-3 bg-primary-subtle shadow-sm">
+                                    <div class="card-body p-2">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fw-bold text-primary">
+                                                <i class="bi bi-crosshair me-1"></i> Token: <code class="fs-6 px-1 bg-white rounded">@selectedMicroscopeToken.Token</code>
+                                            </span>
+                                            <span class="badge bg-primary">@selectedMicroscopeToken.HierarchyLevel</span>
+                                        </div>
+                                        <div class="small text-dark mt-1">
+                                            <strong>Coordinate / Role:</strong> @selectedMicroscopeToken.Coordinate &bull; @selectedMicroscopeToken.Description
+                                        </div>
+                                        <div class="small text-muted mt-1" style="font-size: 0.75rem;">
+                                            <strong>Standards Rule:</strong> @selectedMicroscopeToken.Rule
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Tokenized Message Grid -->
+                            <div class="border rounded p-3 bg-dark font-monospace small">
+                                @for (int l = 0; l < parsedMessage.Segments.Count; l++)
+                                {
+                                    var seg = parsedMessage.Segments[l];
+                                    <div class="mb-2 text-break">
+                                        <span class="badge bg-secondary cursor-pointer me-1" 
+                                              @onclick='() => SelectToken(seg.SegmentId, "Segment Header", seg.SegmentId, seg.Description, "Segment tag defines the clinical domain of the record.")'>
+                                            @seg.SegmentId
+                                        </span>
+                                        @for (int f = 1; f < seg.Fields.Count; f++)
+                                        {
+                                            var field = seg.Fields[f];
+                                            var fIndex = f;
+                                            <span class="badge bg-danger cursor-pointer mx-1" 
+                                                  @onclick='() => SelectToken("|", "Level 1: Field Separator", $"{seg.SegmentId}-{fIndex}", field.Description, "Separates major data fields within the segment.")'>|</span>
+                                            @if (field.Components.Count > 1)
+                                            {
+                                                @for (int c = 0; c < field.Components.Count; c++)
+                                                {
+                                                    var comp = field.Components[c];
+                                                    var cIndex = c + 1;
+                                                    if (c > 0)
+                                                    {
+                                                        <span class="badge bg-primary cursor-pointer mx-1" 
+                                                              @onclick='() => SelectToken("^", "Level 2: Component Separator", $"{seg.SegmentId}-{fIndex}.{cIndex}", $"Sub-part of {field.Description}", "Splits composite datatype into specific atoms.")'>^</span>
+                                                    }
+                                                    <span class="text-info cursor-pointer" 
+                                                          @onclick='() => SelectToken(comp.Value, "Component Value", $"{seg.SegmentId}-{fIndex}.{cIndex}", comp.Value, "Clinical data stored at this exact sub-coordinate.")'>
+                                                        @(string.IsNullOrEmpty(comp.Value) ? "•" : comp.Value)
+                                                    </span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="text-light cursor-pointer" 
+                                                      @onclick='() => SelectToken(field.Value, "Field Value", $"{seg.SegmentId}-{fIndex}", field.Description, "Direct clinical data value.")'>
+                                                    @(string.IsNullOrEmpty(field.Value) ? "•" : field.Value)
+                                                </span>
+                                            }
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else if (activeTab == "builder")
+                    {
+                        <!-- FORM-BASED ER7 MESSAGE BUILDER -->
+                        <div class="mb-3">
+                            <div class="alert alert-info p-2 small mb-3">
+                                <strong><i class="bi bi-pencil-square"></i> Interactive ER7 Message Builder:</strong> Fill out the clinical form fields below. The engine will dynamically assemble the exact pipe-and-hat ER7 syntax in real time!
+                            </div>
+
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-semibold text-muted mb-0">Message Trigger Event</label>
+                                    <select class="form-select form-select-sm" @bind="builderEvent" @bind:after="UpdateGeneratedEr7">
+                                        <option value="ADT^A01">ADT^A01 (Inpatient Admission)</option>
+                                        <option value="ADT^A04">ADT^A04 (Outpatient Registration)</option>
+                                        <option value="ADT^A08">ADT^A08 (Update Patient Info)</option>
+                                        <option value="ORU^R01">ORU^R01 (Lab Result / Observation)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-semibold text-muted mb-0">MRN / Patient ID (PID-3.1)</label>
+                                    <input type="text" class="form-control form-control-sm font-monospace" @bind="builderMrn" @bind:after="UpdateGeneratedEr7" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-semibold text-muted mb-0">Assigning Authority (PID-3.4)</label>
+                                    <input type="text" class="form-control form-control-sm font-monospace" @bind="builderAuthority" @bind:after="UpdateGeneratedEr7" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-semibold text-muted mb-0">Family Surname (PID-5.1)</label>
+                                    <input type="text" class="form-control form-control-sm" @bind="builderLastName" @bind:after="UpdateGeneratedEr7" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-semibold text-muted mb-0">Given Name (PID-5.2)</label>
+                                    <input type="text" class="form-control form-control-sm" @bind="builderFirstName" @bind:after="UpdateGeneratedEr7" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-semibold text-muted mb-0">Date of Birth (PID-7)</label>
+                                    <input type="text" class="form-control form-control-sm font-monospace" placeholder="YYYYMMDD" @bind="builderDob" @bind:after="UpdateGeneratedEr7" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-semibold text-muted mb-0">Gender (PID-8)</label>
+                                    <select class="form-select form-select-sm" @bind="builderGender" @bind:after="UpdateGeneratedEr7">
+                                        <option value="M">M (Male)</option>
+                                        <option value="F">F (Female)</option>
+                                        <option value="O">O (Other)</option>
+                                        <option value="U">U (Unknown)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-semibold text-muted mb-0">Patient Class (PV1-2)</label>
+                                    <select class="form-select form-select-sm" @bind="builderPatientClass" @bind:after="UpdateGeneratedEr7">
+                                        <option value="I">I (Inpatient)</option>
+                                        <option value="O">O (Outpatient)</option>
+                                        <option value="E">E (Emergency)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-semibold text-muted mb-0">Bed / Room Location (PV1-3)</label>
+                                    <input type="text" class="form-control form-control-sm font-monospace" @bind="builderLocation" @bind:after="UpdateGeneratedEr7" />
+                                </div>
+                                @if (builderEvent.StartsWith("ORU"))
+                                {
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-semibold text-muted mb-0">LOINC Code (OBX-3.1)</label>
+                                        <input type="text" class="form-control form-control-sm font-monospace" @bind="builderLoinc" @bind:after="UpdateGeneratedEr7" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-semibold text-muted mb-0">Test Name (OBX-3.2)</label>
+                                        <input type="text" class="form-control form-control-sm" @bind="builderTestName" @bind:after="UpdateGeneratedEr7" />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label small fw-semibold text-muted mb-0">Result Value (OBX-5)</label>
+                                        <input type="text" class="form-control form-control-sm font-monospace" @bind="builderResultValue" @bind:after="UpdateGeneratedEr7" />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label small fw-semibold text-muted mb-0">Units (OBX-6)</label>
+                                        <input type="text" class="form-control form-control-sm font-monospace" @bind="builderUnits" @bind:after="UpdateGeneratedEr7" />
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold small text-muted">Generated Real-Time HL7 v2 Output:</span>
+                                <button class="btn btn-sm btn-success fw-semibold" @onclick="LoadBuilderIntoInspector">
+                                    <i class="bi bi-box-arrow-in-left me-1"></i> Send to Inspector &amp; Linter
+                                </button>
+                            </div>
+                            <pre class="bg-dark text-light p-3 rounded font-monospace small mb-0 overflow-auto" style="max-height: 160px; white-space: pre-wrap; word-break: break-all;"><code>@generatedEr7</code></pre>
                         </div>
                     }
                     else
@@ -252,6 +435,7 @@
     {
         var targetId = !string.IsNullOrEmpty(Preset) ? Preset : "registration";
         LoadPreset(targetId);
+        UpdateGeneratedEr7();
     }
 
     private void LoadPreset(string presetId)
@@ -347,4 +531,61 @@
         "DG1" => "bg-danger",
         _ => "bg-secondary"
     };
+
+    // Delimiter Microscope State
+    private record MicroscopeToken(string Token, string HierarchyLevel, string Coordinate, string Description, string Rule);
+    private MicroscopeToken? selectedMicroscopeToken;
+
+    private void SelectToken(string token, string level, string coord, string desc, string rule)
+    {
+        selectedMicroscopeToken = new(token, level, coord, desc, rule);
+    }
+
+    // ER7 Message Builder State
+    private string builderEvent = "ADT^A01";
+    private string builderMrn = "MRN552190";
+    private string builderAuthority = "METRO_HOSP^MR";
+    private string builderLastName = "Davis";
+    private string builderFirstName = "Sarah";
+    private string builderDob = "19900822";
+    private string builderGender = "F";
+    private string builderPatientClass = "I";
+    private string builderLocation = "CARDIO^ROOM_204^BED_A";
+    private string builderLoinc = "24331-1";
+    private string builderTestName = "Lipid Panel";
+    private string builderResultValue = "195";
+    private string builderUnits = "mg/dL";
+    private string generatedEr7 = string.Empty;
+
+    private void UpdateGeneratedEr7()
+    {
+        var timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+        var parts = builderEvent.Split('^');
+        var msgType = parts[0];
+        var trigger = parts.Length > 1 ? parts[1] : "A01";
+
+        if (builderEvent.StartsWith("ORU"))
+        {
+            generatedEr7 = $"MSH|^~\\&|LAB_BUILDER|METRO_HOSP|EHR|METRO_HOSP|{timestamp}||ORU^R01|MSG{DateTime.Now.Ticks % 100000}|P|2.5\r\n" +
+                           $"PID|1||{builderMrn}^^^{builderAuthority}||{builderLastName}^{builderFirstName}||{builderDob}|{builderGender}\r\n" +
+                           $"PV1|1|{builderPatientClass}|{builderLocation}\r\n" +
+                           $"OBR|1|ORD-991||{builderLoinc}^{builderTestName}^LN|||||||||||||F\r\n" +
+                           $"OBX|1|NM|{builderLoinc}^{builderTestName}^LN||{builderResultValue}|{builderUnits}|100-200|N|||F";
+        }
+        else
+        {
+            generatedEr7 = $"MSH|^~\\&|BUILDER_SYS|METRO_HOSP|EHR|METRO_HOSP|{timestamp}||{builderEvent}|MSG{DateTime.Now.Ticks % 100000}|P|2.5\r\n" +
+                           $"EVN|{trigger}|{timestamp}\r\n" +
+                           $"PID|1||{builderMrn}^^^{builderAuthority}||{builderLastName}^{builderFirstName}||{builderDob}|{builderGender}\r\n" +
+                           $"PV1|1|{builderPatientClass}|{builderLocation}";
+        }
+    }
+
+    private void LoadBuilderIntoInspector()
+    {
+        UpdateGeneratedEr7();
+        rawHl7Input = generatedEr7;
+        ParseCurrentMessage();
+        activeTab = "tree";
+    }
 }

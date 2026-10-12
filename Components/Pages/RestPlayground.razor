@@ -61,6 +61,14 @@
                 </div>
             </div>
 
+            <!-- Plain English Translation Alert -->
+            <div class="alert alert-primary py-2 px-3 mt-2 mb-0 small d-flex align-items-center gap-2">
+                <i class="bi bi-translate text-primary fs-5"></i>
+                <div class="flex-grow-1">
+                    <strong>Plain-English Query Meaning:</strong> @GetPlainEnglishQueryExplanation()
+                </div>
+            </div>
+
             <!-- Advanced Builder Controls -->
             @if (showAdvancedBuilder)
             {
@@ -341,5 +349,65 @@
     }}
   ]
 }}";
+    }
+
+    private string GetPlainEnglishQueryExplanation()
+    {
+        if (string.IsNullOrWhiteSpace(searchQuery))
+        {
+            return $"Query all {selectedResourceType} resources up to the default pagination limit.";
+        }
+
+        var parts = new List<string>();
+
+        if (searchQuery.Contains("_include=DiagnosticReport:result"))
+        {
+            parts.Add("Compound Join (_include): Returns DiagnosticReport AND automatically includes all Observation result resources in the same response bundle");
+        }
+        else if (searchQuery.Contains("_include=Observation:patient"))
+        {
+            parts.Add("Compound Join (_include): Returns Observations AND automatically bundles the corresponding Patient demographic charts");
+        }
+
+        if (searchQuery.Contains("subject:Patient.name="))
+        {
+            parts.Add("Chained Filter: Traverses from Observation to the referenced Patient and filters by the patient's family name");
+        }
+
+        if (searchQuery.Contains("ge"))
+        {
+            parts.Add("Date Comparator: Matches records occurring on or after the specified timestamp (Greater or Equal)");
+        }
+        else if (searchQuery.Contains("le"))
+        {
+            parts.Add("Date Comparator: Matches records occurring on or before the specified timestamp (Less or Equal)");
+        }
+
+        if (searchQuery.Contains("name="))
+        {
+            parts.Add($"Text Filter: Matches {selectedResourceType} where family or given name contains the query text");
+        }
+
+        if (searchQuery.Contains("gender="))
+        {
+            parts.Add("Demographic Filter: Exact match on administrative gender code");
+        }
+
+        if (searchQuery.Contains("category=laboratory"))
+        {
+            parts.Add("Category Filter: Restricts observation query to lab chemistry and hematology tests");
+        }
+
+        if (searchQuery.Contains("status=in-progress"))
+        {
+            parts.Add("Encounter Lifecycle: Finds currently active, non-discharged patient visits");
+        }
+
+        if (parts.Count == 0)
+        {
+            return $"Filters {selectedResourceType} resources using custom query parameters: '{searchQuery}'.";
+        }
+
+        return string.Join(" • ", parts);
     }
 }

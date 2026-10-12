@@ -55,6 +55,61 @@
         </div>
     </div>
 
+    <!-- INTERACTIVE ONBOARDING & MASTERY WIZARD -->
+    <div class="card border-0 shadow-sm mb-4 bg-light">
+        <div class="card-body p-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                <div>
+                    <h5 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-award-fill text-warning me-1"></i> Interactive Interoperability Mastery Pathway
+                    </h5>
+                    <small class="text-muted">Track your progress from complete beginner to production-ready healthcare integration engineer</small>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge @GetBadgeStyle() fs-6 px-3 py-2">@MasteryTitle</span>
+                    <span class="fw-bold text-primary font-monospace">@ProgressPercentage%</span>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress mb-3" style="height: 10px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated @GetProgressColor()" 
+                     role="progressbar" 
+                     style="width: @ProgressPercentage%;" 
+                     aria-valuenow="@ProgressPercentage" 
+                     aria-valuemin="0" 
+                     aria-valuemax="100"></div>
+            </div>
+
+            <!-- Tasks Checklist -->
+            <div class="row g-2">
+                @for (int t = 0; t < ChecklistTasks.Count; t++)
+                {
+                    var taskIndex = t;
+                    var task = ChecklistTasks[taskIndex];
+                    <div class="col-md-6 col-lg-4">
+                        <div class="p-2 bg-white rounded border d-flex align-items-start gap-2 h-100 shadow-sm">
+                            <input class="form-check-input mt-1" type="checkbox" id="@($"chk_{taskIndex}")" 
+                                   checked="@task.IsCompleted" 
+                                   @onchange="() => ToggleTask(taskIndex)" />
+                            <div class="flex-grow-1 small">
+                                <label class="form-check-label fw-bold d-block cursor-pointer @(task.IsCompleted ? "text-decoration-line-through text-muted" : "text-dark")" for="@($"chk_{taskIndex}")">
+                                    @task.Title
+                                </label>
+                                <span class="text-muted" style="font-size: 0.75rem;">@task.Description</span>
+                                <div class="mt-1">
+                                    <a href="@task.Route" class="text-primary fw-semibold" style="font-size: 0.75rem;">
+                                        Open Tool &rarr;
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
     <!-- QUICK START: 3-STEP GUIDED LEARNING PATH -->
     <div class="card border-primary mb-4 shadow-sm">
         <div class="card-header bg-primary text-white py-2 d-flex justify-content-between align-items-center">
@@ -193,3 +248,49 @@
         }
     </div>
 </div>
+
+@code {
+    private record ChecklistItem(string Title, string Description, string Route, bool IsCompleted);
+
+    private List<ChecklistItem> ChecklistTasks = new()
+    {
+        new("1. Learn 5 ER7 Delimiters", "Understand |, ^, ~, &, and \\ in the Delimiter Microscope.", "hl7-inspector", false),
+        new("2. Trace v2 to FHIR Mapping", "Inspect PID demographics and PV1 encounter in the Bridge.", "bridge", false),
+        new("3. Inspect Port 2575 MLLP Framing", "Step through the <0x0B> and <0x1C 0x0D> packet envelope.", "mllp-simulator", false),
+        new("4. Explore FHIR Resource Graph", "Click resource references in the FHIR Explorer.", "fhir-explorer", false),
+        new("5. Execute a Chained REST Query", "Query FHIR searchsets with _include joins.", "rest-playground", false),
+        new("6. Solve a War Room Bug Puzzle", "Fix real-world hospital message syntax errors.", "war-room", false)
+    };
+
+    private int ProgressPercentage => ChecklistTasks.Count == 0 ? 0 : (int)Math.Round((double)ChecklistTasks.Count(t => t.IsCompleted) / ChecklistTasks.Count * 100);
+
+    private string MasteryTitle => ProgressPercentage switch
+    {
+        100 => "🏆 Senior Interoperability Architect",
+        >= 66 => "⭐ Certified Bridge Engineer",
+        >= 33 => "🚀 Junior Integration Specialist",
+        _ => "🌱 Novice Integrator"
+    };
+
+    private string GetBadgeStyle() => ProgressPercentage switch
+    {
+        100 => "bg-success text-white shadow",
+        >= 66 => "bg-primary text-white",
+        >= 33 => "bg-warning text-dark",
+        _ => "bg-secondary text-white"
+    };
+
+    private string GetProgressColor() => ProgressPercentage switch
+    {
+        100 => "bg-success",
+        >= 66 => "bg-primary",
+        >= 33 => "bg-warning",
+        _ => "bg-info"
+    };
+
+    private void ToggleTask(int index)
+    {
+        var task = ChecklistTasks[index];
+        ChecklistTasks[index] = task with { IsCompleted = !task.IsCompleted };
+    }
+}

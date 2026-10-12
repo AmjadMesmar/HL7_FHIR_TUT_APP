@@ -7,7 +7,7 @@ This document is the official verification log and test guide for the **HL7 v2 &
 ## 1. System Overview & Architecture
 
 ```
-C:\Users\Souls Reaper\Desktop\Hl7FhirWorkbench/
+HL7_FHIR_TUT_APP/
 ├── Hl7FhirWorkbench.csproj         # Target: net10.0, Packages: Hl7.Fhir.R4, Markdig
 ├── Program.cs                      # Blazor Server setup + Dependency Injection
 ├── Models/
@@ -19,19 +19,20 @@ C:\Users\Souls Reaper\Desktop\Hl7FhirWorkbench/
 │   ├── ARCHITECTURE_RATIONALE.md   # Deep architectural explanations of tech stack
 │   └── HL7_FHIR_CHEATSHEET.md      # Engineering cheat sheet
 ├── Components/Pages/
-│   ├── Home.razor                  # Overview & 3-Step Guided Learning Path
-│   ├── GetStarted.razor            # Master in-depth curriculum (Formats, Operators, 5 Messages)
+│   ├── Home.razor                  # Overview, Mastery Pathway checklist & 3-Step Guided Learning Path
+│   ├── GetStarted.razor            # Master in-depth curriculum, 1989 HW context & Rosetta Stone matrix
 │   ├── DocumentationViewer.razor   # In-app interactive Markdown doc reader
+│   ├── HospitalFlowSimulator.razor # Multi-system hospital topology & message flow simulator
 │   ├── InteropBridge.razor         # Side-by-side interactive visual mapping
-│   ├── Hl7Inspector.razor          # ER7 syntax deconstructor + Live Syntax Linter
-│   ├── FhirExplorer.razor          # Firely R4 JSON & Datatypes guide
-│   ├── RestPlayground.razor        # Visual FHIR Search Builder (_include joins) + Sandbox
+│   ├── Hl7Inspector.razor          # ER7 syntax deconstructor, Delimiter Microscope & Message Builder
+│   ├── FhirExplorer.razor          # Firely R4 JSON, Resource Reference Graph & US Core Validator
+│   ├── RestPlayground.razor        # Visual FHIR Search Builder, Plain-English explainer & Sandbox
 │   ├── DataFactory.razor           # Synthetic HL7 v2 and FHIR clinical scenario generator
-│   ├── MllpSimulator.razor         # MLLP minimal lower layer framing & ACK engine
+│   ├── MllpSimulator.razor         # MLLP framing, TCP 3-way handshake, byte breakdown & ACK generator
 │   ├── TerminologyBrowser.razor    # LOINC, ICD-10, and HL7 table search
 │   ├── CodeRecipes.razor           # Production-ready copy-paste C# .NET 10 recipes
 │   ├── UnitTestGenerator.razor     # xUnit test suite generator for v2 parsing & FHIR validation
-│   ├── WarRoom.razor               # Production bug troubleshooting simulator (5 real incidents)
+│   ├── WarRoom.razor               # Production bug troubleshooting & Fix-the-Bug Challenge Arena
 │   └── ProjectInfo.razor           # Engineering specs, NuGet BOM, and onboarding guide
 ```
 
@@ -45,19 +46,20 @@ C:\Users\Souls Reaper\Desktop\Hl7FhirWorkbench/
 * **Result:** `Build succeeded. 0 Warning(s), 0 Error(s)`.
 
 ### Endpoint & Route Verification
-* `GET /` &rarr; **HTTP 200 OK** (Overview and scenario grid rendered)
-* `GET /get-started` &rarr; **HTTP 200 OK** (In-depth 6-topic masterclass)
+* `GET /` &rarr; **HTTP 200 OK** (Overview, Mastery Pathway and scenario grid rendered)
+* `GET /get-started` &rarr; **HTTP 200 OK** (In-depth 6-topic masterclass + Rosetta Stone matrix)
 * `GET /docs` &rarr; **HTTP 200 OK** (In-app Living Documentation viewer)
+* `GET /hospital-flow` &rarr; **HTTP 200 OK** (Multi-system hospital topology sequence simulator)
 * `GET /bridge` &rarr; **HTTP 200 OK** (Side-by-side mapping with live JSON generation)
-* `GET /hl7-inspector` &rarr; **HTTP 200 OK** (Interactive ER7 parser and live syntax linter)
-* `GET /fhir-explorer` &rarr; **HTTP 200 OK** (Firely R4 JSON & Datatypes guide)
-* `GET /rest-playground` &rarr; **HTTP 200 OK** (Visual FHIR Query Builder with `_include`)
+* `GET /hl7-inspector` &rarr; **HTTP 200 OK** (Interactive ER7 parser, Delimiter Microscope and live linter)
+* `GET /fhir-explorer` &rarr; **HTTP 200 OK** (Firely R4 JSON, Reference Graph & US Core Validator)
+* `GET /rest-playground` &rarr; **HTTP 200 OK** (Visual FHIR Query Builder & Plain-English explainer)
 * `GET /data-factory` &rarr; **HTTP 200 OK** (Synthetic patient generator, downloadable `.hl7` & `.json`)
-* `GET /mllp-simulator` &rarr; **HTTP 200 OK** (MLLP framing, byte breakdown & ACK generator)
+* `GET /mllp-simulator` &rarr; **HTTP 200 OK** (MLLP framing, TCP handshake byte stepper & ACK generator)
 * `GET /terminology` &rarr; **HTTP 200 OK** (LOINC, ICD-10, HL7 table explorer & cross-reference)
 * `GET /code-recipes` &rarr; **HTTP 200 OK** (C# .NET 10 snippets with copy button)
 * `GET /test-generator` &rarr; **HTTP 200 OK** (xUnit test generator with copy & download)
-* `GET /war-room` &rarr; **HTTP 200 OK** (Troubleshooting 5 hospital bug scenarios)
+* `GET /war-room` &rarr; **HTTP 200 OK** (Troubleshooting 5 hospital bug scenarios + Fix-the-Bug Arena)
 * `GET /project-info` &rarr; **HTTP 200 OK** (Tech stack bill of materials & package justifications)
 
 ---
@@ -67,7 +69,7 @@ C:\Users\Souls Reaper\Desktop\Hl7FhirWorkbench/
 1. Open PowerShell or Command Prompt.
 2. Navigate to the project root:
    ```powershell
-   cd "C:\Users\Souls Reaper\Desktop\Hl7FhirWorkbench"
+   cd HL7_FHIR_TUT_APP
    dotnet run
    ```
 3. Open your browser: **`http://localhost:5199`**
