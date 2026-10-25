@@ -10,10 +10,15 @@
     <div class="p-4 mb-4 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #0d6efd 0%, #084298 100%);">
         <div class="row align-items-center g-3">
             <div class="col-lg-8">
-                <span class="badge bg-light text-primary mb-2 px-3 py-1 fw-semibold">.NET 10 • Blazor Server • SignalR</span>
-                <h1 class="h2 fw-bold mb-2">
-                    @(Lang.IsRtl ? "منصة ومختبر تعليم تكامل الأنظمة الصحية (HL7 v2 & FHIR)" : "HL7 v2 & FHIR Interoperability Workbench")
-                </h1>
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <img src="logo.png" alt="Logo" width="56" height="56" class="rounded-circle shadow flex-shrink-0" style="border: 2px solid rgba(255,255,255,0.4);" />
+                    <div>
+                        <span class="badge bg-light text-primary mb-1 px-3 py-1 fw-semibold">.NET 10 • Blazor Server • SignalR</span>
+                        <h1 class="h2 fw-bold mb-0">
+                            @(Lang.IsRtl ? "منصة ومختبر تعليم تكامل الأنظمة الصحية (HL7 v2 & FHIR)" : "HL7 v2 & FHIR Interoperability Workbench")
+                        </h1>
+                    </div>
+                </div>
                 <p class="mb-3 text-white-50">
                     @(Lang.IsRtl ? "مختبر تدريبي تفاعلي متكامل يقارن بين رسائل ER7 القديمة (HL7 v2) وهندسة الموارد الحديثة (FHIR R4 JSON)، مع دعم كامل للمعايير الإقليمية العربية."
                                  : "A lightweight, hands-on teaching laboratory comparing legacy pipe-and-hat ER7 messaging against modern FHIR R4 JSON RESTful architecture.")
