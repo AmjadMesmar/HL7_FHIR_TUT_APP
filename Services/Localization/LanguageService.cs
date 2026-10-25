@@ -41,9 +41,8 @@ public class LanguageService
         ["nav.code_recipes"] = ("C# Code Recipes", "وصفات برمجية C#"),
         ["nav.test_generator"] = ("xUnit Test Gen", "مولد اختبارات xUnit"),
         ["nav.war_room"] = ("War Room (Bugs)", "غرفة العمليات واستكشاف الأخطاء"),
-        ["nav.project_info"] = ("Tech & Specs", "المواصفات التقنية والمكونات"),
-        ["nav.regional_interop"] = ("Regional Interop (NPHIES)", "المعايير الإقليمية (NPHIES/الملفي)"),
-        ["nav.training_academy"] = ("Academy & Certification", "الأكاديمية والشهادات المهنية"),
+        ["nav.regional_interop"] = ("Regional Interop", "المعايير الإقليمية"),
+        ["nav.training_academy"] = ("Training Academy", "أكاديمية التدريب"),
 
         // Common Buttons & Actions
         ["btn.copy"] = ("Copy", "نسخ"),

@@ -13,7 +13,7 @@
                 <i class="bi bi-mortarboard-fill text-primary me-1"></i> @Lang.T("app.subtitle")
             </span>
             <div class="d-flex align-items-center gap-2">
-                <button class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 shadow-sm px-2" @onclick="Lang.ToggleLanguage" title="تغيير اللغة / Switch Language">
+                <button class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 shadow-sm px-2" @onclick="ToggleLanguage" title="تغيير اللغة / Switch Language">
                     <i class="bi bi-translate text-primary"></i>
                     <span class="fw-bold">@Lang.T("app.lang.switch")</span>
                 </button>
@@ -31,6 +31,8 @@
     </main>
 </div>
 
+@inject IJSRuntime JS
+
 <GlossaryModal @bind-IsOpen="isGlossaryOpen" />
 
 @code {
@@ -38,12 +40,51 @@
 
     protected override void OnInitialized()
     {
-        Lang.OnLanguageChanged += StateHasChanged;
+        Lang.OnLanguageChanged += HandleLanguageChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                var savedLang = await JS.InvokeAsync<string>("localStorage.getItem", "preferred_language");
+                if (!string.IsNullOrEmpty(savedLang) && savedLang != Lang.CurrentLanguage)
+                {
+                    Lang.SetLanguage(savedLang);
+                    await JS.InvokeVoidAsync("eval", $"document.documentElement.dir = '{Lang.Direction}'; document.documentElement.lang = '{Lang.CurrentLanguage}';");
+                    StateHasChanged();
+                }
+            }
+            catch { }
+        }
+    }
+
+    private async Task ToggleLanguage()
+    {
+        Lang.ToggleLanguage();
+        try
+        {
+            await JS.InvokeVoidAsync("localStorage.setItem", "preferred_language", Lang.CurrentLanguage);
+            await JS.InvokeVoidAsync("eval", $"document.documentElement.dir = '{Lang.Direction}'; document.documentElement.lang = '{Lang.CurrentLanguage}';");
+        }
+        catch { }
+    }
+
+    private async void HandleLanguageChanged()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("eval", $"document.documentElement.dir = '{Lang.Direction}'; document.documentElement.lang = '{Lang.CurrentLanguage}';");
+        }
+        catch { }
+        await InvokeAsync(StateHasChanged);
     }
 
     public void Dispose()
     {
-        Lang.OnLanguageChanged -= StateHasChanged;
+        Lang.OnLanguageChanged -= HandleLanguageChanged;
     }
 }
 
