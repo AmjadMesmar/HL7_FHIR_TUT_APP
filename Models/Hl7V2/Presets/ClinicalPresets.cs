@@ -7,8 +7,16 @@ public record ClinicalPreset(
     string TriggerEvent,
     string Summary,
     string Hl7V2Message,
-    string TeachingNotes
-);
+    string TeachingNotes,
+    string? ArabicTitle = null,
+    string? ArabicCategory = null,
+    string? ArabicSummary = null
+)
+{
+    public string TitleAr => ArabicTitle ?? Title;
+    public string SummaryAr => ArabicSummary ?? Summary;
+    public string CategoryAr => ArabicCategory ?? Category;
+}
 
 public static class ClinicalPresets
 {
@@ -29,7 +37,10 @@ PV1|1|O|CLINIC_OUTPATIENT^EXAM_3^^HOSPITAL_A||||DOC442^Adams^John^M||||||||||||V
 @"• **ADT^A04 vs ADT^A28:** ADT^A04 is historically used for Outpatient/Walk-in Registration; ADT^A28 is explicit 'Add Person/Demographics'.
 • **PID-3 (MRN):** Contains the Medical Record Number, assigning authority (`HOSPITAL_A`), and type code (`MR`). In FHIR, this becomes a `Patient.identifier`.
 • **PID-5 (Name):** Uses `Family^Given^Middle^Suffix^Prefix`. Note how FHIR breaks this into `HumanName.family` and `HumanName.given[]`.
-• **PV1-2 (Patient Class):** Value `O` denotes Outpatient (maps to FHIR `Encounter.class` = `AMB` ambulatory)."
+• **PV1-2 (Patient Class):** Value `O` denotes Outpatient (maps to FHIR `Encounter.class` = `AMB` ambulatory).",
+            ArabicTitle: "1. تسجيل مريض جديد (عيادات خارجية)",
+            ArabicCategory: "الهوية والديموغرافيا",
+            ArabicSummary: "تسجيل ملف مريض جديد بالرقم الطبي، الهاتف، العنوان، وبيانات الزيارة الأولية."
         ),
 
         new ClinicalPreset(
@@ -48,7 +59,10 @@ DG1|1|ICD10|I21.0|ST-Elevation Myocardial Infarction|20261011104500|A",
 @"• **ADT^A01 (Admit):** Signals physical admission of an inpatient into a hospital bed.
 • **PV1-2 & PV1-3:** `I` stands for Inpatient. Field 3 (`ICU_CARDIO^ROOM_402^BED_B`) provides hierarchical location: Unit $\rightarrow$ Room $\rightarrow$ Bed.
 • **PV1-7 (Attending Doctor):** Contains `ID^Family^Given`.
-• **DG1 (Diagnosis):** In v2, diagnoses are often sent as `DG1` segments. In FHIR, this maps to a `Condition` resource linked via `Encounter.diagnosis`."
+• **DG1 (Diagnosis):** In v2, diagnoses are often sent as `DG1` segments. In FHIR, this maps to a `Condition` resource linked via `Encounter.diagnosis`.",
+            ArabicTitle: "2. تنويم مريض (جناح وغرفة وسرير)",
+            ArabicCategory: "الزيارات والتنويم",
+            ArabicSummary: "إشعار إدخال مريض لقسم العناية المركزة وتحديد الجناح والغرفة والسرير والطبيب المعالج."
         ),
 
         new ClinicalPreset(
@@ -65,7 +79,10 @@ PV1|1|I|ICU_CARDIO^ROOM_402^BED_B^METRO_HEALTH||||DOC881^Cardio^Sarah^B|||||||||
             TeachingNotes:
 @"• **ADT^A03 (Discharge):** Signals the patient has left the facility.
 • **PV1-45 (Discharge Date/Time):** `20261011120000`. Maps to FHIR `Encounter.period.end`.
-• **PV1-36 (Discharge Disposition):** Code `01` ('Discharged to home or self care'). In FHIR, maps to `Encounter.hospitalization.dischargeDisposition`."
+• **PV1-36 (Discharge Disposition):** Code `01` ('Discharged to home or self care'). In FHIR, maps to `Encounter.hospitalization.dischargeDisposition`.",
+            ArabicTitle: "3. خروج المريض من المستشفى",
+            ArabicCategory: "دورة حياة الزيارة",
+            ArabicSummary: "إشعار خروج المريض وتحديث حالة الزيارة إلى منتهية وتوثيق حالة الخروج."
         ),
 
         new ClinicalPreset(
@@ -86,7 +103,10 @@ OBX|3|NM|2951-2^Sodium [Moles/volume] in Serum or Plasma^LN||138|mmol/L|135-145|
 • **LOINC Coding:** `2345-7` is Glucose, `2823-3` is Potassium, `2951-2` is Sodium. Note the `^LN` identifier denoting the LOINC standard.
 • **OBX-2 (Value Type):** `NM` signifies Numeric. Other types include `ST` (String), `CE` (Coded), `TX` (Text).
 • **OBX-8 (Abnormal Flag):** `H` = High (Glucose is 142 vs 70-99 range). In FHIR, this maps to `Observation.interpretation` ('H' / 'high').
-• **FHIR Equivalence:** OBR maps to `DiagnosticReport`; each OBX maps to an `Observation` resource referenced in `DiagnosticReport.result`."
+• **FHIR Equivalence:** OBR maps to `DiagnosticReport`; each OBX maps to an `Observation` resource referenced in `DiagnosticReport.result`.",
+            ArabicTitle: "4. نتائج الفحوصات المخبرية (لوحة الكيمياء)",
+            ArabicCategory: "التقارير والملاحظات السريرية",
+            ArabicSummary: "إرسال نتائج فحوصات الجلوكوز والبوتاسيوم والصوديوم مع أكواد LOINC والوحدات والرايات الحرجة."
         )
     };
 

@@ -1,23 +1,35 @@
 @page "/bridge"
 @rendermode InteractiveServer
+@implements IDisposable
+@inject LanguageService Lang
 
-<PageTitle>HL7 v2 to FHIR Interoperability Bridge</PageTitle>
+<PageTitle>@(Lang.IsRtl ? "جسر التحويل البيني بين HL7 v2 و FHIR R4" : "HL7 v2 to FHIR Interoperability Bridge")</PageTitle>
 
 <div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
         <div>
-            <h2 class="h3 fw-bold mb-0"><i class="bi bi-shuffle text-warning"></i> Interoperability Bridge (v2 &rarr; FHIR)</h2>
-            <p class="text-muted small mb-0">Interactive visual transformer demonstrating how traditional ER7 feeds map into FHIR R4 Resources.</p>
+            <h2 class="h3 fw-bold mb-0">
+                <i class="bi bi-shuffle text-warning me-1"></i> 
+                @(Lang.IsRtl ? "جسر التحويل البيني (HL7 v2 ← FHIR R4)" : "Interoperability Bridge (v2 → FHIR)")
+            </h2>
+            <p class="text-muted small mb-0">
+                @(Lang.IsRtl ? "محول مرئي تفاعلي يوضح كيفية مطابقة رسائل ER7 التقليدية وتحويلها خطوة بخطوة إلى موارد FHIR R4 المعيارية."
+                             : "Interactive visual transformer demonstrating how traditional ER7 feeds map into FHIR R4 Resources.")
+            </p>
         </div>
         <div class="btn-group">
             <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown">
-                Change Scenario
+                @(Lang.IsRtl ? "تغيير السيناريو السريري" : "Change Scenario")
             </button>
             <ul class="dropdown-menu dropdown-menu-end shadow">
                 @foreach (var p in ClinicalPresets.All)
                 {
-                    <li><a class="dropdown-item" href="javascript:void(0)" @onclick="() => LoadScenario(p.Id)">@p.Title (@p.TriggerEvent)</a></li>
+                    <li>
+                        <a class="dropdown-item" href="javascript:void(0)" @onclick="() => LoadScenario(p.Id)">
+                            @(Lang.IsRtl && !string.IsNullOrEmpty(p.TitleAr) ? p.TitleAr : p.Title) (@p.TriggerEvent)
+                        </a>
+                    </li>
                 }
             </ul>
         </div>
@@ -27,19 +39,20 @@
     <div class="alert alert-primary py-2 px-3 mb-3 d-flex align-items-center small shadow-sm">
         <i class="bi bi-lightbulb-fill text-warning fs-5 me-2"></i>
         <div>
-            <strong>Interactive Instructions:</strong>
-            Pick a clinical scenario below, then <strong>click any field button in the left box</strong> (e.g. <code>PID-3.1</code>, <code>PID-5</code>, or <code>OBX #1</code>) to see the translation concept and its matching FHIR JSON element!
+            <strong>@(Lang.IsRtl ? "إرشادات تفاعلية:" : "Interactive Instructions:")</strong>
+            @(Lang.IsRtl ? "اختر سيناريو سريرياً أدناه، ثم انقر على أي زر حقل في الصندوق الأيسر (مثل PID-3.1 أو PID-5 أو OBX #1) لرؤية المفهوم الهندسي ومطابقه المباشر في كائن FHIR JSON!"
+                         : "Pick a clinical scenario below, then click any field button in the left box (e.g. PID-3.1, PID-5, or OBX #1) to see the translation concept and its matching FHIR JSON element!")
         </div>
     </div>
 
     <!-- Scenario Switcher Buttons -->
     <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
-        <span class="text-muted small fw-semibold me-1">Scenario:</span>
+        <span class="text-muted small fw-semibold me-1">@(Lang.IsRtl ? "السيناريو:" : "Scenario:")</span>
         @foreach (var p in ClinicalPresets.All)
         {
             <button class="btn btn-sm @(selectedPresetId == p.Id ? "btn-warning fw-semibold text-dark shadow-sm" : "btn-outline-secondary")"
                     @onclick="() => LoadScenario(p.Id)">
-                <span class="badge bg-dark me-1">@p.TriggerEvent</span> @p.Title.Split('(')[0].Trim()
+                <span class="badge bg-dark me-1">@p.TriggerEvent</span> @(Lang.IsRtl && !string.IsNullOrEmpty(p.TitleAr) ? p.TitleAr.Split('(')[0].Trim() : p.Title.Split('(')[0].Trim())
             </button>
         }
     </div>
@@ -51,7 +64,8 @@
             <div class="card-body p-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <div class="fw-bold text-dark">
-                        <i class="bi bi-link-45deg fs-5 align-middle"></i> Active Field Mapping: 
+                        <i class="bi bi-link-45deg fs-5 align-middle"></i> 
+                        @(Lang.IsRtl ? "رابط المطابقة الميداني النشط: " : "Active Field Mapping: ")
                         <span class="badge bg-primary font-monospace ms-1">@selectedMapping.SourceField</span>
                         <i class="bi bi-arrow-right mx-1"></i>
                         <span class="badge bg-success font-monospace">@selectedMapping.TargetFhirPath</span>
@@ -61,27 +75,30 @@
                 <div class="row g-2 small">
                     <div class="col-md-4">
                         <div class="p-2 bg-white rounded border h-100">
-                            <span class="text-muted d-block fw-semibold">Source (HL7 v2 ER7):</span>
-                            <strong>@selectedMapping.SourceLabel:</strong> <code class="text-break">@selectedMapping.SourceValue</code>
+                            <span class="text-muted d-block fw-semibold">@(Lang.IsRtl ? "المصدر (HL7 v2 ER7):" : "Source (HL7 v2 ER7):")</span>
+                            <strong>@(Lang.IsRtl && !string.IsNullOrEmpty(selectedMapping.SourceLabelAr) ? selectedMapping.SourceLabelAr : selectedMapping.SourceLabel):</strong> 
+                            <code class="text-break">@selectedMapping.SourceValue</code>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="p-2 bg-white rounded border h-100">
-                            <span class="text-muted d-block fw-semibold">Target (FHIR R4 JSON):</span>
-                            <strong>@selectedMapping.TargetLabel:</strong> <code class="text-break">@selectedMapping.TargetValue</code>
+                            <span class="text-muted d-block fw-semibold">@(Lang.IsRtl ? "الهدف (FHIR R4 JSON):" : "Target (FHIR R4 JSON):")</span>
+                            <strong>@(Lang.IsRtl && !string.IsNullOrEmpty(selectedMapping.TargetLabelAr) ? selectedMapping.TargetLabelAr : selectedMapping.TargetLabel):</strong> 
+                            <code class="text-break">@selectedMapping.TargetValue</code>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="p-2 bg-white rounded border h-100">
-                            <span class="text-muted d-block fw-semibold">Interoperability Concept:</span>
-                            <span>@selectedMapping.ConceptExplanation</span>
+                            <span class="text-muted d-block fw-semibold">@(Lang.IsRtl ? "مفهوم قابلية التشغيل البيني:" : "Interoperability Concept:")</span>
+                            <span>@(Lang.IsRtl && !string.IsNullOrEmpty(selectedMapping.ConceptExplanationAr) ? selectedMapping.ConceptExplanationAr : selectedMapping.ConceptExplanation)</span>
                         </div>
                     </div>
                 </div>
                 @if (!string.IsNullOrEmpty(selectedMapping.InteropGotcha))
                 {
                     <div class="alert alert-warning mb-0 mt-2 py-1 px-2 small">
-                        <strong><i class="bi bi-exclamation-triangle-fill"></i> Real-World Gotcha:</strong> @selectedMapping.InteropGotcha
+                        <strong><i class="bi bi-exclamation-triangle-fill"></i> @(Lang.IsRtl ? "تنبيه هندسي من الواقع العملي:" : "Real-World Gotcha:")</strong> 
+                        @(Lang.IsRtl && !string.IsNullOrEmpty(selectedMapping.InteropGotchaAr) ? selectedMapping.InteropGotchaAr : selectedMapping.InteropGotcha)
                     </div>
                 }
             </div>
@@ -95,13 +112,14 @@
             <div class="card shadow-sm h-100 border-primary border-top border-3">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
                     <div>
-                        <span class="badge bg-primary me-2">Source</span>
-                        <strong>HL7 v2 ER7 Stream</strong>
+                        <span class="badge bg-primary me-2">@(Lang.IsRtl ? "المصدر" : "Source")</span>
+                        <strong>@(Lang.IsRtl ? "مجرى رسائل HL7 v2 ER7" : "HL7 v2 ER7 Stream")</strong>
                     </div>
                     <span class="badge bg-dark">@currentPreset?.TriggerEvent</span>
                 </div>
                 <div class="card-body p-2 d-flex flex-column">
-                    <div class="p-2 bg-dark text-light rounded font-monospace small mb-2 overflow-auto" style="max-height: 220px; white-space: pre-wrap; word-break: break-all;">
+                    <div class="p-2 bg-dark text-light rounded font-monospace small mb-2 overflow-auto" 
+                         style="max-height: 220px; white-space: pre-wrap; word-break: break-all; direction: ltr !important; text-align: left !important; unicode-bidi: isolate;">
                         @foreach (var line in currentPreset?.Hl7V2Message.Split('\n') ?? Array.Empty<string>())
                         {
                             var trimmed = line.Trim();
@@ -114,12 +132,15 @@
                         }
                     </div>
 
-                    <h6 class="fw-semibold small text-muted px-1 mt-1 mb-1">Click a field button below to inspect:</h6>
+                    <h6 class="fw-semibold small text-muted px-1 mt-1 mb-1">
+                        @(Lang.IsRtl ? "انقر على أحد أزرار الحقول أدناه للمعاينة:" : "Click a field button below to inspect:")
+                    </h6>
                     <div class="d-flex flex-wrap gap-2 p-1 overflow-auto" style="max-height: 240px;">
                         @foreach (var m in transformationResult.Mappings)
                         {
                             <button class="btn btn-sm text-start font-monospace @(selectedMapping == m ? "btn-warning shadow-sm" : "btn-outline-primary")"
-                                    @onclick="() => selectedMapping = m">
+                                    @onclick="() => selectedMapping = m"
+                                    style="direction: ltr !important; unicode-bidi: isolate;">
                                 <strong>@m.SourceField</strong>: <span class="text-truncate d-inline-block align-middle" style="max-width: 160px;">@m.SourceValue</span>
                             </button>
                         }
@@ -133,14 +154,14 @@
             <div class="card shadow-sm h-100 border-success border-top border-3">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
                     <div>
-                        <span class="badge bg-success me-2">Target</span>
-                        <strong>FHIR R4 JSON Representation</strong>
+                        <span class="badge bg-success me-2">@(Lang.IsRtl ? "الهدف" : "Target")</span>
+                        <strong>@(Lang.IsRtl ? "تمثيل FHIR R4 JSON المعياري" : "FHIR R4 JSON Representation")</strong>
                     </div>
-                    <span class="badge bg-secondary">@transformationResult.FhirResource?.TypeName</span>
+                    <span class="badge bg-secondary font-monospace">@transformationResult.FhirResource?.TypeName</span>
                 </div>
                 <div class="card-body p-0">
                     <pre class="bg-dark text-light p-3 m-0 font-monospace small overflow-auto" 
-                         style="max-height: 480px; tab-size: 2; white-space: pre-wrap; word-break: break-all; border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius);"><code>@transformationResult.FhirJson</code></pre>
+                         style="max-height: 480px; tab-size: 2; white-space: pre-wrap; word-break: break-all; border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius); direction: ltr !important; text-align: left !important; unicode-bidi: isolate;"><code>@transformationResult.FhirJson</code></pre>
                 </div>
             </div>
         </div>
@@ -149,33 +170,40 @@
     <!-- Mapping Traceability Table -->
     <div class="card shadow-sm">
         <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
-            <span class="fw-semibold small"><i class="bi bi-table"></i> Complete Transformation Traceability Table</span>
-            <span class="badge bg-secondary">@transformationResult.Mappings.Count Active Mappings</span>
+            <span class="fw-semibold small">
+                <i class="bi bi-table me-1"></i> 
+                @(Lang.IsRtl ? "جدول التتبع الكامل لمطابقات التحويل والربط" : "Complete Transformation Traceability Table")
+            </span>
+            <span class="badge bg-secondary">
+                @transformationResult.Mappings.Count @(Lang.IsRtl ? "مطابقات فعالة" : "Active Mappings")
+            </span>
         </div>
         <div class="table-responsive w-100" style="max-width: 100%; overflow-x: auto;">
             <table class="table table-hover table-sm mb-0 small text-nowrap">
                 <thead class="table-light">
                     <tr>
-                        <th style="min-width: 110px;">v2 Field</th>
-                        <th style="min-width: 140px;">v2 Value</th>
-                        <th style="min-width: 180px;">FHIR JSON Path</th>
-                        <th style="min-width: 250px;">Pedagogical Concept</th>
-                        <th style="min-width: 200px;">Gotcha / Warning</th>
+                        <th style="min-width: 110px;">@(Lang.IsRtl ? "حقل v2" : "v2 Field")</th>
+                        <th style="min-width: 140px;">@(Lang.IsRtl ? "قيمة v2" : "v2 Value")</th>
+                        <th style="min-width: 180px;">@(Lang.IsRtl ? "مسار FHIR JSON" : "FHIR JSON Path")</th>
+                        <th style="min-width: 250px;">@(Lang.IsRtl ? "المفهوم التعليمي" : "Pedagogical Concept")</th>
+                        <th style="min-width: 200px;">@(Lang.IsRtl ? "ملاحظة / تحذير" : "Gotcha / Warning")</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var m in transformationResult.Mappings)
                     {
                         <tr class="@(selectedMapping == m ? "table-warning" : "")" style="cursor: pointer;" @onclick="() => selectedMapping = m">
-                            <td class="font-monospace fw-semibold text-primary">@m.SourceField</td>
-                            <td class="font-monospace text-truncate" style="max-width: 180px;" title="@m.SourceValue">@m.SourceValue</td>
-                            <td class="font-monospace fw-semibold text-success text-truncate" style="max-width: 200px;" title="@m.TargetFhirPath">@m.TargetFhirPath</td>
-                            <td class="text-wrap" style="max-width: 280px;">@m.ConceptExplanation</td>
+                            <td class="font-monospace fw-semibold text-primary" style="direction: ltr !important; unicode-bidi: isolate;">@m.SourceField</td>
+                            <td class="font-monospace text-truncate" style="max-width: 180px; direction: ltr !important; unicode-bidi: isolate;" title="@m.SourceValue">@m.SourceValue</td>
+                            <td class="font-monospace fw-semibold text-success text-truncate" style="max-width: 200px; direction: ltr !important; unicode-bidi: isolate;" title="@m.TargetFhirPath">@m.TargetFhirPath</td>
+                            <td class="text-wrap" style="max-width: 280px;">
+                                @(Lang.IsRtl && !string.IsNullOrEmpty(m.ConceptExplanationAr) ? m.ConceptExplanationAr : m.ConceptExplanation)
+                            </td>
                             <td class="text-wrap" style="max-width: 240px;">
                                 @if (!string.IsNullOrEmpty(m.InteropGotcha))
                                 {
                                     <span class="badge bg-warning-subtle text-dark border border-warning" title="@m.InteropGotcha">
-                                        <i class="bi bi-exclamation-triangle"></i> @m.InteropGotcha
+                                        <i class="bi bi-exclamation-triangle"></i> @(Lang.IsRtl && !string.IsNullOrEmpty(m.InteropGotchaAr) ? m.InteropGotchaAr : m.InteropGotcha)
                                     </span>
                                 }
                                 else
@@ -202,6 +230,7 @@
 
     protected override void OnInitialized()
     {
+        Lang.OnLanguageChanged += StateHasChanged;
         var targetId = !string.IsNullOrEmpty(Preset) ? Preset : "registration";
         LoadScenario(targetId);
     }
@@ -215,5 +244,10 @@
         transformationResult = Hl7ToFhirMapper.MapMessage(parsed);
         
         selectedMapping = transformationResult.Mappings.FirstOrDefault();
+    }
+
+    public void Dispose()
+    {
+        Lang.OnLanguageChanged -= StateHasChanged;
     }
 }

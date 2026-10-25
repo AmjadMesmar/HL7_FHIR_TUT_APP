@@ -1,20 +1,27 @@
 @page "/docs"
 @rendermode InteractiveServer
+@implements IDisposable
 @using Markdig
 @inject IWebHostEnvironment Env
+@inject LanguageService Lang
 @inject IJSRuntime JS
 
-<PageTitle>Living Documentation - HL7 &amp; FHIR Workbench</PageTitle>
+<PageTitle>@(Lang.IsRtl ? "الوثائق الحية والمراجع الهندسية للمنصة" : "Living Documentation - HL7 & FHIR Workbench")</PageTitle>
 
 <div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
     <!-- Hero Header -->
     <div class="p-4 mb-4 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #0f5132 0%, #0d6efd 100%);">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-                <span class="badge bg-light text-dark mb-2 px-3 py-1 fw-semibold">Docs-as-Code Engine</span>
-                <h1 class="h2 fw-bold mb-1">Living Documentation &amp; Resources</h1>
+                <span class="badge bg-light text-dark mb-2 px-3 py-1 fw-semibold">
+                    @(Lang.IsRtl ? "محرك الوثائق كشفرة Docs-as-Code" : "Docs-as-Code Engine")
+                </span>
+                <h1 class="h2 fw-bold mb-1">
+                    @(Lang.IsRtl ? "الوثائق الحية والمراجع المعمارية" : "Living Documentation & Resources")
+                </h1>
                 <p class="mb-0 text-white-50">
-                    In-app documentation reader rendering version-controlled Markdown files directly from the project root.
+                    @(Lang.IsRtl ? "قارئ وثائق مدمج يعالج ملفات Markdown المتتبعة عبر Git مباشرة من جذر المشروع."
+                                 : "In-app documentation reader rendering version-controlled Markdown files directly from the project root.")
                 </p>
             </div>
             <div class="d-flex gap-2">
@@ -29,13 +36,16 @@
     <div class="card shadow-sm mb-3 border">
         <div class="card-body p-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div class="d-flex align-items-center gap-2">
-                <span class="fw-semibold small text-muted"><i class="bi bi-file-earmark-text text-primary"></i> Select Document:</span>
+                <span class="fw-semibold small text-muted">
+                    <i class="bi bi-file-earmark-text text-primary me-1"></i> 
+                    @(Lang.IsRtl ? "اختر الوثيقة المرجعية:" : "Select Document:")
+                </span>
                 <div class="btn-group btn-group-sm">
                     @foreach (var doc in AvailableDocs)
                     {
                         <button class="btn @(selectedDocFile == doc.FileName ? "btn-primary shadow-sm" : "btn-outline-secondary")"
                                 @onclick="() => LoadDocument(doc.FileName)">
-                            <i class="bi @doc.Icon me-1"></i> @doc.Title
+                            <i class="bi @doc.Icon me-1"></i> @(Lang.IsRtl && !string.IsNullOrEmpty(doc.TitleAr) ? doc.TitleAr : doc.Title)
                         </button>
                     }
                 </div>
@@ -44,11 +54,11 @@
                 <button class="btn btn-outline-secondary btn-sm" @onclick="CopyRawMarkdown">
                     @if (copied)
                     {
-                        <i class="bi bi-check-circle-fill text-success"></i> <span class="text-success fw-bold">Copied Markdown!</span>
+                        <i class="bi bi-check-circle-fill text-success me-1"></i> <span class="text-success fw-bold">@(Lang.IsRtl ? "تم نسخ نص Markdown!" : "Copied Markdown!")</span>
                     }
                     else
                     {
-                        <i class="bi bi-clipboard"></i> <span>Copy Raw Markdown</span>
+                        <i class="bi bi-clipboard me-1"></i> <span>@(Lang.IsRtl ? "نسخ نص Markdown" : "Copy Raw Markdown")</span>
                     }
                 </button>
             </div>
@@ -70,7 +80,7 @@
             {
                 <div class="text-center py-5 text-muted">
                     <div class="spinner-border spinner-border-sm mb-2"></div>
-                    <div>Loading document...</div>
+                    <div>@(Lang.IsRtl ? "جاري تحميل الوثيقة..." : "Loading document...")</div>
                 </div>
             }
         </div>
@@ -79,7 +89,7 @@
 
 <style>
     .markdown-body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        font-family: inherit;
         line-height: 1.6;
         color: #24292f;
     }
@@ -97,6 +107,8 @@
         font-size: 85%;
         background-color: rgba(175, 184, 193, 0.2);
         border-radius: 6px;
+        direction: ltr !important;
+        unicode-bidi: isolate;
     }
     .markdown-body pre {
         padding: 16px;
@@ -107,6 +119,9 @@
         border-radius: 6px;
         white-space: pre-wrap;
         word-break: break-all;
+        direction: ltr !important;
+        text-align: left !important;
+        unicode-bidi: isolate;
     }
     .markdown-body pre code {
         background-color: transparent;
@@ -138,13 +153,13 @@
 </style>
 
 @code {
-    private record DocMeta(string Title, string FileName, string Icon);
+    private record DocMeta(string Title, string FileName, string Icon, string? TitleAr = null);
 
     private static readonly List<DocMeta> AvailableDocs = new()
     {
-        new("Architecture & Tech Rationale", "ARCHITECTURE_RATIONALE.md", "bi-layers-fill"),
-        new("Walkthrough & Verification", "WALKTHROUGH.md", "bi-check2-circle"),
-        new("HL7 & FHIR Cheat Sheet", "HL7_FHIR_CHEATSHEET.md", "bi-card-checklist")
+        new("Architecture & Tech Rationale", "ARCHITECTURE_RATIONALE.md", "bi-layers-fill", "المعمارية والمبررات التقنية"),
+        new("Walkthrough & Verification", "WALKTHROUGH.md", "bi-check2-circle", "الدليل الإرشادي وفحوصات التحقق"),
+        new("HL7 & FHIR Cheat Sheet", "HL7_FHIR_CHEATSHEET.md", "bi-card-checklist", "ورقة التلخيص السريع لمعايير HL7 و FHIR")
     };
 
     private string selectedDocFile = "ARCHITECTURE_RATIONALE.md";
@@ -158,6 +173,7 @@
 
     protected override void OnInitialized()
     {
+        Lang.OnLanguageChanged += StateHasChanged;
         LoadDocument("ARCHITECTURE_RATIONALE.md");
     }
 
@@ -187,5 +203,10 @@
         await Task.Delay(2000);
         copied = false;
         StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        Lang.OnLanguageChanged -= StateHasChanged;
     }
 }

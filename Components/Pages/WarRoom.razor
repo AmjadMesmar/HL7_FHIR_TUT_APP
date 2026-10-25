@@ -1,22 +1,29 @@
 @page "/war-room"
 @rendermode InteractiveServer
+@implements IDisposable
+@inject LanguageService Lang
 
-<PageTitle>Production War Room - Healthcare Bug Simulator</PageTitle>
+<PageTitle>@(Lang.IsRtl ? "غرفة عمليات الإنتاج - محاكي أعطال الأنظمة الصحية" : "Production War Room - Healthcare Bug Simulator")</PageTitle>
 
 <div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
     <!-- Hero Header -->
     <div class="p-4 mb-4 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #842029 0%, #343a40 100%);">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-                <span class="badge bg-danger mb-2 px-3 py-1 fw-semibold">On-Call Troubleshooting Simulator</span>
-                <h1 class="h2 fw-bold mb-1">The Production War Room (Break &amp; Fix Lab)</h1>
+                <span class="badge bg-danger mb-2 px-3 py-1 fw-semibold">
+                    @(Lang.IsRtl ? "محاكي استكشاف وإصلاح أعطال المناوبة الطارئة" : "On-Call Troubleshooting Simulator")
+                </span>
+                <h1 class="h2 fw-bold mb-1">
+                    @(Lang.IsRtl ? "غرفة عمليات الإنتاج (مختبر كشف وإصلاح الأخطاء السريرية)" : "The Production War Room (Break & Fix Lab)")
+                </h1>
                 <p class="mb-0 text-white-50">
-                    Real hospital incidents, integration disasters, and weird edge cases that happen in live production systems.
+                    @(Lang.IsRtl ? "حوادث مستشفيات حقيقية، وكوارث تكامل الأنظمة، والحالات النادرة التي تحدث في بيئات الإنتاج الحية."
+                                 : "Real hospital incidents, integration disasters, and weird edge cases that happen in live production systems.")
                 </p>
             </div>
             <div class="d-flex gap-2">
                 <span class="badge bg-warning text-dark align-self-center px-3 py-2 fw-semibold">
-                    <i class="bi bi-shield-slash-fill me-1"></i> Real War Stories
+                    <i class="bi bi-shield-slash-fill me-1"></i> @(Lang.IsRtl ? "قصص واقعية من المستشفيات" : "Real War Stories")
                 </span>
             </div>
         </div>
@@ -27,13 +34,13 @@
         <div class="card-body p-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div class="btn-group btn-group-sm">
                 <button class="btn @(warRoomMode == "stories" ? "btn-danger fw-bold" : "btn-outline-secondary")" @onclick='() => warRoomMode = "stories"'>
-                    <i class="bi bi-book me-1"></i> Real War Incidents (5 Stories)
+                    <i class="bi bi-book me-1"></i> @(Lang.IsRtl ? "حوادث واقعية (5 قصص موثقة)" : "Real War Incidents (5 Stories)")
                 </button>
                 <button class="btn @(warRoomMode == "challenges" ? "btn-danger fw-bold" : "btn-outline-secondary")" @onclick='() => warRoomMode = "challenges"'>
-                    <i class="bi bi-controller me-1"></i> Fix-The-Bug Challenge Arena (@SolvedCount/@Challenges.Count Solved)
+                    <i class="bi bi-controller me-1"></i> @(Lang.IsRtl ? $"حلبة تحديات إصلاح الأخطاء ({SolvedCount}/{Challenges.Count} منجز)" : $"Fix-The-Bug Challenge Arena ({SolvedCount}/{Challenges.Count} Solved)")
                 </button>
             </div>
-            <span class="badge bg-dark">Interactive Debugging Simulator</span>
+            <span class="badge bg-dark">@(Lang.IsRtl ? "محاكي تفاعلي لاستكشاف الأعطال" : "Interactive Debugging Simulator")</span>
         </div>
     </div>
 
@@ -47,7 +54,7 @@
                 var inc = Incidents[idx];
                 <button class="btn btn-sm @(selectedIncidentIndex == idx ? "btn-danger fw-bold text-white shadow-sm" : "btn-outline-secondary")"
                         @onclick="() => { selectedIncidentIndex = idx; showFixedVersion = false; }">
-                    <span class="badge bg-dark me-1">#@(idx + 1)</span> @inc.ShortTitle
+                    <span class="badge bg-dark me-1">#@(idx + 1)</span> @(Lang.IsRtl && !string.IsNullOrEmpty(inc.ShortTitleAr) ? inc.ShortTitleAr : inc.ShortTitle)
                 </button>
             }
         </div>
@@ -56,65 +63,77 @@
         <div class="card shadow-sm border-danger border-top border-3">
             <div class="card-header bg-light d-flex justify-content-between align-items-center py-2 flex-wrap gap-2">
                 <div>
-                    <span class="badge bg-danger me-2">Incident #@(selectedIncidentIndex + 1)</span>
-                <strong class="text-dark">@curInc.FullTitle</strong>
+                    <span class="badge bg-danger me-2">@(Lang.IsRtl ? $"حادثة #{selectedIncidentIndex + 1}" : $"Incident #{selectedIncidentIndex + 1}")</span>
+                    <strong class="text-dark">@(Lang.IsRtl && !string.IsNullOrEmpty(curInc.FullTitleAr) ? curInc.FullTitleAr : curInc.FullTitle)</strong>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-dark">@(Lang.IsRtl ? "الفئة:" : "Category:") @(Lang.IsRtl && !string.IsNullOrEmpty(curInc.CategoryAr) ? curInc.CategoryAr : curInc.Category)</span>
+                    <button class="btn btn-sm @(showFixedVersion ? "btn-success" : "btn-outline-danger") fw-semibold"
+                            @onclick="() => showFixedVersion = !showFixedVersion">
+                        <i class="bi @(showFixedVersion ? "bi-check-circle-fill" : "bi-wrench-adjustable") me-1"></i>
+                        @(showFixedVersion 
+                            ? (Lang.IsRtl ? "معاينة: النسخة المصححة" : "Showing: FIXED Version") 
+                            : (Lang.IsRtl ? "انقر لعرض الحل" : "Click to View FIX"))
+                    </button>
+                </div>
             </div>
-            <div class="d-flex align-items-center gap-2">
-                <span class="badge bg-dark">Category: @curInc.Category</span>
-                <button class="btn btn-sm @(showFixedVersion ? "btn-success" : "btn-outline-danger") fw-semibold"
-                        @onclick="() => showFixedVersion = !showFixedVersion">
-                    <i class="bi @(showFixedVersion ? "bi-check-circle-fill" : "bi-wrench-adjustable") me-1"></i>
-                    @(showFixedVersion ? "Showing: FIXED Version" : "Click to View FIX")
-                </button>
-            </div>
-        </div>
-        <div class="card-body p-3">
-            <!-- Clinical Hazard Alert -->
-            <div class="alert alert-danger py-2 px-3 small mb-3">
-                <div class="fw-bold mb-1"><i class="bi bi-exclamation-octagon-fill text-danger me-1"></i> Clinical Hazard &amp; Business Impact:</div>
-                <div>@curInc.HazardExplanation</div>
-            </div>
+            <div class="card-body p-3">
+                <!-- Clinical Hazard Alert -->
+                <div class="alert alert-danger py-2 px-3 small mb-3">
+                    <div class="fw-bold mb-1">
+                        <i class="bi bi-exclamation-octagon-fill text-danger me-1"></i> 
+                        @(Lang.IsRtl ? "الخطر السريري وتأثيره المباشر على رعاية المرضى:" : "Clinical Hazard & Business Impact:")
+                    </div>
+                    <div>@(Lang.IsRtl && !string.IsNullOrEmpty(curInc.HazardExplanationAr) ? curInc.HazardExplanationAr : curInc.HazardExplanation)</div>
+                </div>
 
-            <!-- Code Comparison View -->
-            <div class="row g-3 mb-3">
-                <div class="col-lg-6">
-                    <div class="card border-danger h-100">
-                        <div class="card-header bg-danger-subtle text-danger py-1 fw-bold small">
-                            <i class="bi bi-x-circle-fill me-1"></i> Broken Payload (The Bug)
+                <!-- Code Comparison View -->
+                <div class="row g-3 mb-3">
+                    <div class="col-lg-6">
+                        <div class="card border-danger h-100">
+                            <div class="card-header bg-danger-subtle text-danger py-1 fw-bold small">
+                                <i class="bi bi-x-circle-fill me-1"></i> @(Lang.IsRtl ? "الحمولة المعطوبة (الخطأ البرمجي)" : "Broken Payload (The Bug)")
+                            </div>
+                            <div class="card-body p-2 bg-dark text-light font-monospace small" style="direction: ltr !important; text-align: left !important; unicode-bidi: isolate;">
+                                <pre class="m-0 text-danger-emphasis overflow-auto" style="white-space: pre-wrap; word-break: break-all; max-height: 200px;"><code>@curInc.BrokenPayload</code></pre>
+                            </div>
+                            <div class="card-footer bg-light p-2 small text-danger">
+                                <strong>@(Lang.IsRtl ? "سبب الفشل الهندسي:" : "Why it fails:")</strong> 
+                                @(Lang.IsRtl && !string.IsNullOrEmpty(curInc.FailureRootCauseAr) ? curInc.FailureRootCauseAr : curInc.FailureRootCause)
+                            </div>
                         </div>
-                        <div class="card-body p-2 bg-dark text-light font-monospace small">
-                            <pre class="m-0 text-danger-emphasis overflow-auto" style="white-space: pre-wrap; word-break: break-all; max-height: 200px;"><code>@curInc.BrokenPayload</code></pre>
-                        </div>
-                        <div class="card-footer bg-light p-2 small text-danger">
-                            <strong>Why it fails:</strong> @curInc.FailureRootCause
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="card border-success h-100">
+                            <div class="card-header bg-success-subtle text-success py-1 fw-bold small">
+                                <i class="bi bi-check-circle-fill me-1"></i> @(Lang.IsRtl ? "الحمولة المصححة (الحل المعتمد)" : "Corrected Payload (The Fix)")
+                            </div>
+                            <div class="card-body p-2 bg-dark text-light font-monospace small" style="direction: ltr !important; text-align: left !important; unicode-bidi: isolate;">
+                                <pre class="m-0 text-success-emphasis overflow-auto" style="white-space: pre-wrap; word-break: break-all; max-height: 200px;"><code>@curInc.FixedPayload</code></pre>
+                            </div>
+                            <div class="card-footer bg-light p-2 small text-success">
+                                <strong>@(Lang.IsRtl ? "الحل الهندسي المعتمد:" : "The Engineering Solution:")</strong> 
+                                @(Lang.IsRtl && !string.IsNullOrEmpty(curInc.FixExplanationAr) ? curInc.FixExplanationAr : curInc.FixExplanation)
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-lg-6">
-                    <div class="card border-success h-100">
-                        <div class="card-header bg-success-subtle text-success py-1 fw-bold small">
-                            <i class="bi bi-check-circle-fill me-1"></i> Corrected Payload (The Fix)
-                        </div>
-                        <div class="card-body p-2 bg-dark text-light font-monospace small">
-                            <pre class="m-0 text-success-emphasis overflow-auto" style="white-space: pre-wrap; word-break: break-all; max-height: 200px;"><code>@curInc.FixedPayload</code></pre>
-                        </div>
-                        <div class="card-footer bg-light p-2 small text-success">
-                            <strong>The Engineering Solution:</strong> @curInc.FixExplanation
+                <!-- Production Best Practice Recommendation -->
+                <div class="card bg-light border">
+                    <div class="card-body p-2 small">
+                        <strong class="text-primary">
+                            <i class="bi bi-lightbulb-fill text-warning me-1"></i> 
+                            @(Lang.IsRtl ? "القاعدة الوقائية الإلزامية لفريقك في بيئة الإنتاج:" : "Production Guardrail Rule for Your Team:")
+                        </strong>
+                        <div class="text-muted mt-1">
+                            @(Lang.IsRtl && !string.IsNullOrEmpty(curInc.GuardrailRuleAr) ? curInc.GuardrailRuleAr : curInc.GuardrailRule)
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Production Best Practice Recommendation -->
-            <div class="card bg-light border">
-                <div class="card-body p-2 small">
-                    <strong class="text-primary"><i class="bi bi-lightbulb-fill text-warning me-1"></i> Production Guardrail Rule for Your Team:</strong>
-                    <div class="text-muted mt-1">@curInc.GuardrailRule</div>
-                </div>
-            </div>
         </div>
-    </div>
     }
     else
     {
@@ -124,8 +143,11 @@
             <div class="col-lg-4">
                 <div class="card shadow-sm border mb-3">
                     <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
-                        <strong class="small text-dark"><i class="bi bi-list-check text-primary me-1"></i> Interactive Puzzles</strong>
-                        <span class="badge bg-success">@SolvedCount / @Challenges.Count Solved</span>
+                        <strong class="small text-dark">
+                            <i class="bi bi-list-check text-primary me-1"></i> 
+                            @(Lang.IsRtl ? "الألغاز والتحديات التفاعلية" : "Interactive Puzzles")
+                        </strong>
+                        <span class="badge bg-success">@SolvedCount / @Challenges.Count @(Lang.IsRtl ? "مكتمل" : "Solved")</span>
                     </div>
                     <div class="list-group list-group-flush small">
                         @for (int c = 0; c < Challenges.Count; c++)
@@ -138,11 +160,11 @@
                                     <span class="badge @(ch.IsSolved ? "bg-success" : "bg-secondary") me-2">
                                         <i class="bi @(ch.IsSolved ? "bi-check-lg" : "bi-puzzle")"></i>
                                     </span>
-                                    <span>#@(cIdx + 1) @ch.Title</span>
+                                    <span>#@(cIdx + 1) @(Lang.IsRtl && !string.IsNullOrEmpty(ch.TitleAr) ? ch.TitleAr : ch.Title)</span>
                                 </div>
                                 @if (ch.IsSolved)
                                 {
-                                    <span class="badge bg-success-subtle text-success border border-success">SOLVED</span>
+                                    <span class="badge bg-success-subtle text-success border border-success">@(Lang.IsRtl ? "محلول" : "SOLVED")</span>
                                 }
                             </a>
                         }
@@ -150,8 +172,9 @@
                 </div>
 
                 <div class="alert alert-info py-2 px-3 small">
-                    <strong><i class="bi bi-lightbulb"></i> How It Works:</strong>
-                    Read the hospital error scenario, inspect the broken code, fix the syntax in the editor, and click <strong>Verify Solution</strong>!
+                    <strong><i class="bi bi-lightbulb me-1"></i> @(Lang.IsRtl ? "كيف تعمل الحلبة:" : "How It Works:")</strong>
+                    @(Lang.IsRtl ? "اقرأ سيناريو الخطأ في المستشفى، افحص الشفرة المعطوبة، أصلح البنية النحوية في المحرر، وانقر على 'تحقق من الحل'!"
+                                 : "Read the hospital error scenario, inspect the broken code, fix the syntax in the editor, and click Verify Solution!")
                 </div>
             </div>
 
@@ -160,23 +183,23 @@
                 <div class="card shadow-sm border h-100">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center py-2 flex-wrap gap-2">
                         <div>
-                            <span class="badge bg-danger me-2">Challenge #@(selectedChallengeIndex + 1)</span>
-                            <strong class="text-dark">@curCh.Title</strong>
+                            <span class="badge bg-danger me-2">@(Lang.IsRtl ? $"تحدي #{selectedChallengeIndex + 1}" : $"Challenge #{selectedChallengeIndex + 1}")</span>
+                            <strong class="text-dark">@(Lang.IsRtl && !string.IsNullOrEmpty(curCh.TitleAr) ? curCh.TitleAr : curCh.Title)</strong>
                         </div>
                         <div class="d-flex gap-2">
                             <button class="btn btn-outline-secondary btn-sm" @onclick="ResetChallenge">
-                                <i class="bi bi-arrow-counterclockwise"></i> Reset Code
+                                <i class="bi bi-arrow-counterclockwise me-1"></i> @(Lang.IsRtl ? "إعادة ضبط الشفرة" : "Reset Code")
                             </button>
                             <button class="btn btn-success btn-sm fw-bold px-3" @onclick="VerifyCurrentChallenge">
-                                <i class="bi bi-play-fill me-1"></i> Verify Solution
+                                <i class="bi bi-play-fill me-1"></i> @(Lang.IsRtl ? "تحقق من الحل" : "Verify Solution")
                             </button>
                         </div>
                     </div>
                     <div class="card-body p-3 d-flex flex-column">
                         <!-- Problem Description -->
                         <div class="alert alert-warning py-2 px-3 small mb-2">
-                            <strong><i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Problem:</strong>
-                            <div>@curCh.Description</div>
+                            <strong><i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> @(Lang.IsRtl ? "المشكلة:" : "Problem:")</strong>
+                            <div>@(Lang.IsRtl && !string.IsNullOrEmpty(curCh.DescriptionAr) ? curCh.DescriptionAr : curCh.Description)</div>
                         </div>
 
                         <!-- Verification Result Alert -->
@@ -188,21 +211,24 @@
                             </div>
                         }
 
-                        <label class="form-label small fw-semibold text-muted mb-1">Interactive Code Editor:</label>
+                        <label class="form-label small fw-semibold text-muted mb-1">@(Lang.IsRtl ? "محرر الشفرة التفاعلي:" : "Interactive Code Editor:")</label>
                         <textarea class="form-control font-monospace small flex-grow-1 mb-2" 
-                                  style="min-height: 160px; resize: vertical;" 
+                                  style="min-height: 160px; resize: vertical; direction: ltr !important; text-align: left !important; unicode-bidi: isolate;" 
                                   @bind="curCh.CurrentCode"></textarea>
 
                         <!-- Collapsible Hint -->
                         <div class="p-2 bg-light rounded border small">
                             <div class="d-flex justify-content-between align-items-center cursor-pointer" @onclick="() => showHint = !showHint">
-                                <span class="fw-semibold text-primary"><i class="bi bi-info-circle me-1"></i> Need a Hint? Click Here</span>
+                                <span class="fw-semibold text-primary">
+                                    <i class="bi bi-info-circle me-1"></i> 
+                                    @(Lang.IsRtl ? "هل تحتاج إلى تلميح؟ انقر هنا" : "Need a Hint? Click Here")
+                                </span>
                                 <i class="bi @(showHint ? "bi-chevron-up" : "bi-chevron-down")"></i>
                             </div>
                             @if (showHint)
                             {
                                 <div class="mt-2 text-muted border-top pt-2" style="font-size: 0.8rem;">
-                                    @curCh.Hint
+                                    @(Lang.IsRtl && !string.IsNullOrEmpty(curCh.HintAr) ? curCh.HintAr : curCh.Hint)
                                 </div>
                             }
                         </div>
@@ -230,6 +256,9 @@
         public string InitialCode { get; set; } = "";
         public string CurrentCode { get; set; } = "";
         public string Hint { get; set; } = "";
+        public string? TitleAr { get; set; }
+        public string? DescriptionAr { get; set; }
+        public string? HintAr { get; set; }
         public bool IsSolved { get; set; }
         public string? VerificationStatus { get; set; }
         public Func<string, (bool Passed, string Message)> Validator { get; set; } = null!;
@@ -240,89 +269,105 @@
 
     protected override void OnInitialized()
     {
+        Lang.OnLanguageChanged += StateHasChanged;
         Challenges = new List<BugChallenge>
         {
             new BugChallenge
             {
                 Title = "Fix Truncated MSH-7 Timestamp",
+                TitleAr = "إصلاح ختم MSH-7 الزمني المبتور",
                 Description = "A chemistry analyzer transmitted MSH-7 as '2026101112' (only 10 digits without minutes and seconds). The hospital engine rejected the packet. Fix MSH-7 to be a valid 14-digit HL7 timestamp (e.g. 20261011123000).",
+                DescriptionAr = "أرسل جهاز تحليل كيمياء الدم ختم MSH-7 كـ '2026101112' (10 أرقام فقط دون دقائق وثوانٍ). رفض محرك المستشفى الرسالة. أصلح MSH-7 ليصبح ختماً زمنياً صحيحاً من 14 رقماً (مثل 20261011123000).",
                 InitialCode = "MSH|^~\\&|ROCHE|HOSP_A|EHR|HOSP_A|2026101112||ORU^R01|MSG901|P|2.5\r\nPID|1||MRN1002||Smith^Eleanor||19850614|F",
                 CurrentCode = "MSH|^~\\&|ROCHE|HOSP_A|EHR|HOSP_A|2026101112||ORU^R01|MSG901|P|2.5\r\nPID|1||MRN1002||Smith^Eleanor||19850614|F",
                 Hint = "In HL7 v2, timestamps in MSH-7 require at least YYYYMMDDHHMMSS format (14 digits: 4 year + 2 month + 2 day + 2 hour + 2 min + 2 sec). Replace '2026101112' with '20261011123000'.",
+                HintAr = "يتطلب معيار HL7 v2 في MSH-7 صياغة YYYYMMDDHHMMSS على الأقل (14 رقماً: 4 سنة + 2 شهر + 2 يوم + 2 ساعة + 2 دقيقة + 2 ثانية). استبدل '2026101112' بـ '20261011123000'.",
                 Validator = code =>
                 {
                     var lines = code.Split('\n');
                     var msh = lines.FirstOrDefault(l => l.Trim().StartsWith("MSH"));
-                    if (msh == null) return (false, "MSH segment missing.");
+                    if (msh == null) return (false, Lang.IsRtl ? "مقطع MSH مفقود." : "MSH segment missing.");
                     var parts = msh.Trim().Split('|');
-                    if (parts.Length < 8) return (false, "MSH segment does not have enough fields.");
+                    if (parts.Length < 8) return (false, Lang.IsRtl ? "مقطع MSH لا يحتوي على حقول كافية." : "MSH segment does not have enough fields.");
                     var ts = parts[6].Trim();
-                    if (ts.Length >= 14 && ts.All(char.IsDigit)) return (true, "Excellent! Timestamp is now valid YYYYMMDDHHMMSS (14 digits).");
-                    return (false, $"MSH-7 value '{ts}' is only {ts.Length} digits. It must be at least 14 digits (YYYYMMDDHHMMSS).");
+                    if (ts.Length >= 14 && ts.All(char.IsDigit)) return (true, Lang.IsRtl ? "ممتاز! الختم الزمني الآن مكتمل ومطابق من 14 رقماً." : "Excellent! Timestamp is now valid YYYYMMDDHHMMSS (14 digits).");
+                    return (false, Lang.IsRtl ? $"قيمة MSH-7 '{ts}' تحتوي {ts.Length} أرقام فقط. يجب أن تكون 14 رقماً على الأقل." : $"MSH-7 value '{ts}' is only {ts.Length} digits. It must be at least 14 digits (YYYYMMDDHHMMSS).");
                 }
             },
             new BugChallenge
             {
                 Title = "Fix Illegal Gender Code in PID-8",
+                TitleAr = "إصلاح رمز الجنس غير القانوني في PID-8",
                 Description = "A vendor billing interface sent 'PID-8' as 'MALE'. HL7 Table 0001 only permits single-character codes: 'M' (Male), 'F' (Female), 'O' (Other), or 'U' (Unknown). Fix the field to prevent EHR parse crash.",
+                DescriptionAr = "أرسلت واجهة فوترة خارجية حقل 'PID-8' كـ 'MALE'. يسمح جدول HL7 0001 برمز حرفي واحد فقط: M أو F أو O أو U. أصلح الحقل لمنع تعطل المحلل السريري.",
                 InitialCode = "PID|1||MRN401^^^METRO^MR||Johnson^Robert||19750420|MALE||124 Main St^^Austin^TX^78701",
                 CurrentCode = "PID|1||MRN401^^^METRO^MR||Johnson^Robert||19750420|MALE||124 Main St^^Austin^TX^78701",
                 Hint = "Change 'MALE' in PID-8 to 'M'. Field 8 is between the birthdate (PID-7) and patient alias (PID-9).",
+                HintAr = "غير كلمة 'MALE' في PID-8 إلى الحرف 'M'. الحقل الثامن يقع بين تاريخ الميلاد (PID-7) ومحدد المريض الإضافي.",
                 Validator = code =>
                 {
                     var lines = code.Split('\n');
                     var pid = lines.FirstOrDefault(l => l.Trim().StartsWith("PID"));
-                    if (pid == null) return (false, "PID segment missing.");
+                    if (pid == null) return (false, Lang.IsRtl ? "مقطع PID مفقود." : "PID segment missing.");
                     var parts = pid.Trim().Split('|');
-                    if (parts.Length < 9) return (false, "PID segment does not have enough fields.");
+                    if (parts.Length < 9) return (false, Lang.IsRtl ? "مقطع PID لا يحتوي على حقول كافية." : "PID segment does not have enough fields.");
                     var gender = parts[8].Trim().ToUpperInvariant();
-                    if (gender is "M" or "F" or "O" or "U") return (true, $"Success! '{gender}' is a valid HL7 Table 0001 administrative sex code.");
-                    return (false, $"'{parts[8]}' is not a valid HL7 Table 0001 code. Must be M, F, O, or U.");
+                    if (gender is "M" or "F" or "O" or "U") return (true, Lang.IsRtl ? $"نجاح رائع! الرمز '{gender}' معتمد وصحيح وفق جدول HL7 0001." : $"Success! '{gender}' is a valid HL7 Table 0001 administrative sex code.");
+                    return (false, Lang.IsRtl ? $"الرمز '{parts[8]}' غير معتمد. يجب أن يكون M أو F أو O أو U." : $"'{parts[8]}' is not a valid HL7 Table 0001 code. Must be M, F, O, or U.");
                 }
             },
             new BugChallenge
             {
                 Title = "Escape Literal Pipe in Patient Address",
+                TitleAr = "حماية فاصل الأنابيب الصريح في عنوان المريض",
                 Description = "A registration clerk typed '100 Elm St | Suite 4' into the street address. The unescaped pipe '|' split the address across two fields, corrupting City, State, and Zip coordinates! Replace the raw pipe with the proper HL7 escape operator.",
+                DescriptionAr = "أدخل موظف الاستقبال النص '100 Elm St | Suite 4' في عنوان الشارع. أدى الفاصل غير المحمي '|' إلى كسر العنوان عبر حقلين وتدمير إحداثيات المدينة والرمز البريدي! استبدله بمحرف الهروب المعياري.",
                 InitialCode = "PID|1||MRN778||Davis^Alice||19910812|F||100 Elm St | Suite 4^^Denver^CO^80203",
                 CurrentCode = "PID|1||MRN778||Davis^Alice||19910812|F||100 Elm St | Suite 4^^Denver^CO^80203",
                 Hint = "In HL7 v2, a literal pipe must be escaped as '\\F\\'. Replace '|' inside '100 Elm St | Suite 4' with '\\F\\'.",
+                HintAr = "في HL7 v2، يجب ترميز الفاصل الصريح كـ '\\F\\'. استبدل '|' داخل العنوان بـ '\\F\\'.",
                 Validator = code =>
                 {
-                    if (code.Contains(@"\F\")) return (true, "Great job! '\\F\\' safely encodes the pipe character without splitting the segment.");
-                    return (false, "The raw pipe was not escaped. Use '\\F\\' in place of the inner pipe character.");
+                    if (code.Contains(@"\F\")) return (true, Lang.IsRtl ? "عمل متقن! الترميز '\\F\\' يحمي الفاصل ويمنع كسر المقطع." : "Great job! '\\F\\' safely encodes the pipe character without splitting the segment.");
+                    return (false, Lang.IsRtl ? "لم يتم تحويل الفاصل. استخدم '\\F\\' بدلاً من رمز الأنبوب داخل النص." : "The raw pipe was not escaped. Use '\\F\\' in place of the inner pipe character.");
                 }
             },
             new BugChallenge
             {
                 Title = "Add Missing MLLP Framing Envelopes",
+                TitleAr = "إضافة بايتات تأطير MLLP المفقودة",
                 Description = "A new hospital TCP socket listener failed because the payload was sent as bare text without Minimal Lower Layer Protocol (MLLP) framing delimiters. Add '<0x0B>' at the beginning and '<0x1C><0x0D>' at the end.",
+                DescriptionAr = "فشل مستقبل مقبس TCP الجديد في المستشفى لأن الحمولة أرسلت كنص خام دون مغلف MLLP. أضف '<0x0B>' في البداية و '<0x1C><0x0D>' في النهاية.",
                 InitialCode = "MSH|^~\\&|PAS|METRO|EHR|METRO|20261012100000||ADT^A01|MSG55|P|2.5\r\nPID|1||9001||Lee^David",
                 CurrentCode = "MSH|^~\\&|PAS|METRO|EHR|METRO|20261012100000||ADT^A01|MSG55|P|2.5\r\nPID|1||9001||Lee^David",
                 Hint = "Wrap the message so it starts with '<0x0B>' and ends with '<0x1C><0x0D>' (or '\\x0B' and '\\x1C\\x0D').",
+                HintAr = "غلف الرسالة بحيث تبدأ بـ '<0x0B>' وتنتهي بـ '<0x1C><0x0D>'.",
                 Validator = code =>
                 {
                     var trimmed = code.Trim();
                     bool hasStart = trimmed.StartsWith("<0x0B>") || trimmed.StartsWith("\x0B") || trimmed.StartsWith("0x0B");
                     bool hasEnd = trimmed.EndsWith("<0x1C><0x0D>") || trimmed.EndsWith("\x1C\x0D") || trimmed.EndsWith("0x1C 0x0D");
-                    if (hasStart && hasEnd) return (true, "Packet framed! MLLP receivers on port 2575 will now recognize start and end of transmission.");
-                    return (false, "Message must begin with '<0x0B>' (Start Block) and terminate with '<0x1C><0x0D>' (End Block + Carriage Return).");
+                    if (hasStart && hasEnd) return (true, Lang.IsRtl ? "تم تأطير الحزمة بنجاح! سيتعرف خادم MLLP على المنفذ 2575 على حدود الإرسال." : "Packet framed! MLLP receivers on port 2575 will now recognize start and end of transmission.");
+                    return (false, Lang.IsRtl ? "يجب أن تبدأ الرسالة بـ '<0x0B>' وتنتهي بـ '<0x1C><0x0D>'." : "Message must begin with '<0x0B>' (Start Block) and terminate with '<0x1C><0x0D>' (End Block + Carriage Return).");
                 }
             },
             new BugChallenge
             {
                 Title = "Add Missing Required FHIR Observation Status",
+                TitleAr = "إضافة حالة الملاحظة الإلزامية في مورد FHIR",
                 Description = "A laboratory script pushed a JSON Observation to HAPI FHIR, but the server rejected it with HTTP 422: 'Missing required 1..1 element: status'. Add the required status property with value 'final'.",
+                DescriptionAr = "أرسل برنامج مخبري كائن Observation بصيغة JSON إلى خادم HAPI FHIR، لكن الخادم رفضه بالخطأ HTTP 422: 'العنصر الإلزامي status مفقود (1..1)'. أضف خاصية status بالقيمة 'final'.",
                 InitialCode = "{\r\n  \"resourceType\": \"Observation\",\r\n  \"code\": {\r\n    \"text\": \"Blood Glucose\"\r\n  },\r\n  \"valueQuantity\": {\r\n    \"value\": 105,\r\n    \"unit\": \"mg/dL\"\r\n  }\r\n}",
                 CurrentCode = "{\r\n  \"resourceType\": \"Observation\",\r\n  \"code\": {\r\n    \"text\": \"Blood Glucose\"\r\n  },\r\n  \"valueQuantity\": {\r\n    \"value\": 105,\r\n    \"unit\": \"mg/dL\"\r\n  }\r\n}",
                 Hint = "Add '\"status\": \"final\",' right below '\"resourceType\": \"Observation\",'.",
+                HintAr = "أضف '\"status\": \"final\",' مباشرة أسفل سطر '\"resourceType\": \"Observation\",'.",
                 Validator = code =>
                 {
                     if (code.Contains("\"status\"") && (code.Contains("\"final\"") || code.Contains("\"preliminary\"")))
                     {
-                        return (true, "Verified! 'status: final' satisfies the mandatory FHIR R4 Observation cardinality (1..1).");
+                        return (true, Lang.IsRtl ? "تم التحقق بنجاح! الخاصية 'status: final' تلبي شرط الإلزام الصارم (1..1) في معيار FHIR R4." : "Verified! 'status: final' satisfies the mandatory FHIR R4 Observation cardinality (1..1).");
                     }
-                    return (false, "Observation is still missing 'status': 'final'. Add the mandatory status attribute.");
+                    return (false, Lang.IsRtl ? "المورد لا يزال يفتقر إلى 'status': 'final'. أضف الخاصية الإلزامية." : "Observation is still missing 'status': 'final'. Add the mandatory status attribute.");
                 }
             }
         };
@@ -359,7 +404,14 @@
         string FailureRootCause,
         string FixedPayload,
         string FixExplanation,
-        string GuardrailRule
+        string GuardrailRule,
+        string? ShortTitleAr = null,
+        string? FullTitleAr = null,
+        string? CategoryAr = null,
+        string? HazardExplanationAr = null,
+        string? FailureRootCauseAr = null,
+        string? FixExplanationAr = null,
+        string? GuardrailRuleAr = null
     );
 
     private static readonly List<WarIncident> Incidents = new()
@@ -380,7 +432,14 @@ PID|1||10042||Johnson^Alice||19920510|F",
 ...
 PID|1||10042^^^CLINIC_SOUTH^MR||Johnson^Alice||19920510|F",
             FixExplanation: "Component 4 (Assigning Authority) provides namespacing. In FHIR, this maps to distinct system URIs: 'http://clinic-north.org/mrn' vs 'http://clinic-south.org/mrn'.",
-            GuardrailRule: "Never accept raw patient IDs without an Assigning Authority (PID-3.4) in v2, or a valid 'system' URI in FHIR."
+            GuardrailRule: "Never accept raw patient IDs without an Assigning Authority (PID-3.4) in v2, or a valid 'system' URI in FHIR.",
+            ShortTitleAr: "تضارب واصطدام الملفات المكررة",
+            FullTitleAr: "كارثة اصطدام معرفات الفهرس الرئيسي للمرضى (MPI)",
+            CategoryAr: "هوية المريض / الفهرس المركزي",
+            HazardExplanationAr: "اندمجت عيادتان إقليميتان في شبكة مستشفيات واحدة. صادف أن أصدرت كلتا العيادتين رقم الملف الطبي '10042'. ولأن فريق الربط أغفل الحقل PID-3.4 (جهة الإصدار)، رُبطت خطة علاج كيماوي لمريض من العيادة (أ) بسجل سيدة حامل من العيادة (ب)!",
+            FailureRootCauseAr: "يشترك المريضان في الرقم '10042'. ودون تحديد جهة الإصدار، اعتبر نظام MPI المركزي أنهما نفس الشخص.",
+            FixExplanationAr: "يوفر المكون الرابع PID-3.4 نطاقاً مستقلاً (Namespace). ويقابل ذلك في FHIR تحديد روابط URI مستقلة لكل جهة.",
+            GuardrailRuleAr: "لا تقبل أبداً أرقام ملفات مجردة دون جهة إصدار (PID-3.4) في v2، أو رابط 'system' فريد في FHIR."
         ),
 
         // 2. Unescaped Delimiter Crash
@@ -395,7 +454,14 @@ PID|1||10042^^^CLINIC_SOUTH^MR||Johnson^Alice||19920510|F",
             FixedPayload:
 @"OBX|1|TX|NOTE^Clinical Note||Pain: Severe \F\ Patient drowsy||||||F",
             FixExplanation: "Using '\\F\\' escapes the pipe so parsers know it is textual content rather than a structural delimiter.",
-            GuardrailRule: "Always run outgoing HL7 v2 messages through an escape sanitizer that automatically replaces bare '|', '^', and '~' characters in user inputs."
+            GuardrailRule: "Always run outgoing HL7 v2 messages through an escape sanitizer that automatically replaces bare '|', '^', and '~' characters in user inputs.",
+            ShortTitleAr: "انهيار المحلل بفواصل غير محمية",
+            FullTitleAr: "تعطل محلل المستشفى بسبب فاصل أنابيب صريح غير مشفر",
+            CategoryAr: "بروتوكول الأسلاك / البنية النحوية",
+            HazardExplanationAr: "كتب الطبيب ملاحظة: 'ألم حاد | اشتباه حصوة'. أرسلت واجهة الربط الملاحظة برمز الأنبوب الصريح '|'. ظن النظام المستقبل أنه فاصل حقول جديد، فزحزح جميع الحقول التالية وأسقط بيانات المطالبات المالية للمريض!",
+            FailureRootCauseAr: "عومل الرمز '|' داخل النص كفاصل حقول، فبحث المحلل عن وحدات القياس فوجد نص الملاحظة السريرية فتعطل النظام.",
+            FixExplanationAr: "استخدام الرمز '\\F\\' يحمي الفاصل المعياري ويخبر المحللات بأنه نص حرفي وليس حداً فاصلاً بين الحقول.",
+            GuardrailRuleAr: "مرر دائماً رسائل HL7 الصادرة عبر معالج تنقية وتعقيم يستبدل الفواصل الصريحة بمحارف الهروب المعيارية."
         ),
 
         // 3. Timezone Shift
@@ -417,7 +483,14 @@ patient.BirthDate = rawDate.Substring(0, 4) + ""-"" +
                     rawDate.Substring(4, 2) + ""-"" + 
                     rawDate.Substring(6, 2); // '1985-06-14'",
             FixExplanation: "FHIR allows Date strings ('YYYY-MM-DD') without time components. Never append '00:00:00' to a date of birth.",
-            GuardrailRule: "Never convert Date of Birth through a UTC DateTime converter. Treat birth dates as timezone-agnostic calendar strings."
+            GuardrailRule: "Never convert Date of Birth through a UTC DateTime converter. Treat birth dates as timezone-agnostic calendar strings.",
+            ShortTitleAr: "شبح إزاحة التوقيت الزمني",
+            FullTitleAr: "إزاحة تاريخ ميلاد المريض يوماً كاملاً بسبب تحويل UTC الخاطئ",
+            CategoryAr: "أنواع البيانات والتواريخ السريرية",
+            HazardExplanationAr: "أرسل نظام المستشفى تاريخ ميلاد المريض كـ '19850614'. حول المبرمج النص إلى UTC بمنتصف الليل (00:00:00). عند فتح الملف في منطقة زمنية بتوقيت متأخر (UTC-8)، تحول التاريخ إلى 13 يونيو! رفضت شركات التأمين كافة المطالبات لاختلاف تاريخ الميلاد.",
+            FailureRootCauseAr: "تواريخ الميلاد تواريخ تقويمية وليست أختاماً زمنية! تحويل التواريخ عبر فروق التوقيت يزيح حدود اليوم.",
+            FixExplanationAr: "يدعم معيار FHIR نصوص التواريخ الخالصة ('YYYY-MM-DD'). لا تقرن تاريخ الميلاد بوقت أو مناطق زمنية نهائياً.",
+            GuardrailRuleAr: "لا تمرر تاريخ الميلاد عبر محولات DateTime ذات المناطق الزمنية. تعامل معه كنص تقويمي مجرد ومستقل."
         ),
 
         // 4. Non-Numeric in NM Type
@@ -442,7 +515,14 @@ OBX|1|ST|1234-5^Viral Load^LN||< 0.01|copies/mL|0-100|N|||F
   }
 }",
             FixExplanation: "In FHIR, the Quantity data type provides a dedicated 'comparator' field ('<', '<=', '>=', '>'), preserving both the numeric value and the qualifier cleanly.",
-            GuardrailRule: "When parsing OBX-5 with type NM, always use decimal.TryParse() with a regex fallback to extract comparators ('<', '>')."
+            GuardrailRule: "When parsing OBX-5 with type NM, always use decimal.TryParse() with a regex fallback to extract comparators ('<', '>').",
+            ShortTitleAr: "فخ القيم غير الرقمية في NM",
+            FullTitleAr: "إرسال المختبر للقيمة '< 0.01' داخل حقل رقمي (NM)",
+            CategoryAr: "المختبرات والتحاليل السريرية",
+            HazardExplanationAr: "أظهر فحص PCR للحمل الفيروسي النتيجة '< 0.01'. أرسل جهاز المختبر النتيجة في مقطع OBX بنوع 'NM' (رقمي). نفذ نظام المستشفى المستقبل decimal.Parse('< 0.01')، مما تسبب بانهيار FormatException وإسقاط كامل حزمة نتائج التحاليل!",
+            FailureRootCauseAr: "حدد OBX-2 النوع بأنه 'NM'، ولكن '< 0.01' نص يحتوي معامل مقارنة وليس رقماً عشرياً خالصاً.",
+            FixExplanationAr: "في FHIR، يحتوي نوع البيانات Quantity على حقل مخصص للمقارنة comparator ('<')، مما يحافظ على القيمة والمعامل معاً.",
+            GuardrailRuleAr: "عند قراءة حقول OBX الرقمية، استخدم دائماً decimal.TryParse مع استخراج معاملات المقارنة '<' و '>' عبر Regex."
         ),
 
         // 5. Missing Trigger Event
@@ -459,7 +539,19 @@ PID|1||99102||Baker^Tom...",
 @"MSH|^~\&|OLD_PAS|HOSP|EHR|HOSP|202610111000||ADT^A01|CTRL_001|P|2.3
 PID|1||99102||Baker^Tom...",
             FixExplanation: "Adding the trigger event '^A01' allows interface engine filters to route the patient to bed census systems immediately.",
-            GuardrailRule: "Validate MSH-9 in your ingestion middleware; if MSH-9.2 is empty, fail-fast and reject the message with an explicit NACK before it gets lost."
+            GuardrailRule: "Validate MSH-9 in your ingestion middleware; if MSH-9.2 is empty, fail-fast and reject the message with an explicit NACK before it gets lost.",
+            ShortTitleAr: "غياب الحدث المسبب للرسالة",
+            FullTitleAr: "إرسال 'ADT' مجردة بدلاً من الحدث المحدد 'ADT^A01'",
+            CategoryAr: "توجيه محركات الربط والتكامل",
+            HazardExplanationAr: "أرسل نظام تسجيل قديم رمز 'ADT' في MSH-9 دون فاصل القبعة والحدث المسبب ('ADT^A01'). يقوم محرك التكامل بالتوجيه بناء على الحدث، فلم يطابق أي قاعدة وأسقط الرسالة في قائمة الرسائل الميتة! انتظر المريض 4 ساعات في الطوارئ لأن محطة التمريض لم تستلم إشعار التنويم.",
+            FailureRootCauseAr: "يجب أن يكون MSH-9 مركباً: نوع الرسالة^الحدث المسبب (مثل ADT^A01). بدونه لا تستطيع الموجهات الآلية تحديد المقصد.",
+            FixExplanationAr: "إضافة الحدث '^A01' يمكن فلاتر محرك التكامل من توجيه المريض فوراً لنظام إشغال الأسرة السريري.",
+            GuardrailRuleAr: "تحقق من حقل MSH-9 فور استقبال الرسالة؛ وإذا كان MSH-9.2 فارغاً، ارفض الرسالة فوراً بإشعار NACK صريح."
         )
     };
+
+    public void Dispose()
+    {
+        Lang.OnLanguageChanged -= StateHasChanged;
+    }
 }

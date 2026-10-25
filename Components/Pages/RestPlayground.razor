@@ -1,20 +1,29 @@
 @page "/rest-playground"
 @rendermode InteractiveServer
+@implements IDisposable
 @inject FhirService FhirService
+@inject LanguageService Lang
 @inject IJSRuntime JS
 
-<PageTitle>FHIR REST API Playground &amp; Query Builder</PageTitle>
+<PageTitle>@(Lang.IsRtl ? "مختبر استعلامات واجهة FHIR REST وباني المعاملات" : "FHIR REST API Playground & Query Builder")</PageTitle>
 
 <div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <div>
-            <h2 class="h3 fw-bold mb-0"><i class="bi bi-cloud-arrow-down text-info"></i> FHIR REST API Playground &amp; Query Builder</h2>
-            <p class="text-muted small mb-0">Learn FHIR RESTful interactions, visual search parameters, _include joins, and Bundle responses.</p>
+            <h2 class="h3 fw-bold mb-0">
+                <i class="bi bi-cloud-arrow-down text-info me-1"></i> 
+                @(Lang.IsRtl ? "مختبر استعلامات واجهة FHIR REST وباني المعاملات" : "FHIR REST API Playground & Query Builder")
+            </h2>
+            <p class="text-muted small mb-0">
+                @(Lang.IsRtl ? "تعلم تفاعلات RESTful في معيار FHIR، ومعاملات البحث البصرية، والربط المتشعب عبر _include، وتحليل حزم الاستجابة."
+                             : "Learn FHIR RESTful interactions, visual search parameters, _include joins, and Bundle responses.")
+            </p>
         </div>
         <div class="form-check form-switch">
             <input class="form-check-input" type="checkbox" id="mockToggle" @bind="useMockMode">
             <label class="form-check-label small fw-semibold" for="mockToggle">
-                Offline / Mock Mode @(useMockMode ? "(Instant)" : "(Live Cloud API)")
+                @(Lang.IsRtl ? "الوضع غير المتصل / المحاكي" : "Offline / Mock Mode") 
+                @(useMockMode ? (Lang.IsRtl ? "(فوري محلي)" : "(Instant)") : (Lang.IsRtl ? "(خادم سحابي حي)" : "(Live Cloud API)"))
             </label>
         </div>
     </div>
@@ -22,40 +31,46 @@
     <!-- Visual Search Builder Card -->
     <div class="card shadow-sm mb-3 border">
         <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
-            <span class="fw-semibold small"><i class="bi bi-sliders text-primary me-1"></i> Visual FHIR Search Parameter Builder</span>
+            <span class="fw-semibold small">
+                <i class="bi bi-sliders text-primary me-1"></i> 
+                @(Lang.IsRtl ? "باني معاملات بحث FHIR البصري" : "Visual FHIR Search Parameter Builder")
+            </span>
             <button class="btn btn-sm btn-outline-secondary py-0" @onclick="() => showAdvancedBuilder = !showAdvancedBuilder">
-                <i class="bi @(showAdvancedBuilder ? "bi-chevron-up" : "bi-chevron-down")"></i> @(showAdvancedBuilder ? "Hide Advanced Options" : "Show Advanced Options (_include, prefixes)")
+                <i class="bi @(showAdvancedBuilder ? "bi-chevron-up" : "bi-chevron-down") me-1"></i> 
+                @(showAdvancedBuilder 
+                    ? (Lang.IsRtl ? "إخفاء الخيارات المتقدمة" : "Hide Advanced Options") 
+                    : (Lang.IsRtl ? "إظهار الخيارات المتقدمة (_include، البادئات)" : "Show Advanced Options (_include, prefixes)"))
             </button>
         </div>
         <div class="card-body p-3">
             <div class="row g-2 align-items-center">
                 <div class="col-md-3">
-                    <label class="form-label small text-muted mb-1">Base FHIR Endpoint</label>
-                    <input type="text" class="form-control form-control-sm font-monospace" @bind="baseUrl" disabled="@useMockMode" />
+                    <label class="form-label small text-muted mb-1">@(Lang.IsRtl ? "نقطة نهاية خادم FHIR الأساسية" : "Base FHIR Endpoint")</label>
+                    <input type="text" class="form-control form-control-sm font-monospace" @bind="baseUrl" disabled="@useMockMode" style="direction: ltr !important;" />
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label small text-muted mb-1">Resource Type</label>
+                    <label class="form-label small text-muted mb-1">@(Lang.IsRtl ? "نوع المورد السريري" : "Resource Type")</label>
                     <select class="form-select form-select-sm" @bind="selectedResourceType" @bind:after="UpdateQueryFromBuilder">
-                        <option value="Patient">Patient</option>
-                        <option value="Observation">Observation</option>
-                        <option value="Encounter">Encounter</option>
-                        <option value="DiagnosticReport">DiagnosticReport</option>
-                        <option value="Condition">Condition</option>
+                        <option value="Patient">Patient (المريض)</option>
+                        <option value="Observation">Observation (الملاحظة المخبرية)</option>
+                        <option value="Encounter">Encounter (الزيارة والتنويم)</option>
+                        <option value="DiagnosticReport">DiagnosticReport (تقرير التشخيص)</option>
+                        <option value="Condition">Condition (التشخيص والحالة)</option>
                     </select>
                 </div>
                 <div class="col-md-5">
-                    <label class="form-label small text-muted mb-1">Compiled Search URL Query</label>
-                    <input type="text" class="form-control form-control-sm font-monospace text-primary fw-bold" @bind="searchQuery" />
+                    <label class="form-label small text-muted mb-1">@(Lang.IsRtl ? "رابط استعلام البحث المجمع" : "Compiled Search URL Query")</label>
+                    <input type="text" class="form-control form-control-sm font-monospace text-primary fw-bold" @bind="searchQuery" style="direction: ltr !important;" />
                 </div>
                 <div class="col-md-2 align-self-end">
                     <button class="btn btn-primary btn-sm w-100" @onclick="ExecuteQuery" disabled="@isLoading">
                         @if (isLoading)
                         {
-                            <span class="spinner-border spinner-border-sm me-1"></span> <span>Querying...</span>
+                            <span class="spinner-border spinner-border-sm me-1"></span> <span>@(Lang.IsRtl ? "جاري الاستعلام..." : "Querying...")</span>
                         }
                         else
                         {
-                            <i class="bi bi-send-fill"></i> <span>Send Request</span>
+                            <i class="bi bi-send-fill me-1"></i> <span>@(Lang.IsRtl ? "إرسال الطلب" : "Send Request")</span>
                         }
                     </button>
                 </div>
@@ -65,7 +80,7 @@
             <div class="alert alert-primary py-2 px-3 mt-2 mb-0 small d-flex align-items-center gap-2">
                 <i class="bi bi-translate text-primary fs-5"></i>
                 <div class="flex-grow-1">
-                    <strong>Plain-English Query Meaning:</strong> @GetPlainEnglishQueryExplanation()
+                    <strong>@(Lang.IsRtl ? "المعنى اللغوي للاستعلام:" : "Plain-English Query Meaning:")</strong> @GetPlainQueryExplanation()
                 </div>
             </div>
 
@@ -73,39 +88,42 @@
             @if (showAdvancedBuilder)
             {
                 <div class="p-3 mt-3 bg-light rounded border small">
-                    <h6 class="fw-bold text-dark mb-2"><i class="bi bi-funnel text-primary me-1"></i> Advanced Query Modifiers:</h6>
+                    <h6 class="fw-bold text-dark mb-2">
+                        <i class="bi bi-funnel text-primary me-1"></i> 
+                        @(Lang.IsRtl ? "محددات وتعديلات الاستعلام المتقدمة:" : "Advanced Query Modifiers:")
+                    </h6>
                     <div class="row g-2 align-items-center">
                         <div class="col-md-3">
-                            <label class="text-muted d-block mb-1">Date Comparator Prefix:</label>
+                            <label class="text-muted d-block mb-1">@(Lang.IsRtl ? "بادئة مقارنة التواريخ:" : "Date Comparator Prefix:")</label>
                             <select class="form-select form-select-sm" @bind="selectedDatePrefix" @bind:after="UpdateQueryFromBuilder">
-                                <option value="">None (Exact)</option>
-                                <option value="ge">ge (&gt;= Greater or Equal)</option>
-                                <option value="le">le (&lt;= Less or Equal)</option>
-                                <option value="gt">gt (&gt; Greater Than)</option>
-                                <option value="lt">lt (&lt; Less Than)</option>
+                                <option value="">@(Lang.IsRtl ? "بدون (مطابقة دقيقة)" : "None (Exact)")</option>
+                                <option value="ge">ge (@(Lang.IsRtl ? ">= أكبر أو يساوي" : ">= Greater or Equal"))</option>
+                                <option value="le">le (@(Lang.IsRtl ? "<= أصغر أو يساوي" : "<= Less or Equal"))</option>
+                                <option value="gt">gt (@(Lang.IsRtl ? "> أكبر من" : "> Greater Than"))</option>
+                                <option value="lt">lt (@(Lang.IsRtl ? "< أصغر من" : "< Less Than"))</option>
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="text-muted d-block mb-1">Compound Join (<code>_include</code>):</label>
+                            <label class="text-muted d-block mb-1">@(Lang.IsRtl ? "الربط المشترك للموارد (_include):" : "Compound Join (_include):")</label>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="incResult" @bind="includeResultResource" @bind:after="UpdateQueryFromBuilder">
                                 <label class="form-check-label" for="incResult">
-                                    <code>_include=DiagnosticReport:result</code> (Fetch report + lab observations)
+                                    <code>_include=DiagnosticReport:result</code> <span class="text-muted">(@(Lang.IsRtl ? "جلب التقرير + نتائج التحاليل" : "Fetch report + lab observations"))</span>
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="incSubject" @bind="includePatientSubject" @bind:after="UpdateQueryFromBuilder">
                                 <label class="form-check-label" for="incSubject">
-                                    <code>_include=Observation:patient</code> (Fetch observation + patient chart)
+                                    <code>_include=Observation:patient</code> <span class="text-muted">(@(Lang.IsRtl ? "جلب الفحص + ملف المريض" : "Fetch observation + patient chart"))</span>
                                 </label>
                             </div>
                         </div>
                         <div class="col-md-5">
-                            <label class="text-muted d-block mb-1">Chained Parameter Search:</label>
+                            <label class="text-muted d-block mb-1">@(Lang.IsRtl ? "البحث بالمعاملات المترابطة (Chained Search):" : "Chained Parameter Search:")</label>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="chainSearch" @bind="useChainedSearch" @bind:after="UpdateQueryFromBuilder">
                                 <label class="form-check-label" for="chainSearch">
-                                    <code>subject:Patient.name=Smith</code> (Find observations by patient surname)
+                                    <code>subject:Patient.name=Smith</code> <span class="text-muted">(@(Lang.IsRtl ? "البحث عن التحاليل عبر اسم عائلة المريض" : "Find observations by patient surname"))</span>
                                 </label>
                             </div>
                         </div>
@@ -115,12 +133,12 @@
 
             <!-- Quick Preset Queries -->
             <div class="mt-2 pt-2 border-top d-flex flex-wrap gap-2 align-items-center">
-                <span class="text-muted small">Quick Presets:</span>
-                <button class="btn btn-outline-secondary btn-sm py-0" @onclick='() => SetQuery("Patient", "name=Smith")'>Patient?name=Smith</button>
-                <button class="btn btn-outline-secondary btn-sm py-0" @onclick='() => SetQuery("Patient", "gender=female&_count=5")'>Patient?gender=female</button>
-                <button class="btn btn-outline-secondary btn-sm py-0" @onclick='() => SetQuery("Observation", "category=laboratory&_count=5")'>Observation?category=laboratory</button>
-                <button class="btn btn-outline-secondary btn-sm py-0" @onclick='() => SetQuery("Encounter", "status=in-progress")'>Encounter?status=in-progress</button>
-                <button class="btn btn-outline-secondary btn-sm py-0" @onclick='() => SetQuery("DiagnosticReport", "_include=DiagnosticReport:result")'>DiagnosticReport?_include=result</button>
+                <span class="text-muted small">@(Lang.IsRtl ? "استعلامات نموذجية سريعة:" : "Quick Presets:")</span>
+                <button class="btn btn-outline-secondary btn-sm py-0 font-monospace" @onclick='() => SetQuery("Patient", "name=Smith")'>Patient?name=Smith</button>
+                <button class="btn btn-outline-secondary btn-sm py-0 font-monospace" @onclick='() => SetQuery("Patient", "gender=female&_count=5")'>Patient?gender=female</button>
+                <button class="btn btn-outline-secondary btn-sm py-0 font-monospace" @onclick='() => SetQuery("Observation", "category=laboratory&_count=5")'>Observation?category=laboratory</button>
+                <button class="btn btn-outline-secondary btn-sm py-0 font-monospace" @onclick='() => SetQuery("Encounter", "status=in-progress")'>Encounter?status=in-progress</button>
+                <button class="btn btn-outline-secondary btn-sm py-0 font-monospace" @onclick='() => SetQuery("DiagnosticReport", "_include=DiagnosticReport:result")'>DiagnosticReport?_include=result</button>
             </div>
         </div>
     </div>
@@ -133,11 +151,11 @@
                 <div class="card-header bg-light d-flex justify-content-between align-items-center py-2 flex-wrap gap-2">
                     <div>
                         <span class="badge @(responseStatusClass) me-2 font-monospace">@statusBadge</span>
-                        <span class="font-monospace small text-muted text-break">GET @($"{baseUrl}/{selectedResourceType}?{searchQuery}")</span>
+                        <span class="font-monospace small text-muted text-break" style="direction: ltr !important; unicode-bidi: isolate;">GET @($"{baseUrl}/{selectedResourceType}?{searchQuery}")</span>
                     </div>
                     @if (!string.IsNullOrEmpty(executionTime))
                     {
-                        <span class="badge bg-secondary">@executionTime</span>
+                        <span class="badge bg-secondary font-monospace">@executionTime</span>
                     }
                 </div>
                 <div class="card-body p-0">
@@ -145,15 +163,18 @@
                     {
                         <div class="p-3">
                             <div class="alert alert-warning mb-0">
-                                <strong><i class="bi bi-exclamation-triangle"></i> Notice:</strong> @errorMessage
-                                <div class="mt-2 small text-muted">Tip: Enable <strong>Offline / Mock Mode</strong> above to test with zero network latency.</div>
+                                <strong><i class="bi bi-exclamation-triangle"></i> @(Lang.IsRtl ? "تنبيه شبكة:" : "Notice:")</strong> @errorMessage
+                                <div class="mt-2 small text-muted">
+                                    @(Lang.IsRtl ? "تلميح: فعل وضع المحاكاة الأوفلاين أعلاه لاختبار النتائج فوراً دون انتظار استجابة الإنترنت."
+                                                 : "Tip: Enable Offline / Mock Mode above to test with zero network latency.")
+                                </div>
                             </div>
                         </div>
                     }
                     else
                     {
                         <pre class="bg-dark text-light p-3 m-0 font-monospace small overflow-auto" 
-                             style="max-height: 60vh; tab-size: 2; white-space: pre-wrap; word-break: break-all; border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius);"><code>@responseContent</code></pre>
+                             style="max-height: 60vh; tab-size: 2; white-space: pre-wrap; word-break: break-all; border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius); direction: ltr !important; text-align: left !important; unicode-bidi: isolate;"><code>@responseContent</code></pre>
                     }
                 </div>
             </div>
@@ -163,22 +184,25 @@
         <div class="col-lg-4">
             <div class="card shadow-sm mb-3">
                 <div class="card-header bg-light fw-semibold small py-2">
-                    <i class="bi bi-journal-text text-primary"></i> FHIR REST Search Rules
+                    <i class="bi bi-journal-text text-primary me-1"></i> 
+                    @(Lang.IsRtl ? "قواعد واستراتيجيات استعلامات FHIR REST" : "FHIR REST Search Rules")
                 </div>
                 <div class="card-body p-3 small text-muted">
                     <ul class="list-unstyled mb-0">
                         <li class="mb-2">
-                            <strong class="text-dark">1. <code>_include</code> (Compound Queries):</strong><br />
-                            Allows you to fetch parent and child resources in a single call (e.g. Report + Observations), preventing the "N+1 queries" problem.
+                            <strong class="text-dark">1. <code>_include</code> (@(Lang.IsRtl ? "الاستعلامات المركبة" : "Compound Queries")):</strong><br />
+                            @(Lang.IsRtl ? "يتيح جلب الموارد الأب والأبناء في استدعاء شبكي واحد (مثل التقرير المخبري وملاحظات الفحص التابعة له)، مما يقضي تماماً على معضلة 'N+1 استدعاء'."
+                                         : "Allows you to fetch parent and child resources in a single call (e.g. Report + Observations), preventing the 'N+1 queries' problem.")
                         </li>
                         <li class="mb-2">
-                            <strong class="text-dark">2. Date Prefixes:</strong><br />
+                            <strong class="text-dark">2. @(Lang.IsRtl ? "بادئات مقارنة التواريخ:" : "Date Prefixes:")</strong><br />
                             <code>ge</code> (&gt;=), <code>le</code> (&lt;=), <code>gt</code> (&gt;), <code>lt</code> (&lt;).<br />
-                            Example: <code>birthdate=ge1980-01-01</code>.
+                            <span class="text-muted">@(Lang.IsRtl ? "مثال:" : "Example:") <code>birthdate=ge1980-01-01</code></span>
                         </li>
                         <li class="mb-2">
-                            <strong class="text-dark">3. Chained Parameters:</strong><br />
-                            Use colons to query related resources without separate requests: <code>Observation?subject:Patient.name=Smith</code>.
+                            <strong class="text-dark">3. @(Lang.IsRtl ? "المعاملات المتسلسلة (Chained Parameters):" : "Chained Parameters:")</strong><br />
+                            @(Lang.IsRtl ? "استخدم النقطتين للاستعلام عن موارد مرتبطة دون الحاجة لإجراء استعلامات منفصلة: Observation?subject:Patient.name=Smith."
+                                         : "Use colons to query related resources without separate requests: Observation?subject:Patient.name=Smith.")
                         </li>
                     </ul>
                 </div>
@@ -186,13 +210,15 @@
 
             <div class="card shadow-sm">
                 <div class="card-header bg-light fw-semibold small py-2">
-                    <i class="bi bi-shield-lock text-secondary"></i> SMART on FHIR Security
+                    <i class="bi bi-shield-lock text-secondary me-1"></i> 
+                    @(Lang.IsRtl ? "أمان ومعايير SMART on FHIR" : "SMART on FHIR Security")
                 </div>
                 <div class="card-body p-3 small text-muted">
-                    Production EHR APIs (Epic, Cerner) enforce OAuth 2.0 scopes:
+                    @(Lang.IsRtl ? "تفرض واجهات الأنظمة الطبية العالمية (Epic و Cerner) نطاقات أمان وتفويض عبر بروتوكول OAuth 2.0:"
+                                 : "Production EHR APIs (Epic, Cerner) enforce OAuth 2.0 scopes:")
                     <ul class="mt-2 mb-0 ps-3">
-                        <li><code>patient/*.read</code>: Read all patient resources</li>
-                        <li><code>user/Observation.write</code>: Log clinical vitals</li>
+                        <li><code>patient/*.read</code>: @(Lang.IsRtl ? "قراءة كافة سجلات المريض المصرح بها" : "Read all patient resources")</li>
+                        <li><code>user/Observation.write</code>: @(Lang.IsRtl ? "تسجيل وقيد المؤشرات الحيوية" : "Log clinical vitals")</li>
                     </ul>
                 </div>
             </div>
@@ -220,6 +246,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        Lang.OnLanguageChanged += StateHasChanged;
         await ExecuteQuery();
     }
 
@@ -289,7 +316,7 @@
             {
                 await Task.Delay(80);
                 responseContent = GenerateMockSearchBundle(selectedResourceType);
-                statusBadge = "200 OK (Mock)";
+                statusBadge = Lang.IsRtl ? "200 OK (محاكي)" : "200 OK (Mock)";
                 responseStatusClass = "bg-info text-dark";
             }
             else
@@ -298,13 +325,13 @@
                 if (success)
                 {
                     responseContent = json;
-                    statusBadge = "200 OK (Live Server)";
+                    statusBadge = Lang.IsRtl ? "200 OK (خادم حي)" : "200 OK (Live Server)";
                     responseStatusClass = "bg-success";
                 }
                 else
                 {
                     errorMessage = error;
-                    statusBadge = "Offline / Error";
+                    statusBadge = Lang.IsRtl ? "أوفلاين / خطأ" : "Offline / Error";
                     responseStatusClass = "bg-danger";
                     responseContent = GenerateMockSearchBundle(selectedResourceType);
                 }
@@ -351,8 +378,68 @@
 }}";
     }
 
-    private string GetPlainEnglishQueryExplanation()
+    private string GetPlainQueryExplanation()
     {
+        if (Lang.IsRtl)
+        {
+            if (string.IsNullOrWhiteSpace(searchQuery))
+            {
+                return $"استعلام عن كافة موارد {selectedResourceType} حتى الحد الأقصى الافتراضي لتقسيم الصفحات.";
+            }
+
+            var partsAr = new List<string>();
+
+            if (searchQuery.Contains("_include=DiagnosticReport:result"))
+            {
+                partsAr.Add("دمج مركب (_include): يعيد تقرير التشخيص ويضمن معه تلقائياً كافة موارد الملاحظات المخبرية في نفس حزمة الاستجابة");
+            }
+            else if (searchQuery.Contains("_include=Observation:patient"))
+            {
+                partsAr.Add("دمج مركب (_include): يعيد الملاحظات المخبرية ويضم معها تلقائياً ملفات المرضى الديموغرافية المرتبطة");
+            }
+
+            if (searchQuery.Contains("subject:Patient.name="))
+            {
+                partsAr.Add("مرشح متسلسل: يتتبع الرابط من الملاحظة إلى المريض ويرشح حسب اسم عائلة المريض");
+            }
+
+            if (searchQuery.Contains("ge"))
+            {
+                partsAr.Add("مقارنة تاريخ: يطابق السجلات الواقعة في أو بعد الختم الزمني المحدد (أكبر أو يساوي)");
+            }
+            else if (searchQuery.Contains("le"))
+            {
+                partsAr.Add("مقارنة تاريخ: يطابق السجلات الواقعة في أو قبل الختم الزمني المحدد (أصغر أو يساوي)");
+            }
+
+            if (searchQuery.Contains("name="))
+            {
+                partsAr.Add($"مرشح نصي: يطابق موارد {selectedResourceType} التي تحتوي على النص المحدد في الاسم");
+            }
+
+            if (searchQuery.Contains("gender="))
+            {
+                partsAr.Add("مرشح ديموغرافي: مطابقة دقيقة لرمز الجنس الإداري");
+            }
+
+            if (searchQuery.Contains("category=laboratory"))
+            {
+                partsAr.Add("مرشح الفئة: يقصر استعلام الملاحظات على تحاليل الكيمياء السريرية وأمراض الدم");
+            }
+
+            if (searchQuery.Contains("status=in-progress"))
+            {
+                partsAr.Add("دورة حياة الزيارة: يبحث عن زيارات وتنويم المرضى النشطة حالياً وغير المغلقة");
+            }
+
+            if (partsAr.Count == 0)
+            {
+                return $"يرشح موارد {selectedResourceType} باستخدام المعاملات المخصصة: '{searchQuery}'.";
+            }
+
+            return string.Join(" • ", partsAr);
+        }
+
         if (string.IsNullOrWhiteSpace(searchQuery))
         {
             return $"Query all {selectedResourceType} resources up to the default pagination limit.";
@@ -409,5 +496,10 @@
         }
 
         return string.Join(" • ", parts);
+    }
+
+    public void Dispose()
+    {
+        Lang.OnLanguageChanged -= StateHasChanged;
     }
 }

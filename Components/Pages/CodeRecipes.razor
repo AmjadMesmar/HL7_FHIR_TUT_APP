@@ -1,23 +1,30 @@
 @page "/code-recipes"
 @rendermode InteractiveServer
+@implements IDisposable
+@inject LanguageService Lang
 @inject IJSRuntime JS
 
-<PageTitle>C# Developer Code Recipes - HL7 & FHIR</PageTitle>
+<PageTitle>@(Lang.IsRtl ? "وصفات برمجية للمطورين بلغة C# - معايير HL7 و FHIR" : "C# Developer Code Recipes - HL7 & FHIR")</PageTitle>
 
 <div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
     <!-- Hero Header -->
     <div class="p-4 mb-4 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #491217 0%, #0d6efd 100%);">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-                <span class="badge bg-danger mb-2 px-3 py-1 fw-semibold">.NET 10 Developer Recipes</span>
-                <h1 class="h2 fw-bold mb-1">C# &amp; .NET Healthcare Code Recipes</h1>
+                <span class="badge bg-danger mb-2 px-3 py-1 fw-semibold">
+                    @(Lang.IsRtl ? "وصفات برمجية معتمدة لبيئة .NET" : ".NET Developer Recipes")
+                </span>
+                <h1 class="h2 fw-bold mb-1">
+                    @(Lang.IsRtl ? "وصفات برمجية بلغة C# وتطبيقات الرعاية الصحية" : "C# & .NET Healthcare Code Recipes")
+                </h1>
                 <p class="mb-0 text-white-50">
-                    Production-ready, copy-paste snippets for your engineering department. Built with the official Firely FHIR SDK.
+                    @(Lang.IsRtl ? "مقتطفات برمجية جاهزة للإنتاج الفعلي والنسخ المباشر لفريقك الهندسي، مبنية بالاعتماد على حزمة Firely FHIR الرسمية."
+                                 : "Production-ready, copy-paste snippets for your engineering department. Built with the official Firely FHIR SDK.")
                 </p>
             </div>
             <div class="d-flex gap-2">
                 <span class="badge bg-light text-dark align-self-center px-3 py-2 fw-semibold">
-                    <i class="bi bi-filetype-cs me-1"></i> Ready for Production
+                    <i class="bi bi-filetype-cs me-1"></i> @(Lang.IsRtl ? "جاهز للإنتاج" : "Ready for Production")
                 </span>
             </div>
         </div>
@@ -31,7 +38,7 @@
             var item = Recipes[idx];
             <button class="btn btn-sm @(selectedRecipeIndex == idx ? "btn-primary fw-bold text-white shadow-sm" : "btn-outline-secondary")"
                     @onclick="() => selectedRecipeIndex = idx">
-                <i class="bi bi-code me-1"></i> @item.Title
+                <i class="bi bi-code me-1"></i> @(Lang.IsRtl && !string.IsNullOrEmpty(item.TitleAr) ? item.TitleAr : item.Title)
             </button>
         }
     </div>
@@ -41,28 +48,31 @@
         var curRecipe = Recipes[selectedRecipeIndex];
     }
     <div class="card shadow-sm border">
-        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2 flex-wrap gap-2">
             <div>
-                <span class="badge bg-dark me-2">Recipe #@(selectedRecipeIndex + 1)</span>
-                <strong class="text-dark">@curRecipe.Title</strong>
+                <span class="badge bg-dark me-2">@(Lang.IsRtl ? $"وصفة #{selectedRecipeIndex + 1}" : $"Recipe #{selectedRecipeIndex + 1}")</span>
+                <strong class="text-dark">@(Lang.IsRtl && !string.IsNullOrEmpty(curRecipe.TitleAr) ? curRecipe.TitleAr : curRecipe.Title)</strong>
             </div>
             <button class="btn btn-sm btn-outline-primary" @onclick="() => CopyRecipeCode(curRecipe.Code)">
                 @if (copiedRecipeId == curRecipe.Title)
                 {
-                    <i class="bi bi-check-circle-fill text-success"></i> <span class="text-success fw-bold">Copied!</span>
+                    <i class="bi bi-check-circle-fill text-success me-1"></i> <span class="text-success fw-bold">@(Lang.IsRtl ? "تم النسخ!" : "Copied!")</span>
                 }
                 else
                 {
-                    <i class="bi bi-clipboard"></i> <span>Copy Snippet</span>
+                    <i class="bi bi-clipboard me-1"></i> <span>@(Lang.IsRtl ? "نسخ الشفرة" : "Copy Snippet")</span>
                 }
             </button>
         </div>
         <div class="card-body p-3">
-            <p class="small text-muted mb-2">@curRecipe.Description</p>
-            <div class="alert alert-secondary py-1 px-2 small mb-2">
+            <p class="small text-muted mb-2">
+                @(Lang.IsRtl && !string.IsNullOrEmpty(curRecipe.DescriptionAr) ? curRecipe.DescriptionAr : curRecipe.Description)
+            </p>
+            <div class="alert alert-secondary py-1 px-2 small mb-2" style="direction: ltr !important; text-align: left !important; unicode-bidi: isolate;">
                 <strong><i class="bi bi-info-circle"></i> NuGet Namespace:</strong> <code>@curRecipe.Namespace</code>
             </div>
-            <pre class="bg-dark text-light p-3 rounded font-monospace small mb-0 overflow-auto" style="max-height: 450px; tab-size: 4; white-space: pre-wrap; word-break: break-all;"><code>@curRecipe.Code</code></pre>
+            <pre class="bg-dark text-light p-3 rounded font-monospace small mb-0 overflow-auto" 
+                 style="max-height: 450px; tab-size: 4; white-space: pre-wrap; word-break: break-all; direction: ltr !important; text-align: left !important; unicode-bidi: isolate;"><code>@curRecipe.Code</code></pre>
         </div>
     </div>
 </div>
@@ -71,7 +81,14 @@
     private int selectedRecipeIndex = 0;
     private string? copiedRecipeId;
 
-    private record CodeRecipeItem(string Title, string Namespace, string Description, string Code);
+    private record CodeRecipeItem(
+        string Title, 
+        string Namespace, 
+        string Description, 
+        string Code,
+        string? TitleAr = null,
+        string? DescriptionAr = null
+    );
 
     private static readonly List<CodeRecipeItem> Recipes = new()
     {
@@ -131,7 +148,9 @@ public Patient CreateFhirPatient()
     });
 
     return patient;
-}"
+}",
+            TitleAr: "1. بناء مورد المريض (Patient) في C#",
+            DescriptionAr: "إنشاء مورد Patient محكم الأنواع مع معرف MRN، واسم رسمي منظم، وتاريخ ميلاد، وجنس، ورقم هاتف، وعنوان وطني."
         ),
 
         // 2. Constructing Inpatient Encounter
@@ -184,7 +203,9 @@ public Encounter CreateInpatientEncounter(string patientId)
     });
 
     return encounter;
-}"
+}",
+            TitleAr: "2. بناء مورد التنويم (Encounter) في C#",
+            DescriptionAr: "إنشاء مورد Encounter لتنويم مريض داخلي مع ترميز ActCode 'IMP'، وربطه بالمريض، وتعيين موقع سرير العناية الحثيثة."
         ),
 
         // 3. Lab Observation with LOINC
@@ -241,7 +262,9 @@ public Observation CreateGlucoseObservation(string patientId)
         ""High""));
 
     return obs;
-}"
+}",
+            TitleAr: "3. بناء نتيجة مخبرية برمز LOINC ووحدات UCUM",
+            DescriptionAr: "إنشاء ملاحظة فحص سكر الدم 142 mg/dL كميًا مقترنة برمز LOINC، ووحدات UCUM، ومدى طبيعي، وعلامة تقييم مرتفعة H."
         ),
 
         // 4. Bundling Resources
@@ -301,7 +324,9 @@ public Bundle PackageTransactionBundle(Patient patient, Encounter encounter, Lis
     }
 
     return bundle;
-}"
+}",
+            TitleAr: "4. تجميع الموارد في حزمة معامَلات (Bundle Transaction)",
+            DescriptionAr: "تغليف كائنات Patient و Encounter والتحاليل معاً داخل حزمة Transaction ذرية لإرسالها دفعة واحدة عبر طلب POST."
         ),
 
         // 5. Dependency Injection for FhirClient
@@ -349,7 +374,9 @@ public class PatientSyncService
     {
         return await _client.ReadAsync<Patient>($""Patient/{id}"");
     }
-}"
+}",
+            TitleAr: "5. تسجيل عميل FhirClient في حاوية الخدمات (DI)",
+            DescriptionAr: "كيفية تسجيل وحقن عميل FhirClient مع إعدادات المهلة والرؤوس المعيارية داخل Program.cs في تطبيقات ASP.NET Core."
         ),
 
         // 6. Zero-Dependency HL7 v2 Parser
@@ -394,7 +421,9 @@ public class PatientSyncService
         var fields = segments[segmentIndex];
         return fieldIndex < fields.Length ? fields[fieldIndex] : string.Empty;
     }
-}"
+}",
+            TitleAr: "6. محلل رسائل HL7 v2 فائق الخفة والخلو من التبعيات",
+            DescriptionAr: "محلل نصوص ER7 سريع ومكتوب بلغة C# الخالصة دون أي مكتبات خارجية، مثالي لمحركات الربط الداخلية وأجهزة الميكروكنترولر."
         )
     };
 
@@ -406,5 +435,15 @@ public class PatientSyncService
         await Task.Delay(2000);
         copiedRecipeId = null;
         StateHasChanged();
+    }
+
+    protected override void OnInitialized()
+    {
+        Lang.OnLanguageChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        Lang.OnLanguageChanged -= StateHasChanged;
     }
 }

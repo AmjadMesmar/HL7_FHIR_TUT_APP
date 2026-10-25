@@ -1,23 +1,30 @@
 @page "/mllp-simulator"
 @rendermode InteractiveServer
+@implements IDisposable
+@inject LanguageService Lang
 @inject IJSRuntime JS
 
-<PageTitle>MLLP Protocol &amp; ACK / NACK Simulator</PageTitle>
+<PageTitle>@(Lang.IsRtl ? "محاكي بروتوكول MLLP وإشعارات ACK / NACK" : "MLLP Protocol & ACK / NACK Simulator")</PageTitle>
 
 <div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
     <!-- Hero Header -->
     <div class="p-4 mb-4 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #0d6efd 0%, #198754 100%);">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-                <span class="badge bg-light text-primary mb-2 px-3 py-1 fw-semibold">Network &amp; Wire Protocols</span>
-                <h1 class="h2 fw-bold mb-1">MLLP Protocol &amp; ACK / NACK Simulator</h1>
+                <span class="badge bg-light text-primary mb-2 px-3 py-1 fw-semibold">
+                    @(Lang.IsRtl ? "بروتوكولات الشبكة والأسلاك السريرية" : "Network & Wire Protocols")
+                </span>
+                <h1 class="h2 fw-bold mb-1">
+                    @(Lang.IsRtl ? "محاكي بروتوكول MLLP وإشعارات ACK / NACK" : "MLLP Protocol & ACK / NACK Simulator")
+                </h1>
                 <p class="mb-0 text-white-50">
-                    Learn the Minimal Lower Layer Protocol (MLLP) framing bytes, TCP socket handshakes, and MSA acknowledgment responses.
+                    @(Lang.IsRtl ? "تعلم بايتات تأطير بروتوكول الطبقة الدنيا (MLLP)، ومصافحات مقابس TCP، وردود تأكيد الاستلام MSA."
+                                 : "Learn the Minimal Lower Layer Protocol (MLLP) framing bytes, TCP socket handshakes, and MSA acknowledgment responses.")
                 </p>
             </div>
             <div class="d-flex gap-2">
                 <span class="badge bg-dark align-self-center px-3 py-2 fw-semibold">
-                    <i class="bi bi-hdd-network me-1"></i> Port 2575 TCP Simulator
+                    <i class="bi bi-hdd-network me-1"></i> @(Lang.IsRtl ? "محاكي منفذ 2575 TCP" : "Port 2575 TCP Simulator")
                 </span>
             </div>
         </div>
@@ -26,31 +33,36 @@
     <!-- MLLP Framing Explanation Card -->
     <div class="card shadow-sm border mb-4">
         <div class="card-header bg-light py-2 fw-bold text-dark d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-box me-2 text-primary"></i> The MLLP Framing Packet Envelope (How Bytes Travel on TCP)</span>
+            <span>
+                <i class="bi bi-box me-2 text-primary"></i> 
+                @(Lang.IsRtl ? "مغلف حزمة تأطير MLLP (كيف تسافر البايتات عبر TCP)" : "The MLLP Framing Packet Envelope (How Bytes Travel on TCP)")
+            </span>
             <span class="badge bg-primary">Port 2575 Spec</span>
         </div>
         <div class="card-body p-3 small">
             <p class="text-muted mb-2">
-                Because raw TCP is an unbounded stream of bytes, HL7 v2 messages are wrapped inside <strong>MLLP block delimiters</strong> so the receiver knows exactly where a message starts and ends:
+                @(Lang.IsRtl ? "نظراً لأن شبكة TCP الخام عبارة عن تدفق غير منقطع من البايتات، تُحاط رسائل HL7 v2 بفواصل تأطير MLLP ليعرف المستقبل متى تبدأ الرسالة وأين تنتهي بدقة:"
+                             : "Because raw TCP is an unbounded stream of bytes, HL7 v2 messages are wrapped inside MLLP block delimiters so the receiver knows exactly where a message starts and ends:")
             </p>
-            <div class="d-flex flex-wrap align-items-center justify-content-center gap-2 p-3 bg-dark rounded font-monospace text-center mb-2">
+            <div class="d-flex flex-wrap align-items-center justify-content-center gap-2 p-3 bg-dark rounded font-monospace text-center mb-2" style="direction: ltr !important;">
                 <div class="p-2 bg-primary text-white rounded">
-                    <strong>START BYTE</strong><br />
+                    <strong>@(Lang.IsRtl ? "بايت البداية" : "START BYTE")</strong><br />
                     <code>0x0B</code> (&lt;VT&gt; / ASCII 11)
                 </div>
                 <div class="text-white fs-4 fw-bold">&rarr;</div>
                 <div class="p-2 bg-secondary text-white rounded flex-grow-1" style="max-width: 320px;">
-                    <strong>HL7 v2 ER7 MESSAGE</strong><br />
+                    <strong>@(Lang.IsRtl ? "رسالة HL7 v2 ER7 السريرية" : "HL7 v2 ER7 MESSAGE")</strong><br />
                     <code>MSH|... PID|... PV1|...</code>
                 </div>
                 <div class="text-white fs-4 fw-bold">&rarr;</div>
                 <div class="p-2 bg-danger text-white rounded">
-                    <strong>END BYTES</strong><br />
+                    <strong>@(Lang.IsRtl ? "بايتات النهاية" : "END BYTES")</strong><br />
                     <code>0x1C 0x0D</code> (&lt;FS&gt; &lt;CR&gt; / ASCII 28 &amp; 13)
                 </div>
             </div>
             <div class="text-muted text-center" style="font-size: 0.78rem;">
-                Without <code>0x0B</code> and <code>0x1C 0x0D</code>, interface engines (Mirth, Cloverleaf) will wait indefinitely or drop packets.
+                @(Lang.IsRtl ? "بدون 0x0B و 0x1C 0x0D، ستنتظر محركات تكامل المستشفيات (مثل Mirth و Cloverleaf) إلى ما لا نهاية أو تسقط الحزم."
+                             : "Without 0x0B and 0x1C 0x0D, interface engines (Mirth, Cloverleaf) will wait indefinitely or drop packets.")
             </div>
         </div>
     </div>
@@ -60,18 +72,20 @@
         <div class="card-header bg-white d-flex justify-content-between align-items-center py-2 flex-wrap gap-2">
             <div>
                 <i class="bi bi-cpu-fill text-warning me-1"></i>
-                <strong class="text-dark">Interactive TCP Wire Frame Stepper:</strong>
-                <span class="badge bg-warning text-dark ms-2">Step @(stepperIndex + 1) of @WireSteps.Count</span>
+                <strong class="text-dark">@(Lang.IsRtl ? "محاكي خطوات إرسال حزم الأسلاك عبر TCP:" : "Interactive TCP Wire Frame Stepper:")</strong>
+                <span class="badge bg-warning text-dark ms-2">
+                    @(Lang.IsRtl ? $"الخطوة {stepperIndex + 1} من {WireSteps.Count}" : $"Step {stepperIndex + 1} of {WireSteps.Count}")
+                </span>
             </div>
             <div class="btn-group btn-group-sm">
                 <button class="btn btn-outline-secondary" @onclick="PrevWireStep" disabled="@(stepperIndex == 0)">
-                    <i class="bi bi-chevron-left"></i> Previous
+                    <i class="bi bi-chevron-left me-1"></i> @(Lang.IsRtl ? "السابق" : "Previous")
                 </button>
                 <button class="btn btn-primary" @onclick="NextWireStep" disabled="@(stepperIndex >= WireSteps.Count - 1)">
-                    Next Byte Stage <i class="bi bi-chevron-right"></i>
+                    @(Lang.IsRtl ? "المرحلة التالية" : "Next Byte Stage") <i class="bi bi-chevron-right ms-1"></i>
                 </button>
                 <button class="btn btn-outline-danger" @onclick="ResetWireStep">
-                    <i class="bi bi-arrow-counterclockwise"></i> Reset
+                    <i class="bi bi-arrow-counterclockwise me-1"></i> @(Lang.IsRtl ? "إعادة ضبط" : "Reset")
                 </button>
             </div>
         </div>
@@ -81,29 +95,35 @@
             }
             <div class="row g-3 align-items-center mb-3">
                 <div class="col-md-7">
-                    <h6 class="fw-bold text-primary mb-1">@curWire.StageTitle</h6>
-                    <p class="small text-muted mb-2">@curWire.Explanation</p>
-                    <div class="alert @curWire.AlertClass py-1 px-2 small mb-0 font-monospace">
+                    <h6 class="fw-bold text-primary mb-1">
+                        @(Lang.IsRtl && !string.IsNullOrEmpty(curWire.StageTitleAr) ? curWire.StageTitleAr : curWire.StageTitle)
+                    </h6>
+                    <p class="small text-muted mb-2">
+                        @(Lang.IsRtl && !string.IsNullOrEmpty(curWire.ExplanationAr) ? curWire.ExplanationAr : curWire.Explanation)
+                    </p>
+                    <div class="alert @curWire.AlertClass py-1 px-2 small mb-0 font-monospace" style="direction: ltr !important; text-align: left !important; unicode-bidi: isolate;">
                         <strong>Wire Buffer:</strong> @curWire.WireStatus
                     </div>
                 </div>
                 <div class="col-md-5">
-                    <div class="p-2 rounded bg-dark text-light font-monospace small">
+                    <div class="p-2 rounded bg-dark text-light font-monospace small" style="direction: ltr !important; text-align: left !important; unicode-bidi: isolate;">
                         <div class="text-muted" style="font-size: 0.7rem;">Active Wire Byte Stream:</div>
                         <div class="fs-6 mt-1">@((MarkupString)curWire.HighlightedHex)</div>
-                        <div class="text-muted mt-2" style="font-size: 0.7rem;">ASCII Meaning: @curWire.AsciiMeaning</div>
+                        <div class="text-muted mt-2" style="font-size: 0.7rem;">
+                            Meaning: @(Lang.IsRtl && !string.IsNullOrEmpty(curWire.AsciiMeaningAr) ? curWire.AsciiMeaningAr : curWire.AsciiMeaning)
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Visual Progress Dots -->
-            <div class="d-flex justify-content-between align-items-center px-2">
+            <div class="d-flex justify-content-between align-items-center px-2 flex-wrap gap-2">
                 @for (int w = 0; w < WireSteps.Count; w++)
                 {
                     var wIdx = w;
                     <span class="badge @(stepperIndex == wIdx ? "bg-primary p-2" : (stepperIndex > wIdx ? "bg-success" : "bg-secondary")) cursor-pointer"
                           @onclick="() => stepperIndex = wIdx">
-                        @(wIdx + 1). @WireSteps[wIdx].ShortName
+                        @(wIdx + 1). @(Lang.IsRtl && !string.IsNullOrEmpty(WireSteps[wIdx].ShortNameAr) ? WireSteps[wIdx].ShortNameAr : WireSteps[wIdx].ShortName)
                     </span>
                 }
             </div>
@@ -116,16 +136,19 @@
         <div class="col-lg-6">
             <div class="card shadow-sm h-100 border-primary border-top border-3">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
-                    <strong>Inbound HL7 v2 Transmission (Client &rarr; Server)</strong>
+                    <strong>@(Lang.IsRtl ? "إرسال HL7 v2 الوارد (العميل ← الخادم)" : "Inbound HL7 v2 Transmission (Client → Server)")</strong>
                     <span class="badge bg-primary">Socket Payload</span>
                 </div>
                 <div class="card-body p-2 d-flex flex-column">
-                    <label class="form-label small text-muted mb-1">Message to Send:</label>
-                    <textarea class="form-control font-monospace small flex-grow-1 mb-2" style="min-height: 140px;" @bind="inboundMessage" @bind:after="UpdateAckResponse"></textarea>
+                    <label class="form-label small text-muted mb-1">@(Lang.IsRtl ? "الرسالة المراد إرسالها عبر المقبس:" : "Message to Send:")</label>
+                    <textarea class="form-control font-monospace small flex-grow-1 mb-2" 
+                              style="min-height: 140px; direction: ltr !important; text-align: left !important; unicode-bidi: isolate;" 
+                              @bind="inboundMessage" 
+                              @bind:after="UpdateAckResponse"></textarea>
                     
                     <div class="p-2 bg-light rounded border small">
-                        <strong>Raw Hex Packet Stream:</strong>
-                        <div class="font-monospace text-muted mt-1 text-break" style="font-size: 0.75rem;">
+                        <strong>@(Lang.IsRtl ? "تدفق البايتات الست عشرية (Hex):" : "Raw Hex Packet Stream:")</strong>
+                        <div class="font-monospace text-muted mt-1 text-break" style="font-size: 0.75rem; direction: ltr !important; text-align: left !important; unicode-bidi: isolate;">
                             <span class="text-primary fw-bold">0B</span> @GetHexRepresentation(inboundMessage) <span class="text-danger fw-bold">1C 0D</span>
                         </div>
                     </div>
@@ -137,29 +160,32 @@
         <div class="col-lg-6">
             <div class="card shadow-sm h-100 border-success border-top border-3">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center py-2 flex-wrap gap-2">
-                    <strong>ACK Response (Server &rarr; Client)</strong>
+                    <strong>@(Lang.IsRtl ? "استجابة إشعار ACK (الخادم ← العميل)" : "ACK Response (Server → Client)")</strong>
                     <div class="btn-group btn-group-sm">
                         <button class="btn @(ackCode == "AA" ? "btn-success" : "btn-outline-success")" @onclick='() => SetAckStatus("AA")'>
-                            AA (Accept)
+                            AA @(Lang.IsRtl ? "(قبول)" : "(Accept)")
                         </button>
                         <button class="btn @(ackCode == "AE" ? "btn-warning text-dark" : "btn-outline-warning")" @onclick='() => SetAckStatus("AE")'>
-                            AE (Error)
+                            AE @(Lang.IsRtl ? "(خطأ)" : "(Error)")
                         </button>
                         <button class="btn @(ackCode == "AR" ? "btn-danger" : "btn-outline-danger")" @onclick='() => SetAckStatus("AR")'>
-                            AR (Reject)
+                            AR @(Lang.IsRtl ? "(رفض)" : "(Reject)")
                         </button>
                     </div>
                 </div>
                 <div class="card-body p-2 d-flex flex-column">
                     <div class="alert @GetAckAlertClass() py-2 px-3 small mb-2">
-                        <strong><i class="bi bi-info-circle-fill me-1"></i> Acknowledgment Code: <code>MSA-1: @ackCode</code></strong>
-                        <div>@ackExplanation</div>
+                        <strong><i class="bi bi-info-circle-fill me-1"></i> @(Lang.IsRtl ? "رمز إشعار الاستلام:" : "Acknowledgment Code:") <code>MSA-1: @ackCode</code></strong>
+                        <div>@(Lang.IsRtl && !string.IsNullOrEmpty(ackExplanationAr) ? ackExplanationAr : ackExplanation)</div>
                     </div>
 
-                    <pre class="bg-dark text-light p-3 rounded font-monospace small flex-grow-1 mb-2 overflow-auto" style="min-height: 130px; white-space: pre-wrap; word-break: break-all;"><code>@generatedAckMessage</code></pre>
+                    <pre class="bg-dark text-light p-3 rounded font-monospace small flex-grow-1 mb-2 overflow-auto" 
+                         style="min-height: 130px; white-space: pre-wrap; word-break: break-all; direction: ltr !important; text-align: left !important; unicode-bidi: isolate;"><code>@generatedAckMessage</code></pre>
 
                     <div class="p-2 bg-light rounded border small text-muted">
-                        <strong>Control ID Tracking:</strong> Notice how <code>MSA-2</code> echoes back <code>@extractedControlId</code> to guarantee transaction idempotency.
+                        <strong>@(Lang.IsRtl ? "تتبع معرف التحكم:" : "Control ID Tracking:")</strong> 
+                        @(Lang.IsRtl ? $"لاحظ كيف يعكس MSA-2 نفس المعرف ({extractedControlId}) لضمان موثوقية المعاملة وعدم التكرار."
+                                     : $"Notice how MSA-2 echoes back {extractedControlId} to guarantee transaction idempotency.")
                     </div>
                 </div>
             </div>
@@ -169,11 +195,13 @@
     <!-- The Interface Queue Freeze Warning -->
     <div class="card bg-warning-subtle border-warning shadow-sm">
         <div class="card-body p-3 small">
-            <h6 class="fw-bold text-dark mb-1"><i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Why Missing ACKs Freeze Hospital Operations:</h6>
+            <h6 class="fw-bold text-dark mb-1">
+                <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> 
+                @(Lang.IsRtl ? "لماذا يؤدي غياب إشعارات ACK إلى تجميد عمليات المستشفى بالكامل:" : "Why Missing ACKs Freeze Hospital Operations:")
+            </h6>
             <p class="text-muted mb-0">
-                Hospital interface engines operate in <strong>FIFO (First In, First Out)</strong> order. 
-                When a hospital interface sends message #101, it freezes the entire queue until it receives an <code>ACK</code> with <code>MSA|AA|101</code>. 
-                If the receiver crashes or fails to send an ACK within the socket timeout (typically 10-30 seconds), thousands of subsequent lab results and admission notices pile up in memory!
+                @(Lang.IsRtl ? "تعمل محركات التكامل في المستشفيات بنظام FIFO (الوارد أولاً يخرج أولاً). عندما يرسل النظام رسالة #101، فإنه يجمد قائمة الانتظار بأكملها حتى يستلم إشعار ACK برمز MSA|AA|101. إذا تعطل المستقبل أو لم يرد خلال مهلة المقبس (عادة 10-30 ثانية)، تتراكم آلاف نتائج التحاليل وإشعارات التنويم التالية في الذاكرة ويتوقف تدفق المستشفى!"
+                             : "Hospital interface engines operate in FIFO (First In, First Out) order. When a hospital interface sends message #101, it freezes the entire queue until it receives an ACK with MSA|AA|101. If the receiver crashes or fails to send an ACK within the socket timeout (typically 10-30 seconds), thousands of subsequent lab results and admission notices pile up in memory!")
             </p>
         </div>
     </div>
@@ -187,11 +215,13 @@ PV1|1|I|CARD_ICU^ROOM_402^BED_B";
 
     private string ackCode = "AA";
     private string ackExplanation = "Message Accepted Successfully. Downstream database committed the transaction.";
+    private string ackExplanationAr = "تم قبول الرسالة بنجاح. قامت قاعدة البيانات بتسجيل وقيد المعاملة.";
     private string generatedAckMessage = string.Empty;
     private string extractedControlId = "MSG20261011_001";
 
     protected override void OnInitialized()
     {
+        Lang.OnLanguageChanged += StateHasChanged;
         UpdateAckResponse();
     }
 
@@ -201,14 +231,17 @@ PV1|1|I|CARD_ICU^ROOM_402^BED_B";
         if (code == "AA")
         {
             ackExplanation = "Application Accept (AA): Message was validated and committed successfully.";
+            ackExplanationAr = "قبول في التطبيق (AA): تم التحقق من صحة الرسالة وقيدها بنجاح.";
         }
         else if (code == "AE")
         {
             ackExplanation = "Application Error (AE): Message syntax passed, but a business rule failed (e.g. invalid doctor ID or unknown ward).";
+            ackExplanationAr = "خطأ في التطبيق (AE): البنية النحوية سليمة ولكن فشلت قاعدة منطق العمل (مثل رمز طبيب غير معروف أو جناح غير مسجل).";
         }
         else
         {
             ackExplanation = "Application Reject (AR): System is offline, paused, or schema completely unreadable. Sender should retry.";
+            ackExplanationAr = "رفض في التطبيق (AR): النظام غير متاح، متوقف مؤقتاً، أو بنية الرسالة غير مفهومة نهائياً. يجب إعادة المحاولة.";
         }
         UpdateAckResponse();
     }
@@ -233,9 +266,9 @@ PV1|1|I|CARD_ICU^ROOM_402^BED_B";
         var timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
         var textNote = ackCode switch
         {
-            "AA" => "Message Accepted Successfully",
-            "AE" => "Validation Error: Unknown Location Ward in PV1-3",
-            _ => "System Busy: Receiver Interface Paused"
+            "AA" => Lang.IsRtl ? "تم قبول الرسالة بنجاح" : "Message Accepted Successfully",
+            "AE" => Lang.IsRtl ? "خطأ في التحقق: موقع غير معروف في PV1-3" : "Validation Error: Unknown Location Ward in PV1-3",
+            _ => Lang.IsRtl ? "النظام مشغول: واجهة الاستقبال متوقفة مؤقتاً" : "System Busy: Receiver Interface Paused"
         };
 
         generatedAckMessage = $@"MSH|^~\&|CENTRAL_EHR|METRO_HEALTH|EPIC_ADT|METRO_HOSPITAL|{timestamp}||ACK|ACK_{DateTime.UtcNow.Ticks % 100000}|P|2.5
@@ -265,7 +298,11 @@ MSA|{ackCode}|{extractedControlId}|{textNote}";
         string WireStatus,
         string HighlightedHex,
         string AsciiMeaning,
-        string AlertClass
+        string AlertClass,
+        string? ShortNameAr = null,
+        string? StageTitleAr = null,
+        string? ExplanationAr = null,
+        string? AsciiMeaningAr = null
     );
 
     private int stepperIndex = 0;
@@ -278,7 +315,11 @@ MSA|{ackCode}|{extractedControlId}|{textNote}";
             WireStatus: "Socket Connected: 192.168.1.50:54210 <-> 192.168.1.10:2575",
             HighlightedHex: "<span class='text-muted'>[TCP Flags: SYN, ACK]</span>",
             AsciiMeaning: "TCP Stream Open",
-            AlertClass: "alert-info"
+            AlertClass: "alert-info",
+            ShortNameAr: "مصافحة TCP الثلاثية",
+            StageTitleAr: "1. تأسيس اتصال مقبس TCP الثلاثي",
+            ExplanationAr: "يفتح العميل اتصال TCP مع الخادم على المنفذ 2575. تبادل حزم SYN -> SYN-ACK -> ACK ينشئ مجرى موثوقاً لنقل البايتات.",
+            AsciiMeaningAr: "مجرى TCP مفتوح وجاهز"
         ),
         new(
             ShortName: "Start Block 0x0B",
@@ -287,7 +328,11 @@ MSA|{ackCode}|{extractedControlId}|{textNote}";
             WireStatus: "Buffer contains: 1 byte [0x0B]",
             HighlightedHex: "<span class='text-primary fw-bold'>0B</span>",
             AsciiMeaning: "<VT> (Vertical Tab)",
-            AlertClass: "alert-primary"
+            AlertClass: "alert-primary",
+            ShortNameAr: "بايت البداية 0x0B",
+            StageTitleAr: "2. العميل يرسل كتلة البداية (<SB>)",
+            ExplanationAr: "يشير بايت 0x0B (رمز VT، ASCII 11) لذاكرة المستقبل بأن رسالة سريرية جديدة على وشك البدء.",
+            AsciiMeaningAr: "علامة الجدولة الرأسية VT"
         ),
         new(
             ShortName: "ER7 Payload Stream",
@@ -296,7 +341,11 @@ MSA|{ackCode}|{extractedControlId}|{textNote}";
             WireStatus: "Buffer contains: 180 bytes [0x0B, MSH|^~\\&...]",
             HighlightedHex: "<span class='text-primary'>0B</span> <span class='text-warning'>4D 53 48 7C 5E 7E 5C 26 7C ... 50 49 44 ...</span>",
             AsciiMeaning: "MSH|^~\\&|...\\rPID|1|...\\r",
-            AlertClass: "alert-warning"
+            AlertClass: "alert-warning",
+            ShortNameAr: "تدفق حمولة ER7",
+            StageTitleAr: "3. نقل وتدفق نص رسالة ER7 السريرية",
+            ExplanationAr: "تنتقل أحرف ASCII عبر السلك حزمة بحزمة. ينتهي كل مقطع ببايت العودة إلى بداية السطر 0x0D (\\r).",
+            AsciiMeaningAr: "مقاطع MSH و PID و PV1 متتالية"
         ),
         new(
             ShortName: "End Block 0x1C 0x0D",
@@ -305,7 +354,11 @@ MSA|{ackCode}|{extractedControlId}|{textNote}";
             WireStatus: "Buffer closed & sealed. Ready for parser.",
             HighlightedHex: "<span class='text-primary'>0B</span> <span class='text-muted'>[Payload]</span> <span class='text-danger fw-bold'>1C 0D</span>",
             AsciiMeaning: "<FS> <CR> (File Separator + Carriage Return)",
-            AlertClass: "alert-danger"
+            AlertClass: "alert-danger",
+            ShortNameAr: "بايتات الختام 0x1C 0x0D",
+            StageTitleAr: "4. العميل يرسل كتلة الختام (<EB><CR>)",
+            ExplanationAr: "يعلن البايتان 0x1C و 0x0D انتهاء نقل الرسالة بالكامل، ليقوم الخادم بتسليم المخزن المؤقت لمحلل HL7.",
+            AsciiMeaningAr: "فاصل الملفات FS + رجوع السطر CR"
         ),
         new(
             ShortName: "Server Ack Reply",
@@ -314,7 +367,11 @@ MSA|{ackCode}|{extractedControlId}|{textNote}";
             WireStatus: "ACK Frame Transmitted: <0x0B> MSH... MSA|AA... <0x1C><0x0D>",
             HighlightedHex: "<span class='text-success fw-bold'>0B</span> <span class='text-success'>[ACK Payload]</span> <span class='text-success fw-bold'>1C 0D</span>",
             AsciiMeaning: "MSA|AA|MSG20261011_001|Message Accepted",
-            AlertClass: "alert-success"
+            AlertClass: "alert-success",
+            ShortNameAr: "رد إشعار الخادم ACK",
+            StageTitleAr: "5. الخادم يعيد إشعار ACK مؤطراً ببروتوكول MLLP",
+            ExplanationAr: "يعيد الخادم رسالة تأكيد استلام مؤطرة بنفس بايتات MLLP تحتوي على MSA|AA لتأكيد الحفظ وقيد المعاملة.",
+            AsciiMeaningAr: "تأكيد الاستلام MSA|AA بنجاح"
         )
     };
 
@@ -331,5 +388,10 @@ MSA|{ackCode}|{extractedControlId}|{textNote}";
     private void ResetWireStep()
     {
         stepperIndex = 0;
+    }
+
+    public void Dispose()
+    {
+        Lang.OnLanguageChanged -= StateHasChanged;
     }
 }

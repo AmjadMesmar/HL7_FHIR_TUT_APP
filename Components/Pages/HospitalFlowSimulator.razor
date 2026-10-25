@@ -1,22 +1,29 @@
 @page "/hospital-flow"
 @rendermode InteractiveServer
+@implements IDisposable
+@inject LanguageService Lang
 
-<PageTitle>Hospital Topology &amp; Message Flow Simulator</PageTitle>
+<PageTitle>@(Lang.IsRtl ? "محاكي تدفق رسائل المستشفى - منصة HL7 و FHIR" : "Hospital Topology & Message Flow Simulator")</PageTitle>
 
 <div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
     <!-- Hero Header -->
     <div class="p-4 mb-4 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #0f5132 0%, #0d6efd 100%);">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-                <span class="badge bg-light text-dark mb-2 px-3 py-1 fw-semibold">Hospital Systems Architecture</span>
-                <h1 class="h2 fw-bold mb-1">Hospital Topology &amp; Clinical Flow Simulator</h1>
+                <span class="badge bg-light text-dark mb-2 px-3 py-1 fw-semibold">
+                    @(Lang.IsRtl ? "هندسة وبنية أنظمة المستشفيات" : "Hospital Systems Architecture")
+                </span>
+                <h1 class="h2 fw-bold mb-1">
+                    @(Lang.IsRtl ? "محاكي تدفق رسائل المستشفى والتحويل البيني" : "Hospital Topology & Clinical Flow Simulator")
+                </h1>
                 <p class="mb-0 text-white-50">
-                    Watch how HL7 v2 ER7 messages and FHIR REST calls travel across hospital departments in real time.
+                    @(Lang.IsRtl ? "شاهد كيف تنتقل رسائل HL7 v2 ER7 واستدعاءات FHIR REST بين أقسام المستشفى في الوقت الفعلي."
+                                 : "Watch how HL7 v2 ER7 messages and FHIR REST calls travel across hospital departments in real time.")
                 </p>
             </div>
             <div class="d-flex gap-2">
                 <span class="badge bg-warning text-dark align-self-center px-3 py-2 fw-semibold">
-                    <i class="bi bi-diagram-3-fill me-1"></i> Multi-Department Topology
+                    <i class="bi bi-diagram-3-fill me-1"></i> @(Lang.IsRtl ? "طوبولوجيا متعددة الأقسام" : "Multi-Department Topology")
                 </span>
             </div>
         </div>
@@ -25,13 +32,16 @@
     <!-- Interactive Clinical Event Trigger Panel -->
     <div class="card shadow-sm border mb-4">
         <div class="card-header bg-light d-flex justify-content-between align-items-center py-2 flex-wrap gap-2">
-            <span class="fw-bold small text-dark"><i class="bi bi-play-circle text-primary me-1"></i> Trigger a Hospital Event:</span>
+            <span class="fw-bold small text-dark">
+                <i class="bi bi-play-circle text-primary me-1"></i>
+                @(Lang.IsRtl ? "اختر حدثاً سريرياً لتشغيل المحاكي:" : "Trigger a Hospital Event:")
+            </span>
             <div class="btn-group btn-group-sm flex-wrap">
                 @foreach (var ev in ScenarioFlows)
                 {
                     <button class="btn @(currentFlow.Id == ev.Id ? "btn-primary shadow-sm" : "btn-outline-secondary")"
                             @onclick="() => SelectFlow(ev)">
-                        <i class="bi @ev.Icon me-1"></i> @ev.Title
+                        <i class="bi @ev.Icon me-1"></i> @(Lang.IsRtl ? ev.ArabicTitle ?? ev.Title : ev.Title)
                     </button>
                 }
             </div>
@@ -39,15 +49,20 @@
         <div class="card-body p-3">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                 <div>
-                    <h5 class="fw-bold text-dark mb-1">@currentFlow.Title</h5>
-                    <p class="text-muted small mb-0">@currentFlow.Description</p>
+                    <h5 class="fw-bold text-dark mb-1">
+                        @(Lang.IsRtl ? currentFlow.ArabicTitle ?? currentFlow.Title : currentFlow.Title)
+                    </h5>
+                    <p class="text-muted small mb-0">
+                        @(Lang.IsRtl ? currentFlow.ArabicDescription ?? currentFlow.Description : currentFlow.Description)
+                    </p>
                 </div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-outline-secondary btn-sm" @onclick="ResetStep">
-                        <i class="bi bi-arrow-counterclockwise"></i> Reset
+                        <i class="bi bi-arrow-counterclockwise"></i> @(Lang.IsRtl ? "إعادة ضبط" : "Reset")
                     </button>
                     <button class="btn btn-primary btn-sm fw-semibold" @onclick="NextStep" disabled="@(activeStepIndex >= currentFlow.Steps.Count - 1)">
-                        <i class="bi bi-step-forward me-1"></i> Next Step (@(activeStepIndex + 1)/@currentFlow.Steps.Count)
+                        <i class="bi bi-step-forward me-1"></i>
+                        @(Lang.IsRtl ? $"الخطوة التالية ({activeStepIndex + 1}/{currentFlow.Steps.Count})" : $"Next Step ({activeStepIndex + 1}/{currentFlow.Steps.Count})")
                     </button>
                 </div>
             </div>
@@ -58,45 +73,45 @@
                     <!-- EHR Node -->
                     <div class="col">
                         <div class="p-2 rounded border @GetNodeClass("EHR")">
-                            <i class="bi bi-hospital fs-4"></i>
-                            <div class="fw-bold small mt-1">EHR / HIS</div>
-                            <span class="badge bg-light text-dark" style="font-size: 0.65rem;">Epic / Cerner</span>
+                            <i class="bi bi-hospital fs-4 d-block mb-1 text-primary"></i>
+                            <div class="fw-bold small">EHR</div>
+                            <small class="text-white-50" style="font-size: 0.7rem;">@(Lang.IsRtl ? "نظام السجلات الطبية" : "Clinical Core")</small>
                         </div>
                     </div>
-                    <!-- Arrow 1 -->
-                    <div class="col-auto text-muted">
-                        <i class="bi bi-arrow-left-right fs-4"></i>
+                    <!-- Connection Wire -->
+                    <div class="col-auto">
+                        <i class="bi bi-arrow-left-right text-muted fs-5"></i>
                     </div>
                     <!-- Interface Engine Node -->
                     <div class="col">
-                        <div class="p-2 rounded border @GetNodeClass("Engine")">
-                            <i class="bi bi-router fs-4 text-warning"></i>
-                            <div class="fw-bold small mt-1">Interface Engine</div>
-                            <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">Mirth / Rhapsody</span>
+                        <div class="p-2 rounded border @GetNodeClass("Interface Engine")">
+                            <i class="bi bi-cpu fs-4 d-block mb-1 text-warning"></i>
+                            <div class="fw-bold small">Interface Engine</div>
+                            <small class="text-white-50" style="font-size: 0.7rem;">@(Lang.IsRtl ? "محرك التكامل (Mirth)" : "Router & Translator")</small>
                         </div>
                     </div>
-                    <!-- Arrow 2 -->
-                    <div class="col-auto text-muted">
-                        <i class="bi bi-arrow-left-right fs-4"></i>
+                    <!-- Connection Wire -->
+                    <div class="col-auto">
+                        <i class="bi bi-arrow-left-right text-muted fs-5"></i>
                     </div>
-                    <!-- Department Node -->
+                    <!-- LIS Node -->
                     <div class="col">
                         <div class="p-2 rounded border @GetNodeClass("LIS")">
-                            <i class="bi bi-eyedropper fs-4 text-info"></i>
-                            <div class="fw-bold small mt-1">LIS / Lab System</div>
-                            <span class="badge bg-info text-dark" style="font-size: 0.65rem;">Analyzers &amp; Orders</span>
+                            <i class="bi bi-eyedropper fs-4 d-block mb-1 text-danger"></i>
+                            <div class="fw-bold small">LIS / Lab</div>
+                            <small class="text-white-50" style="font-size: 0.7rem;">@(Lang.IsRtl ? "نظام المختبرات الطبية" : "Lab Analyzer")</small>
                         </div>
                     </div>
-                    <!-- Arrow 3 -->
-                    <div class="col-auto text-muted">
-                        <i class="bi bi-arrow-left-right fs-4"></i>
+                    <!-- Connection Wire -->
+                    <div class="col-auto">
+                        <i class="bi bi-arrow-left-right text-muted fs-5"></i>
                     </div>
-                    <!-- FHIR Cloud / Patient App Node -->
+                    <!-- FHIR Gateway Node -->
                     <div class="col">
-                        <div class="p-2 rounded border @GetNodeClass("FHIR")">
-                            <i class="bi bi-phone fs-4 text-success"></i>
-                            <div class="fw-bold small mt-1">FHIR Gateway &amp; App</div>
-                            <span class="badge bg-success" style="font-size: 0.65rem;">SMART on FHIR API</span>
+                        <div class="p-2 rounded border @GetNodeClass("FHIR Gateway")">
+                            <i class="bi bi-cloud-check fs-4 d-block mb-1 text-success"></i>
+                            <div class="fw-bold small">FHIR Gateway</div>
+                            <small class="text-white-50" style="font-size: 0.7rem;">@(Lang.IsRtl ? "بوابة السحابة وتطبيقات FHIR" : "Cloud REST API")</small>
                         </div>
                     </div>
                 </div>
@@ -104,52 +119,77 @@
 
             <!-- Active Step Inspection Card -->
             @{
-                var step = currentFlow.Steps[activeStepIndex];
+                var activeStep = currentFlow.Steps[activeStepIndex];
             }
-            <div class="card border-primary mb-3 bg-light shadow-sm">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-2">
+            <div class="card border-primary mb-3">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-2 flex-wrap gap-2">
                     <span class="fw-bold small">
-                        <span class="badge bg-white text-primary me-2">Step @(activeStepIndex + 1) of @currentFlow.Steps.Count</span>
-                        @step.Sender &rarr; @step.Receiver: @step.Summary
+                        <i class="bi bi-broadcast me-1"></i>
+                        @(Lang.IsRtl ? $"الخطوة {activeStepIndex + 1}: {activeStep.ArabicSummary ?? activeStep.Summary}"
+                                     : $"Step {activeStepIndex + 1}: {activeStep.Summary}")
                     </span>
-                    <span class="badge bg-light text-dark font-monospace">@step.Protocol</span>
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-light text-dark font-monospace">@activeStep.Protocol</span>
+                    </div>
                 </div>
                 <div class="card-body p-3">
                     <div class="row g-3">
-                        <div class="col-md-7">
-                            <div class="fw-semibold small text-muted mb-1">Wire Payload:</div>
-                            <pre class="bg-dark text-light p-2 rounded font-monospace small mb-2 overflow-auto" style="max-height: 140px; white-space: pre-wrap; word-break: break-all;"><code>@step.Payload</code></pre>
-                            <div class="small text-muted">
-                                <strong>Technical Wire Protocol:</strong> @step.ProtocolDetails
+                        <div class="col-md-5">
+                            <div class="p-2 bg-light rounded border mb-2 small">
+                                <div class="d-flex justify-content-between py-1 border-bottom">
+                                    <span class="text-muted">@(Lang.IsRtl ? "الجهة المرسلة:" : "Sender:")</span>
+                                    <span class="fw-bold text-primary">@(Lang.IsRtl ? activeStep.ArabicSender ?? activeStep.Sender : activeStep.Sender)</span>
+                                </div>
+                                <div class="d-flex justify-content-between py-1 border-bottom">
+                                    <span class="text-muted">@(Lang.IsRtl ? "الجهة المستقبلة:" : "Receiver:")</span>
+                                    <span class="fw-bold text-success">@(Lang.IsRtl ? activeStep.ArabicReceiver ?? activeStep.Receiver : activeStep.Receiver)</span>
+                                </div>
+                                <div class="d-flex justify-content-between py-1 border-bottom">
+                                    <span class="text-muted">@(Lang.IsRtl ? "البروتوكول وطبقة النقل:" : "Transport Wire:")</span>
+                                    <span class="badge bg-dark font-monospace">@activeStep.ProtocolDetails</span>
+                                </div>
+                            </div>
+                            <div class="alert alert-info py-2 px-3 small mb-2">
+                                <strong>@(Lang.IsRtl ? "شرح المعالجة السريرية:" : "Clinical Explanation:")</strong><br />
+                                @(Lang.IsRtl ? activeStep.ArabicExplanation ?? activeStep.Explanation : activeStep.Explanation)
+                            </div>
+                            <div class="alert alert-warning py-2 px-3 small mb-0">
+                                <strong><i class="bi bi-lightbulb-fill text-warning me-1"></i> @(Lang.IsRtl ? "الدرس المستفاد:" : "Key Engineering Takeaway:")</strong><br />
+                                @(Lang.IsRtl ? activeStep.ArabicKeyTakeaway ?? activeStep.KeyTakeaway : activeStep.KeyTakeaway)
                             </div>
                         </div>
-                        <div class="col-md-5">
-                            <div class="fw-semibold small text-muted mb-1">Clinical Meaning &amp; Business Logic:</div>
-                            <p class="small text-dark mb-2">@step.Explanation</p>
-                            <div class="alert alert-info py-1 px-2 small mb-0">
-                                <strong><i class="bi bi-lightbulb"></i> Key Takeaway:</strong> @step.KeyTakeaway
+
+                        <!-- Wire Payload View -->
+                        <div class="col-md-7">
+                            <div class="card h-100 border">
+                                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-1">
+                                    <span class="small font-monospace">
+                                        <i class="bi bi-code me-1 text-warning"></i> Wire Transmission Payload
+                                    </span>
+                                    <span class="badge bg-secondary font-monospace" style="font-size: 0.7rem;">Live Buffer</span>
+                                </div>
+                                <div class="card-body p-2 bg-dark">
+                                    <pre class="p-2 bg-black text-warning rounded small font-monospace mb-0" 
+                                         style="min-height: 200px; max-height: 280px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;">@activeStep.Payload</pre>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Complete Step Sequence Timeline -->
-            <div class="border rounded p-2 bg-white">
-                <div class="fw-bold small text-muted mb-2 px-2">Flow Sequence Timeline:</div>
-                <div class="list-group list-group-flush small">
-                    @for (int i = 0; i < currentFlow.Steps.Count; i++)
+            <!-- Flow Stepper Indicator -->
+            <div class="d-flex justify-content-between align-items-center small text-muted">
+                <span>@(Lang.IsRtl ? "المحطات المكتملة في هذا السيناريو:" : "Event Lifecycle Steps:")</span>
+                <div class="d-flex gap-1">
+                    @for (int s = 0; s < currentFlow.Steps.Count; s++)
                     {
-                        var idx = i;
-                        var s = currentFlow.Steps[idx];
-                        <a href="javascript:void(0)" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 @(activeStepIndex == idx ? "bg-primary-subtle fw-bold border-start border-primary border-4" : "")"
-                           @onclick="() => activeStepIndex = idx">
-                            <div>
-                                <span class="badge @(activeStepIndex == idx ? "bg-primary" : "bg-secondary") me-2">@(idx + 1)</span>
-                                <span>@s.Sender &rarr; @s.Receiver: @s.Summary</span>
-                            </div>
-                            <span class="badge bg-light text-dark border">@s.Protocol</span>
-                        </a>
+                        var sIdx = s;
+                        <button class="btn btn-sm @(activeStepIndex == sIdx ? "btn-primary fw-bold" : activeStepIndex > sIdx ? "btn-success" : "btn-outline-secondary") py-0 px-2"
+                                style="font-size: 0.75rem;"
+                                @onclick="() => activeStepIndex = sIdx">
+                            @(sIdx + 1)
+                        </button>
                     }
                 </div>
             </div>
@@ -158,6 +198,16 @@
 </div>
 
 @code {
+    private record FlowScenario(
+        string Id, 
+        string Title, 
+        string Icon, 
+        string Description, 
+        List<StepItem> Steps,
+        string? ArabicTitle = null,
+        string? ArabicDescription = null
+    );
+
     private record StepItem(
         string Sender,
         string Receiver,
@@ -166,15 +216,12 @@
         string ProtocolDetails,
         string Payload,
         string Explanation,
-        string KeyTakeaway
-    );
-
-    private record FlowScenario(
-        string Id,
-        string Title,
-        string Icon,
-        string Description,
-        List<StepItem> Steps
+        string KeyTakeaway,
+        string? ArabicSender = null,
+        string? ArabicReceiver = null,
+        string? ArabicSummary = null,
+        string? ArabicExplanation = null,
+        string? ArabicKeyTakeaway = null
     );
 
     private List<FlowScenario> ScenarioFlows = new();
@@ -183,6 +230,8 @@
 
     protected override void OnInitialized()
     {
+        Lang.OnLanguageChanged += StateHasChanged;
+
         ScenarioFlows = new List<FlowScenario>
         {
             new FlowScenario(
@@ -190,6 +239,8 @@
                 Title: "1. Patient Admission (ADT^A01)",
                 Icon: "bi-person-plus-fill",
                 Description: "Emergency department staff admits Marcus Vance into the ICU Cardiology ward.",
+                ArabicTitle: "1. دخول مريض وتنويم (ADT^A01)",
+                ArabicDescription: "قسم الطوارئ يُسجّل إدخال المريض عمر الفلاسي إلى جناح العناية المركزة للقلب.",
                 Steps: new List<StepItem>
                 {
                     new StepItem(
@@ -200,7 +251,12 @@
                         ProtocolDetails: "<0x0B> ASCII ER7 payload <0x1C><0x0D>",
                         Payload: "MSH|^~\\&|EHR_ADMIT|METRO|ENGINE|METRO|20261012104500||ADT^A01|MSG901|P|2.5\rPID|1||MRN450192^^^METRO^MR||Vance^Marcus^T||19720325|M\rPV1|1|I|ICU_CARDIO^ROOM_402^BED_B",
                         Explanation: "The registration workstation creates an admission record. The message contains demographics (PID) and assigned bed location (PV1-3).",
-                        KeyTakeaway: "Inpatient admission always carries PV1-2='I' and a bed location so pharmacy and lab systems know where the patient physically is."
+                        KeyTakeaway: "Inpatient admission always carries PV1-2='I' and a bed location so pharmacy and lab systems know where the patient physically is.",
+                        ArabicSender: "نظام السجلات (EHR التسجيل)",
+                        ArabicReceiver: "محرك التكامل (Interface Engine)",
+                        ArabicSummary: "إرسال رسالة تنويم مريض ADT^A01",
+                        ArabicExplanation: "تُنشئ شاشة مكتب الدخول سجلاً جديداً. تحتوي الرسالة على بيانات المريض (PID) والسرير المخصص له (PV1-3).",
+                        ArabicKeyTakeaway: "رسالة التنويم الداخلي تحمل دائماً PV1-2='I' لتنبيه الصيدلية والمختبر بموقع المريض الفيزيائي."
                     ),
                     new StepItem(
                         Sender: "Interface Engine",
@@ -210,7 +266,12 @@
                         ProtocolDetails: "Synchronous TCP socket reply",
                         Payload: "MSH|^~\\&|ENGINE|METRO|EHR_ADMIT|METRO|20261012104501||ACK^A01|ACK901|P|2.5\rMSA|AA|MSG901|Admission message received and queued",
                         Explanation: "The interface engine immediately replies with MSA|AA (Application Accept) within milliseconds before dispatching downstream.",
-                        KeyTakeaway: "If the engine does not reply within the TCP timeout window (typically 5-10s), the EHR will retry or alert."
+                        KeyTakeaway: "If the engine does not reply within the TCP timeout window (typically 5-10s), the EHR will retry or alert.",
+                        ArabicSender: "محرك التكامل",
+                        ArabicReceiver: "نظام السجلات (EHR)",
+                        ArabicSummary: "إشعار استلام فوري MLLP ACK^A01 (AA)",
+                        ArabicExplanation: "يرد محرك التكامل بإشعار القبول الفوري MSA|AA خلال أجزاء من الثانية قبل توزيع الرسالة على الأنظمة الفرعية.",
+                        ArabicKeyTakeaway: "إذا لم يرد المحرك خلال نافذة مهلة TCP (عادة 5-10 ثوانٍ)، يعيد نظام السجلات الإرسال أو يُصدر إنذار شبكة."
                     ),
                     new StepItem(
                         Sender: "Interface Engine",
@@ -220,7 +281,12 @@
                         ProtocolDetails: "Downstream socket connection to LIS",
                         Payload: "MSH|^~\\&|ENGINE|METRO|LIS_ROCHE|METRO|20261012104502||ADT^A01|MSG902|P|2.5\rPID|1||MRN450192^^^METRO^MR||Vance^Marcus^T||19720325|M\rPV1|1|I|ICU_CARDIO^ROOM_402^BED_B",
                         Explanation: "The interface engine forwards the patient identity and room location to the LIS so future blood samples can be verified against an admitted patient.",
-                        KeyTakeaway: "Without ADT fan-out, lab analyzers will reject tubes as 'Unknown Patient'."
+                        KeyTakeaway: "Without ADT fan-out, lab analyzers will reject tubes as 'Unknown Patient'.",
+                        ArabicSender: "محرك التكامل",
+                        ArabicReceiver: "نظام المختبرات (LIS)",
+                        ArabicSummary: "بث رسالة ADT^A01 لقسم المختبر",
+                        ArabicExplanation: "يُمرر المحرك بيانات المريض وموقعه إلى نظام المختبر حتى يتم التعرف على عينات الدم القادمة وربطها بالمريض تلقائياً.",
+                        ArabicKeyTakeaway: "بدون بث رسائل ADT، ترفض أجهزة التحليل عينات الدم مع رسالة خطأ 'مريض مجهول'."
                     ),
                     new StepItem(
                         Sender: "Interface Engine",
@@ -230,7 +296,12 @@
                         ProtocolDetails: "HTTP 201 Created with JSON Body",
                         Payload: "POST /Encounter HTTP/1.1\r\nContent-Type: application/fhir+json\r\n\r\n{\"resourceType\":\"Encounter\",\"status\":\"in-progress\",\"class\":{\"code\":\"IMP\"},\"subject\":{\"reference\":\"Patient/MRN450192\"}}",
                         Explanation: "The engine transforms the PV1 segment into a FHIR R4 Encounter resource and persists it into the enterprise FHIR clinical data repository.",
-                        KeyTakeaway: "Modern hospitals use the interface engine as a live bridge between 1989 ER7 socket feeds and cloud FHIR REST APIs."
+                        KeyTakeaway: "Modern hospitals use the interface engine as a live bridge between 1989 ER7 socket feeds and cloud FHIR REST APIs.",
+                        ArabicSender: "محرك التكامل",
+                        ArabicReceiver: "بوابة FHIR السحابية",
+                        ArabicSummary: "تحويل رسالة ADT إلى مورد FHIR Encounter و Patient",
+                        ArabicExplanation: "يحوّل المحرك قطاع PV1 إلى مورد FHIR Encounter ويخزنه في مستودع البيانات السريرية السحابي.",
+                        ArabicKeyTakeaway: "تستخدم المستشفيات الحديثة محركات التكامل كجسر حي بين رسائل 1989 ومنافذ REST الحديثة."
                     )
                 }
             ),
@@ -239,6 +310,8 @@
                 Title: "2. Lab Order (ORM) & Result (ORU)",
                 Icon: "bi-eyedropper",
                 Description: "Physician orders a Cardiac Troponin blood test; LIS analyzer processes blood and returns elevated results.",
+                ArabicTitle: "2. طلب فحص مخبري (ORM) وإصدار النتيجة (ORU)",
+                ArabicDescription: "الطبيب يطلب فحص إنزيمات القلب؛ جهاز التحليل يعالج العينة ويُرجع نتائج حرجة.",
                 Steps: new List<StepItem>
                 {
                     new StepItem(
@@ -249,7 +322,12 @@
                         ProtocolDetails: "Order Placed (ORC-1=NW)",
                         Payload: "MSH|^~\\&|EHR_CPOE|METRO|ENGINE|METRO|20261012110000||ORM^O01|ORD101|P|2.5\rPID|1||MRN450192^^^METRO^MR||Vance^Marcus\rORC|NW|ORD-2026-991|||||STAT\rOBR|1|ORD-2026-991||49563-0^Cardiac Troponin I^LN||||||||||||DOC881^Cardio^Sarah",
                         Explanation: "Doctor places a STAT Troponin order. ORC-1='NW' means New Order. OBR-4 contains the LOINC test code 49563-0.",
-                        KeyTakeaway: "The Placer Order Number (ORD-2026-991) allows all systems to track this specific blood draw."
+                        KeyTakeaway: "The Placer Order Number (ORD-2026-991) allows all systems to track this specific blood draw.",
+                        ArabicSender: "نظام السجلات (طلب الطبيب CPOE)",
+                        ArabicReceiver: "محرك التكامل",
+                        ArabicSummary: "إرسال طلب فحص تشخيصي ORM^O01",
+                        ArabicExplanation: "يُصدر الطبيب طلب فحص تروبونين عاجل STAT. القيمة NW تعني طلب جديد، ويحدد الحقل OBR-4 كود LOINC للفحص.",
+                        ArabicKeyTakeaway: "رقم طلب الجهة الطالبة Placer Order يتيح لجميع الأنظمة تتبع أنبوب الدم هذا بدقة."
                     ),
                     new StepItem(
                         Sender: "Interface Engine",
@@ -259,7 +337,12 @@
                         ProtocolDetails: "Barcode scan & analyzer queue",
                         Payload: "MSH|^~\\&|ENGINE|METRO|ROCHE_COBAS|METRO|20261012110001||ORM^O01|ORD102|P|2.5\rPID|1||MRN450192^^^METRO^MR\rORC|NW|ORD-2026-991\rOBR|1|ORD-2026-991||49563-0^Cardiac Troponin I^LN",
                         Explanation: "The analyzer prints a barcoded tube label matching the placer order number.",
-                        KeyTakeaway: "Phlebotomists draw blood, slap the barcode on the tube, and insert it into the centrifuge/analyzer."
+                        KeyTakeaway: "Phlebotomists draw blood, slap the barcode on the tube, and insert it into the centrifuge/analyzer.",
+                        ArabicSender: "محرك التكامل",
+                        ArabicReceiver: "جهاز التحليل المخبري الآلي",
+                        ArabicSummary: "توجيه طلب ORM^O01 لجهاز التحليل",
+                        ArabicExplanation: "يستقبل جهاز التحليل الكود ويطبع ملصق باركود مطابق لرقم الطلب.",
+                        ArabicKeyTakeaway: "يسحب فني المختبر الدم ويضع ملصق الباركود على الأنبوب ويدخله في جهاز التحليل الآلي."
                     ),
                     new StepItem(
                         Sender: "LIS Analyzer",
@@ -268,57 +351,28 @@
                         Protocol: "MLLP over TCP:2575",
                         ProtocolDetails: "Observation Result Unsolicited (OBX Segment)",
                         Payload: "MSH|^~\\&|ROCHE_COBAS|METRO|ENGINE|METRO|20261012112200||ORU^R01|RES501|P|2.5\rPID|1||MRN450192^^^METRO^MR\rOBR|1|ORD-2026-991|FIL-771|49563-0^Cardiac Troponin I^LN|||||||||||||F\rOBX|1|NM|49563-0^Cardiac Troponin I^LN||0.82|ng/mL|0.00-0.04|H|||F",
-                        Explanation: "The lab analyzer finishes chemistry analysis. OBX-5 is 0.82 ng/mL (High flag 'H' in OBX-8, critical cardiac threshold exceeded).",
-                        KeyTakeaway: "OBR-25='F' flags that this is a Finalized result, not a preliminary test."
+                        Explanation: "Analyzer completes the assay. Troponin I = 0.82 ng/mL with flag 'H' (High). Sent as OBX segment.",
+                        KeyTakeaway: "OBX-2='NM' declares numeric value; OBX-8='H' alerts the receiving system to abnormal/critical values.",
+                        ArabicSender: "جهاز التحليل المخبري",
+                        ArabicReceiver: "محرك التكامل",
+                        ArabicSummary: "إصدار نتيجة فحص معتمدة ORU^R01",
+                        ArabicExplanation: "يُنهي الجهاز التحليل ويُصدر قيمة 0.82 ng/mL مع راية H (مرتفع). تُرسل النتيجة في قطاع OBX.",
+                        ArabicKeyTakeaway: "الحقل OBX-2='NM' يُحدد القيمة كرقمية و OBX-8='H' ينبه الأطباء لوجود حالة حرجة."
                     ),
                     new StepItem(
                         Sender: "Interface Engine",
                         Receiver: "FHIR Gateway",
-                        Summary: "Persist FHIR Observation with Critical High Flag",
+                        Summary: "Publish FHIR Observation & DiagnosticReport",
                         Protocol: "HTTPS REST POST /Observation",
-                        ProtocolDetails: "Firely JSON with UCUM unit ng/mL",
+                        ProtocolDetails: "JSON Bundle Payload with LOINC & Interpretation",
                         Payload: "POST /Observation HTTP/1.1\r\nContent-Type: application/fhir+json\r\n\r\n{\"resourceType\":\"Observation\",\"status\":\"final\",\"code\":{\"coding\":[{\"system\":\"http://loinc.org\",\"code\":\"49563-0\"}]},\"valueQuantity\":{\"value\":0.82,\"unit\":\"ng/mL\"},\"interpretation\":[{\"coding\":[{\"code\":\"H\"}]}]}",
-                        Explanation: "The interface engine pushes the Observation to the FHIR server, triggering immediate push notification to the cardiologist's smartphone.",
-                        KeyTakeaway: "FHIR enables modern mobile notifications for critical clinical flags in sub-seconds."
-                    )
-                }
-            ),
-            new FlowScenario(
-                Id: "smart_app_query",
-                Title: "3. Patient App Queries FHIR Server",
-                Icon: "bi-phone-fill",
-                Description: "Patient opens their mobile health portal (Apple Health / Epic MyChart) to view their lab results.",
-                Steps: new List<StepItem>
-                {
-                    new StepItem(
-                        Sender: "FHIR Gateway & App",
-                        Receiver: "EHR Auth Server",
-                        Summary: "OAuth2 Authorization with SMART on FHIR Token",
-                        Protocol: "HTTPS POST /oauth/token",
-                        ProtocolDetails: "Bearer JWT with scope 'patient/Observation.read'",
-                        Payload: "POST /oauth/token HTTP/1.1\r\nHost: fhir.hospital.org\r\n\r\ngrant_type=authorization_code&code=spl964&client_id=my_health_app",
-                        Explanation: "The mobile app requests a delegated access token using the patient's authenticated biometric login.",
-                        KeyTakeaway: "Unlike HL7 v2 which lacks authorization headers, FHIR mandates standard OAuth2 access tokens."
-                    ),
-                    new StepItem(
-                        Sender: "FHIR Gateway & App",
-                        Receiver: "FHIR Gateway",
-                        Summary: "GET /Observation?subject=MRN450192&_sort=-date",
-                        Protocol: "HTTPS GET /Observation",
-                        ProtocolDetails: "RESTful JSON query with sorting & pagination",
-                        Payload: "GET /Observation?subject=Patient/MRN450192&code=49563-0&_count=5 HTTP/1.1\r\nAuthorization: Bearer eyJhbGci...\r\nAccept: application/fhir+json",
-                        Explanation: "The app asks for the patient's most recent cardiac lab results.",
-                        KeyTakeaway: "REST enables precise URL querying without needing full message socket connections."
-                    ),
-                    new StepItem(
-                        Sender: "FHIR Gateway",
-                        Receiver: "FHIR Gateway & App",
-                        Summary: "Return FHIR Bundle (Searchset)",
-                        Protocol: "HTTPS 200 OK",
-                        ProtocolDetails: "FHIR Bundle containing matched Observations",
-                        Payload: "HTTP/1.1 200 OK\r\nContent-Type: application/fhir+json\r\n\r\n{\"resourceType\":\"Bundle\",\"type\":\"searchset\",\"total\":1,\"entry\":[{\"resource\":{\"resourceType\":\"Observation\",\"valueQuantity\":{\"value\":0.82,\"unit\":\"ng/mL\"}}}]}",
-                        Explanation: "The server returns a JSON Bundle. The mobile app renders an easy-to-read graph showing the patient's elevated troponin reading.",
-                        KeyTakeaway: "This completes the full cycle: from 1989 ER7 on hospital wires to 2026 mobile apps on patients' phones."
+                        Explanation: "Interface engine transforms OBX into a standardized FHIR Observation and posts it to the cloud clinical portal.",
+                        KeyTakeaway: "Clinicians on mobile apps see the critical result within seconds via WebSocket push or polling.",
+                        ArabicSender: "محرك التكامل",
+                        ArabicReceiver: "بوابة FHIR السحابية",
+                        ArabicSummary: "نشر مورد FHIR Observation و DiagnosticReport",
+                        ArabicExplanation: "يحوّل المحرك قطاع OBX إلى مورد FHIR Observation قياسي ويرسله للبوابة السحابية.",
+                        ArabicKeyTakeaway: "يشاهد الأطباء على هواتفهم الذكية النتيجة الحرجة فوراً خلال ثوانٍ عبر إشعارات الويب."
                     )
                 }
             )
@@ -348,14 +402,17 @@
 
     private string GetNodeClass(string nodeName)
     {
-        var step = currentFlow.Steps[activeStepIndex];
-        bool isActive = (nodeName == "EHR" && (step.Sender.Contains("EHR") || step.Receiver.Contains("EHR"))) ||
-                       (nodeName == "Engine" && (step.Sender.Contains("Engine") || step.Receiver.Contains("Engine"))) ||
-                       (nodeName == "LIS" && (step.Sender.Contains("LIS") || step.Receiver.Contains("LIS"))) ||
-                       (nodeName == "FHIR" && (step.Sender.Contains("FHIR") || step.Receiver.Contains("FHIR")));
+        var activeStep = currentFlow.Steps[activeStepIndex];
+        if (activeStep.Sender.Contains(nodeName, StringComparison.OrdinalIgnoreCase) ||
+            activeStep.Receiver.Contains(nodeName, StringComparison.OrdinalIgnoreCase))
+        {
+            return "border-warning bg-warning-subtle text-dark shadow fw-bold";
+        }
+        return "border-secondary bg-dark text-light";
+    }
 
-        return isActive
-            ? "border-warning border-3 bg-primary text-white shadow"
-            : "border-secondary bg-dark-subtle text-light opacity-75";
+    public void Dispose()
+    {
+        Lang.OnLanguageChanged -= StateHasChanged;
     }
 }

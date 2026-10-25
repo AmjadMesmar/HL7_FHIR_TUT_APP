@@ -1,22 +1,29 @@
 @page "/terminology"
 @rendermode InteractiveServer
+@implements IDisposable
+@inject LanguageService Lang
 
-<PageTitle>Clinical Terminology Browser - LOINC, ICD-10 &amp; HL7 Tables</PageTitle>
+<PageTitle>@(Lang.IsRtl ? "مستعرض المصطلحات السريرية - LOINC و ICD-10 وجداول HL7" : "Clinical Terminology Browser - LOINC, ICD-10 & HL7 Tables")</PageTitle>
 
 <div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
     <!-- Hero Header -->
     <div class="p-4 mb-4 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #491217 0%, #d63384 100%);">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-                <span class="badge bg-light text-dark mb-2 px-3 py-1 fw-semibold">Clinical Vocabularies</span>
-                <h1 class="h2 fw-bold mb-1">Clinical Terminology &amp; Standard Tables Browser</h1>
+                <span class="badge bg-light text-dark mb-2 px-3 py-1 fw-semibold">
+                    @(Lang.IsRtl ? "المعاجم والمصطلحات السريرية القياسية" : "Clinical Vocabularies")
+                </span>
+                <h1 class="h2 fw-bold mb-1">
+                    @(Lang.IsRtl ? "مستعرض المصطلحات السريرية وجداول HL7 القياسية" : "Clinical Terminology & Standard Tables Browser")
+                </h1>
                 <p class="mb-0 text-white-50">
-                    Rapid in-app lookup for LOINC laboratory test codes, ICD-10 diagnoses, and HL7 standard tables.
+                    @(Lang.IsRtl ? "بحث فوري سريع عن رموز تحاليل LOINC المخبرية، وتشخيصات ICD-10، وجداول معايير HL7 الدولية."
+                                 : "Rapid in-app lookup for LOINC laboratory test codes, ICD-10 diagnoses, and HL7 standard tables.")
                 </p>
             </div>
             <div class="d-flex gap-2">
                 <span class="badge bg-white text-dark align-self-center px-3 py-2 fw-semibold">
-                    <i class="bi bi-search me-1"></i> Quick Reference
+                    <i class="bi bi-search me-1"></i> @(Lang.IsRtl ? "مرجع سريع" : "Quick Reference")
                 </span>
             </div>
         </div>
@@ -29,16 +36,25 @@
                 <div class="col-md-7">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <input type="text" class="form-control" placeholder="Search by name, code, or description (e.g. Glucose, I21.0, Inpatient, 2345-7)..." 
+                        <input type="text" class="form-control" 
+                               placeholder="@(Lang.IsRtl ? "ابحث بالاسم أو الرمز أو الوصف (مثل Glucose، سكر، I21.0، تنويم، 2345-7)..." : "Search by name, code, or description (e.g. Glucose, I21.0, Inpatient, 2345-7)...")" 
                                @bind="searchTerm" @bind:event="oninput" />
                     </div>
                 </div>
                 <div class="col-md-5">
                     <div class="btn-group btn-group-sm w-100">
-                        <button class="btn @(activeCategory == "All" ? "btn-dark" : "btn-outline-secondary")" @onclick='() => activeCategory = "All"'>All</button>
-                        <button class="btn @(activeCategory == "LOINC" ? "btn-primary" : "btn-outline-primary")" @onclick='() => activeCategory = "LOINC"'>LOINC (Labs)</button>
-                        <button class="btn @(activeCategory == "ICD-10" ? "btn-danger" : "btn-outline-danger")" @onclick='() => activeCategory = "ICD-10"'>ICD-10 (Diagnoses)</button>
-                        <button class="btn @(activeCategory == "HL7 Tables" ? "btn-warning text-dark" : "btn-outline-warning")" @onclick='() => activeCategory = "HL7 Tables"'>HL7 Tables</button>
+                        <button class="btn @(activeCategory == "All" ? "btn-dark" : "btn-outline-secondary")" @onclick='() => activeCategory = "All"'>
+                            @(Lang.IsRtl ? "الكل" : "All")
+                        </button>
+                        <button class="btn @(activeCategory == "LOINC" ? "btn-primary" : "btn-outline-primary")" @onclick='() => activeCategory = "LOINC"'>
+                            LOINC @(Lang.IsRtl ? "(المختبرات)" : "(Labs)")
+                        </button>
+                        <button class="btn @(activeCategory == "ICD-10" ? "btn-danger" : "btn-outline-danger")" @onclick='() => activeCategory = "ICD-10"'>
+                            ICD-10 @(Lang.IsRtl ? "(التشخيصات)" : "(Diagnoses)")
+                        </button>
+                        <button class="btn @(activeCategory == "HL7 Tables" ? "btn-warning text-dark" : "btn-outline-warning")" @onclick='() => activeCategory = "HL7 Tables"'>
+                            @(Lang.IsRtl ? "جداول HL7" : "HL7 Tables")
+                        </button>
                     </div>
                 </div>
             </div>
@@ -48,33 +64,39 @@
     <!-- Results Table -->
     <div class="card shadow-sm border mb-4">
         <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
-            <span class="fw-semibold small">Showing @FilteredEntries.Count() Terminology Entries</span>
-            <span class="badge bg-secondary">Universal Vocabularies</span>
+            <span class="fw-semibold small">
+                @(Lang.IsRtl ? $"عرض {FilteredEntries.Count()} مدخلاً من المعاجم السريرية" : $"Showing {FilteredEntries.Count()} Terminology Entries")
+            </span>
+            <span class="badge bg-secondary">@(Lang.IsRtl ? "معاجم عالمية موحدة" : "Universal Vocabularies")</span>
         </div>
         <div class="table-responsive">
             <table class="table table-hover table-sm mb-0 small text-nowrap">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 15%;">Standard Code</th>
-                        <th style="width: 15%;">Category</th>
-                        <th style="width: 35%;">Official Name / Meaning</th>
-                        <th style="width: 35%;">Clinical Context / Units / Reference</th>
+                        <th style="width: 15%;">@(Lang.IsRtl ? "الرمز القياسي" : "Standard Code")</th>
+                        <th style="width: 15%;">@(Lang.IsRtl ? "الفئة" : "Category")</th>
+                        <th style="width: 35%;">@(Lang.IsRtl ? "الاسم الرسمي والمعنى" : "Official Name / Meaning")</th>
+                        <th style="width: 35%;">@(Lang.IsRtl ? "السياق السريري والوحدات والمدى" : "Clinical Context / Units / Reference")</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in FilteredEntries)
                     {
                         <tr>
-                            <td class="font-monospace fw-bold text-primary">@item.Code</td>
+                            <td class="font-monospace fw-bold text-primary" style="direction: ltr !important; unicode-bidi: isolate;">@item.Code</td>
                             <td><span class="badge @GetCategoryBadge(item.Category)">@item.Category</span></td>
                             <td class="text-wrap" style="max-width: 320px;">
-                                <strong class="text-dark">@item.Name</strong>
+                                <strong class="text-dark">@(Lang.IsRtl && !string.IsNullOrEmpty(item.NameAr) ? item.NameAr : item.Name)</strong>
                                 @if (!string.IsNullOrEmpty(item.Description))
                                 {
-                                    <div class="text-muted" style="font-size: 0.78rem;">@item.Description</div>
+                                    <div class="text-muted" style="font-size: 0.78rem;">
+                                        @(Lang.IsRtl && !string.IsNullOrEmpty(item.DescriptionAr) ? item.DescriptionAr : item.Description)
+                                    </div>
                                 }
                             </td>
-                            <td class="text-wrap text-muted" style="max-width: 320px;">@item.ClinicalDetails</td>
+                            <td class="text-wrap text-muted" style="max-width: 320px;">
+                                @(Lang.IsRtl && !string.IsNullOrEmpty(item.ClinicalDetailsAr) ? item.ClinicalDetailsAr : item.ClinicalDetails)
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -87,37 +109,244 @@
     private string searchTerm = string.Empty;
     private string activeCategory = "All";
 
-    private record TerminologyEntry(string Code, string Category, string Name, string Description, string ClinicalDetails);
+    private record TerminologyEntry(
+        string Code, 
+        string Category, 
+        string Name, 
+        string Description, 
+        string ClinicalDetails,
+        string? NameAr = null,
+        string? DescriptionAr = null,
+        string? ClinicalDetailsAr = null
+    );
 
     private static readonly List<TerminologyEntry> AllEntries = new()
     {
         // LOINC LAB CODES
-        new("2345-7", "LOINC", "Glucose [Mass/volume] in Serum or Plasma", "Blood sugar level", "Units: mg/dL. Normal Adult Range: 70 - 99 mg/dL. Specimen: Serum/Plasma."),
-        new("4548-4", "LOINC", "Hemoglobin A1c [Mass fraction] in Blood", "Glycated hemoglobin 3-month average", "Units: %. Normal Range: 4.0 - 5.6%. Diabetic target: < 7.0%."),
-        new("2823-3", "LOINC", "Potassium [Moles/volume] in Serum or Plasma", "Serum electrolyte potassium", "Units: mmol/L. Normal Range: 3.5 - 5.1 mmol/L. Critical < 3.0 or > 6.0!"),
-        new("2951-2", "LOINC", "Sodium [Moles/volume] in Serum or Plasma", "Serum electrolyte sodium", "Units: mmol/L. Normal Range: 135 - 145 mmol/L."),
-        new("49563-0", "LOINC", "Troponin I.cardiac [Mass/volume] in Serum or Plasma", "Cardiac muscle damage marker", "Units: ng/mL. Normal: 0.00 - 0.04 ng/mL. Elevated (>0.40) indicates MI!"),
-        new("718-7", "LOINC", "Hemoglobin [Mass/volume] in Blood", "Red blood cell oxygen carrier", "Units: g/dL. Normal Male: 13.8 - 17.2, Female: 12.1 - 15.1 g/dL."),
-        new("6690-2", "LOINC", "Leukocytes [#/volume] in Blood", "White Blood Cell Count (WBC)", "Units: 10*3/uL. Normal Range: 4.5 - 11.0 10*3/uL. Elevated indicates infection."),
-        new("24323-8", "LOINC", "Basic Metabolic Panel (BMP)", "Universal chemistry battery order", "Orders Glucose, Calcium, Sodium, Potassium, CO2, Chloride, BUN, Creatinine."),
+        new(
+            "2345-7", 
+            "LOINC", 
+            "Glucose [Mass/volume] in Serum or Plasma", 
+            "Blood sugar level", 
+            "Units: mg/dL. Normal Adult Range: 70 - 99 mg/dL. Specimen: Serum/Plasma.",
+            "الجلوكوز [كتلة/حجم] في المصل أو البلازما",
+            "مستوى السكر في الدم",
+            "الوحدة: mg/dL. المدى الطبيعي للبالغين: 70 - 99 mg/dL. العينة: مصل/بلازما."
+        ),
+        new(
+            "4548-4", 
+            "LOINC", 
+            "Hemoglobin A1c [Mass fraction] in Blood", 
+            "Glycated hemoglobin 3-month average", 
+            "Units: %. Normal Range: 4.0 - 5.6%. Diabetic target: < 7.0%.",
+            "الهيموغلوبين السكري A1c في الدم",
+            "متوسط السكر التراكمي على مدى 3 أشهر",
+            "الوحدة: %. المدى الطبيعي: 4.0 - 5.6%. الهدف العلاجي لمرضى السكري: أقل من 7.0%."
+        ),
+        new(
+            "2823-3", 
+            "LOINC", 
+            "Potassium [Moles/volume] in Serum or Plasma", 
+            "Serum electrolyte potassium", 
+            "Units: mmol/L. Normal Range: 3.5 - 5.1 mmol/L. Critical < 3.0 or > 6.0!",
+            "البوتاسيوم في المصل أو البلازما",
+            "أحد شوارد الدم الكهرلية الأساسية لعمل عضلة القلب",
+            "الوحدة: mmol/L. المدى الطبيعي: 3.5 - 5.1 mmol/L. قيم حرجة خطيرة أقل من 3.0 أو أكثر من 6.0!"
+        ),
+        new(
+            "2951-2", 
+            "LOINC", 
+            "Sodium [Moles/volume] in Serum or Plasma", 
+            "Serum electrolyte sodium", 
+            "Units: mmol/L. Normal Range: 135 - 145 mmol/L.",
+            "الصوديوم في المصل أو البلازما",
+            "شاردة الصوديوم الكهرلية لتوازن السوائل والضغط الأسموزي",
+            "الوحدة: mmol/L. المدى الطبيعي: 135 - 145 mmol/L."
+        ),
+        new(
+            "49563-0", 
+            "LOINC", 
+            "Troponin I.cardiac [Mass/volume] in Serum or Plasma", 
+            "Cardiac muscle damage marker", 
+            "Units: ng/mL. Normal: 0.00 - 0.04 ng/mL. Elevated (>0.40) indicates MI!",
+            "التروبونين القلبي I في المصل أو البلازما",
+            "المؤشر السريري الحيوي الدال على تلف خلايا عضلة القلب",
+            "الوحدة: ng/mL. المدى الطبيعي: 0.00 - 0.04 ng/mL. الارتفاع فوق 0.40 يشير بقوة إلى احتشاء عضلة القلب (جلطة حادة)."
+        ),
+        new(
+            "718-7", 
+            "LOINC", 
+            "Hemoglobin [Mass/volume] in Blood", 
+            "Red blood cell oxygen carrier", 
+            "Units: g/dL. Normal Male: 13.8 - 17.2, Female: 12.1 - 15.1 g/dL.",
+            "خضاب الدم (الهيموغلوبين) في الدم الكامل",
+            "البروتين الناقل للأكسجين داخل كريات الدم الحمراء",
+            "الوحدة: g/dL. المدى الطبيعي: الذكور 13.8 - 17.2، الإناث 12.1 - 15.1 g/dL."
+        ),
+        new(
+            "6690-2", 
+            "LOINC", 
+            "Leukocytes [#/volume] in Blood", 
+            "White Blood Cell Count (WBC)", 
+            "Units: 10*3/uL. Normal Range: 4.5 - 11.0 10*3/uL. Elevated indicates infection.",
+            "تعداد كريات الدم البيضاء (WBC) في الدم",
+            "مؤشر الاستجابة المناعية للعدوى والالتهابات",
+            "الوحدة: 10*3/uL. المدى الطبيعي: 4.5 - 11.0. الارتفاع يدل على وجود عدوى جرثومية أو التهاب حاد."
+        ),
+        new(
+            "24323-8", 
+            "LOINC", 
+            "Basic Metabolic Panel (BMP)", 
+            "Universal chemistry battery order", 
+            "Orders Glucose, Calcium, Sodium, Potassium, CO2, Chloride, BUN, Creatinine.",
+            "حزمة الفحوصات الأيضية الأساسية (BMP)",
+            "طلب تحاليل الكيمياء السريرية الشامل للوظائف الحيوية",
+            "تشمل: سكر الدم، الكالسيوم، الصوديوم، البوتاسيوم، ثاني أكسيد الكربون، الكلوريد، اليوريا، والكرياتينين."
+        ),
 
         // ICD-10 DIAGNOSES
-        new("I21.0", "ICD-10", "ST elevation (STEMI) myocardial infarction", "Acute anterior wall heart attack", "Category: Diseases of the circulatory system. Admitting diagnosis in ADT^A01."),
-        new("E11.9", "ICD-10", "Type 2 diabetes mellitus without complications", "Adult-onset diabetes", "Category: Endocrine, nutritional and metabolic diseases."),
-        new("I10", "ICD-10", "Essential (primary) hypertension", "High blood pressure", "Common comorbidity in adult outpatient encounters."),
-        new("J45.909", "ICD-10", "Unspecified asthma, uncomplicated", "Reactive airway disease", "Common in pediatric admissions and emergency visits."),
-        new("N17.9", "ICD-10", "Acute kidney injury, unspecified", "Rapid decline in renal function", "Common inpatient complication tracked with Creatinine labs."),
+        new(
+            "I21.0", 
+            "ICD-10", 
+            "ST elevation (STEMI) myocardial infarction", 
+            "Acute anterior wall heart attack", 
+            "Category: Diseases of the circulatory system. Admitting diagnosis in ADT^A01.",
+            "احتشاء عضلة القلب الحاد مع ارتفاع مقطع ST (STEMI)",
+            "نوبة قلبية حادة في الجدار الأمامي للقلب تتطلب قسطرة إسعافية فورية",
+            "الفئة: أمراض جهاز الدوران. تشخيص تنويم رئيسي في رسائل ADT^A01."
+        ),
+        new(
+            "E11.9", 
+            "ICD-10", 
+            "Type 2 diabetes mellitus without complications", 
+            "Adult-onset diabetes", 
+            "Category: Endocrine, nutritional and metabolic diseases.",
+            "داء السكري من النوع الثاني دون مضاعفات",
+            "مرض السكري المزمن لدى البالغين",
+            "الفئة: أمراض الغدد الصماء والتغذية والتمثيل الغذائي."
+        ),
+        new(
+            "I10", 
+            "ICD-10", 
+            "Essential (primary) hypertension", 
+            "High blood pressure", 
+            "Common comorbidity in adult outpatient encounters.",
+            "ارتفاع ضغط الدم الأولي (الأساسي)",
+            "مرض ضغط الدم المزمن الشائع",
+            "تشخيص مرافق شائع جداً في زيارات العيادات الخارجية للبالغين."
+        ),
+        new(
+            "J45.909", 
+            "ICD-10", 
+            "Unspecified asthma, uncomplicated", 
+            "Reactive airway disease", 
+            "Common in pediatric admissions and emergency visits.",
+            "الربو القصبي غير المحدد دون مضاعفات",
+            "مرض تحسس المسالك التنفسية المزمن",
+            "شائع في تنويم الأطفال وزيارات أقسام الطوارئ."
+        ),
+        new(
+            "N17.9", 
+            "ICD-10", 
+            "Acute kidney injury, unspecified", 
+            "Rapid decline in renal function", 
+            "Common inpatient complication tracked with Creatinine labs.",
+            "قصور الكلى الحاد غير المحدد (AKI)",
+            "تدهور مفاجئ وسريع في وظائف الكلى وتصفية السموم",
+            "مضاعفة شائعة لدى المنومين تُتابع عبر تحاليل الكرياتينين المخبرية."
+        ),
 
         // HL7 TABLES
-        new("Table 0004 (I)", "HL7 Tables", "Patient Class: Inpatient", "PV1-2 Patient Class", "Patient admitted to a hospital bed for overnight stay."),
-        new("Table 0004 (O)", "HL7 Tables", "Patient Class: Outpatient", "PV1-2 Patient Class", "Clinic visit, ambulatory care, or day procedure (no overnight stay)."),
-        new("Table 0004 (E)", "HL7 Tables", "Patient Class: Emergency", "PV1-2 Patient Class", "Emergency department evaluation."),
-        new("Table 0078 (H)", "HL7 Tables", "Abnormal Flag: High", "OBX-8 Abnormal Flag", "Test result exceeds physiological upper reference boundary."),
-        new("Table 0078 (L)", "HL7 Tables", "Abnormal Flag: Low", "OBX-8 Abnormal Flag", "Test result falls below physiological lower reference boundary."),
-        new("Table 0078 (N)", "HL7 Tables", "Abnormal Flag: Normal", "OBX-8 Abnormal Flag", "Result is within safe expected parameters."),
-        new("Table 0112 (01)", "HL7 Tables", "Discharge Disposition: Discharged to Home", "PV1-36 Discharge Status", "Patient cleared by attending doctor to return home."),
-        new("Table 0112 (20)", "HL7 Tables", "Discharge Disposition: Expired", "PV1-36 Discharge Status", "Patient deceased during encounter."),
-        new("Table 0119 (NW)", "HL7 Tables", "Order Control: New Order", "ORC-1 Order Control", "Transmits a newly created clinical test or imaging order.")
+        new(
+            "Table 0004 (I)", 
+            "HL7 Tables", 
+            "Patient Class: Inpatient", 
+            "PV1-2 Patient Class", 
+            "Patient admitted to a hospital bed for overnight stay.",
+            "تصنيف المريض: تنويم داخلي (Inpatient)",
+            "الحقل PV1-2 لتصنيف الإقامة",
+            "مريض منوم رسمياً في سرير مستشفى للإقامة والمراقبة الليلية."
+        ),
+        new(
+            "Table 0004 (O)", 
+            "HL7 Tables", 
+            "Patient Class: Outpatient", 
+            "PV1-2 Patient Class", 
+            "Clinic visit, ambulatory care, or day procedure (no overnight stay).",
+            "تصنيف المريض: عيادات خارجية (Outpatient)",
+            "الحقل PV1-2 لتصنيف الإقامة",
+            "مريض مراجع لعيادة استشارية أو إجراء يومي دون مبيت."
+        ),
+        new(
+            "Table 0004 (E)", 
+            "HL7 Tables", 
+            "Patient Class: Emergency", 
+            "PV1-2 Patient Class", 
+            "Emergency department evaluation.",
+            "تصنيف المريض: طوارئ وإسعاف (Emergency)",
+            "الحقل PV1-2 لتصنيف الإقامة",
+            "مريض تحت التقييم والعلاج العاجل في قسم الطوارئ."
+        ),
+        new(
+            "Table 0078 (H)", 
+            "HL7 Tables", 
+            "Abnormal Flag: High", 
+            "OBX-8 Abnormal Flag", 
+            "Test result exceeds physiological upper reference boundary.",
+            "شارة غير طبيعي: مرتفع (High)",
+            "الحقل OBX-8 لتقييم النتائج",
+            "النتيجة المخبرية تتجاوز الحد الأعلى للقيم الفسيولوجية الطبيعية."
+        ),
+        new(
+            "Table 0078 (L)", 
+            "HL7 Tables", 
+            "Abnormal Flag: Low", 
+            "OBX-8 Abnormal Flag", 
+            "Test result falls below physiological lower reference boundary.",
+            "شارة غير طبيعي: منخفض (Low)",
+            "الحقل OBX-8 لتقييم النتائج",
+            "النتيجة المخبرية تقل عن الحد الأدنى للقيم الفسيولوجية الطبيعية."
+        ),
+        new(
+            "Table 0078 (N)", 
+            "HL7 Tables", 
+            "Abnormal Flag: Normal", 
+            "OBX-8 Abnormal Flag", 
+            "Result is within safe expected parameters.",
+            "شارة النتيجة: طبيعي (Normal)",
+            "الحقل OBX-8 لتقييم النتائج",
+            "النتيجة تقع بدقة داخل النطاق الفسيولوجي الآمن والمتوقع."
+        ),
+        new(
+            "Table 0112 (01)", 
+            "HL7 Tables", 
+            "Discharge Disposition: Discharged to Home", 
+            "PV1-36 Discharge Status", 
+            "Patient cleared by attending doctor to return home.",
+            "حالة الخروج: خروج إلى المنزل (Discharged to Home)",
+            "الحقل PV1-36 لمآل خروج المريض",
+            "سمح الطبيب المعالج للمريض بالعودة إلى المنزل مع استقرار حالته."
+        ),
+        new(
+            "Table 0112 (20)", 
+            "HL7 Tables", 
+            "Discharge Disposition: Expired", 
+            "PV1-36 Discharge Status", 
+            "Patient deceased during encounter.",
+            "حالة الخروج: وفاة المريض (Expired)",
+            "الحقل PV1-36 لمآل خروج المريض",
+            "وفاة المريض أثناء فترة التنويم أو الإسعاف بالمستشفى."
+        ),
+        new(
+            "Table 0119 (NW)", 
+            "HL7 Tables", 
+            "Order Control: New Order", 
+            "ORC-1 Order Control", 
+            "Transmits a newly created clinical test or imaging order.",
+            "التحكم بالطلب: طلب جديد (New Order)",
+            "الحقل ORC-1 لإدارة أوامر الأطباء",
+            "إرسال طلب فحص مخبري أو شعاعي سريري جديد إلى الأنظمة المنفذة."
+        )
     };
 
     private IEnumerable<TerminologyEntry> FilteredEntries => AllEntries
@@ -125,7 +354,9 @@
         .Where(e => string.IsNullOrWhiteSpace(searchTerm) ||
                     e.Code.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
                     e.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    (e.NameAr != null && e.NameAr.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
                     e.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    (e.DescriptionAr != null && e.DescriptionAr.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
                     e.ClinicalDetails.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
 
     private string GetCategoryBadge(string category) => category switch
@@ -134,4 +365,14 @@
         "ICD-10" => "bg-danger",
         _ => "bg-warning text-dark"
     };
+
+    protected override void OnInitialized()
+    {
+        Lang.OnLanguageChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        Lang.OnLanguageChanged -= StateHasChanged;
+    }
 }

@@ -1,37 +1,49 @@
 @page "/fhir-explorer"
 @rendermode InteractiveServer
+@implements IDisposable
 @inject FhirService FhirService
+@inject LanguageService Lang
 @inject IJSRuntime JS
 
-<PageTitle>FHIR R4 Resource Explorer</PageTitle>
+<PageTitle>@(Lang.IsRtl ? "مستكشف موارد FHIR R4 المعيارية" : "FHIR R4 Resource Explorer")</PageTitle>
 
 <div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <div>
-            <h2 class="fw-bold mb-0"><i class="bi bi-filetype-json text-success"></i> FHIR R4 Resource Explorer</h2>
-            <p class="text-muted small mb-0">Explore strongly-typed FHIR R4 resources serialized via the official Firely .NET SDK.</p>
+            <h2 class="h3 fw-bold mb-0">
+                <i class="bi bi-filetype-json text-success me-1"></i> 
+                @(Lang.IsRtl ? "مستكشف موارد FHIR R4 المعيارية" : "FHIR R4 Resource Explorer")
+            </h2>
+            <p class="text-muted small mb-0">
+                @(Lang.IsRtl ? "استكشف موارد FHIR R4 محكمة الأنواع والمعالجة عبر حزمة Firely .NET SDK الرسمية."
+                             : "Explore strongly-typed FHIR R4 resources serialized via the official Firely .NET SDK.")
+            </p>
         </div>
         <div class="btn-group">
             <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Load Clinical Scenario
+                @(Lang.IsRtl ? "تحميل سيناريو سريري" : "Load Clinical Scenario")
             </button>
             <ul class="dropdown-menu dropdown-menu-end shadow">
                 @foreach (var p in ClinicalPresets.All)
                 {
-                    <li><a class="dropdown-item" href="javascript:void(0)" @onclick="() => SelectScenario(p.Id)">@p.Title</a></li>
+                    <li>
+                        <a class="dropdown-item" href="javascript:void(0)" @onclick="() => SelectScenario(p.Id)">
+                            @(Lang.IsRtl && !string.IsNullOrEmpty(p.TitleAr) ? p.TitleAr : p.Title)
+                        </a>
+                    </li>
                 }
             </ul>
         </div>
     </div>
 
     <!-- Quick Scenario Buttons -->
-    <div class="mb-3 d-flex flex-wrap gap-2">
-        <span class="text-muted small align-self-center me-1">Scenario:</span>
+    <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
+        <span class="text-muted small align-self-center me-1">@(Lang.IsRtl ? "السيناريو:" : "Scenario:")</span>
         @foreach (var p in ClinicalPresets.All)
         {
             <button class="btn btn-sm @(selectedPresetId == p.Id ? "btn-success" : "btn-outline-secondary")"
                     @onclick="() => SelectScenario(p.Id)">
-                @p.Title.Split('(')[0].Trim()
+                @(Lang.IsRtl && !string.IsNullOrEmpty(p.TitleAr) ? p.TitleAr.Split('(')[0].Trim() : p.Title.Split('(')[0].Trim())
             </button>
         }
     </div>
@@ -43,19 +55,19 @@
                 <div class="card-header bg-light d-flex justify-content-between align-items-center flex-wrap gap-2 py-2">
                     <div class="btn-group btn-group-sm">
                         <button class="btn @(explorerTab == "json" ? "btn-success" : "btn-outline-secondary")" @onclick='() => explorerTab = "json"'>
-                            <i class="bi bi-filetype-json me-1"></i> JSON Source
+                            <i class="bi bi-filetype-json me-1"></i> @(Lang.IsRtl ? "شفرة JSON" : "JSON Source")
                         </button>
                         <button class="btn @(explorerTab == "graph" ? "btn-success" : "btn-outline-secondary")" @onclick='() => explorerTab = "graph"'>
-                            <i class="bi bi-diagram-3 me-1"></i> Reference Graph
+                            <i class="bi bi-diagram-3 me-1"></i> @(Lang.IsRtl ? "مخطط المراجع" : "Reference Graph")
                         </button>
                         <button class="btn @(explorerTab == "validator" ? "btn-success" : "btn-outline-secondary")" @onclick='() => explorerTab = "validator"'>
-                            <i class="bi bi-shield-check me-1"></i> US Core Validator
+                            <i class="bi bi-shield-check me-1"></i> @(Lang.IsRtl ? "مدقق المطابقة" : "US Core Validator")
                         </button>
                     </div>
                     <div class="d-flex gap-2 align-items-center">
-                        <span class="badge bg-success">@resourceType</span>
+                        <span class="badge bg-success font-monospace">@resourceType</span>
                         <button class="btn btn-outline-secondary btn-sm py-0 px-2" @onclick="CopyJson">
-                            <i class="bi bi-clipboard"></i> Copy
+                            <i class="bi bi-clipboard me-1"></i> @(Lang.IsRtl ? "نسخ" : "Copy")
                         </button>
                     </div>
                 </div>
@@ -63,13 +75,15 @@
                     @if (explorerTab == "json")
                     {
                         <pre class="bg-dark text-light p-3 m-0 font-monospace small overflow-auto" 
-                             style="max-height: 70vh; tab-size: 2; border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius);"><code>@fhirJson</code></pre>
+                             style="max-height: 70vh; tab-size: 2; border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius); direction: ltr !important; text-align: left !important; unicode-bidi: isolate;"><code>@fhirJson</code></pre>
                     }
                     else if (explorerTab == "graph")
                     {
                         <div class="p-3 bg-light">
                             <div class="alert alert-info py-2 px-3 small mb-3">
-                                <strong><i class="bi bi-diagram-3-fill"></i> FHIR Resource Knowledge Graph:</strong> Click any node below to inspect how resources point to each other via <code>urn:uuid:...</code> or relative references.
+                                <strong><i class="bi bi-diagram-3-fill me-1"></i> @(Lang.IsRtl ? "مخطط معارف ومراجع موارد FHIR:" : "FHIR Resource Knowledge Graph:")</strong> 
+                                @(Lang.IsRtl ? "انقر على أي عقدة أدناه لمعاينة كيفية إشارة الموارد لبعضها البعض عبر معرفات urn:uuid أو مراجع مسارية."
+                                             : "Click any node below to inspect how resources point to each other via urn:uuid:... or relative references.")
                             </div>
 
                             <!-- Interactive Node Graph Canvas -->
@@ -79,16 +93,16 @@
                                     <div class="d-flex flex-column align-items-center gap-2">
                                         <!-- Root Bundle -->
                                         <div class="card bg-dark text-white p-2 px-3 shadow-sm cursor-pointer border" 
-                                             @onclick='() => SelectGraphNode("Bundle", "Collection bundle holding all transaction elements.", "urn:uuid:bundle-admission")'>
+                                             @onclick='() => SelectGraphNode("Bundle", Lang.IsRtl ? "حزمة تجميعية تضم كافة عناصر العملية في سجل واحد." : "Collection bundle holding all transaction elements.", "urn:uuid:bundle-admission")'>
                                             <span class="fw-bold"><i class="bi bi-box-seam me-1"></i> Bundle (Type = Collection)</span>
                                         </div>
 
-                                        <div class="text-primary fs-5"><i class="bi bi-arrow-down"></i> <span class="small text-muted" style="font-size: 0.75rem;">contains</span> <i class="bi bi-arrow-down"></i></div>
+                                        <div class="text-primary fs-5"><i class="bi bi-arrow-down"></i> <span class="small text-muted" style="font-size: 0.75rem;">@(Lang.IsRtl ? "تتضمن" : "contains")</span> <i class="bi bi-arrow-down"></i></div>
 
                                         <!-- Child Resources -->
                                         <div class="d-flex flex-wrap justify-content-center gap-3 w-100">
                                             <div class="card border-primary p-2 flex-grow-1 shadow-sm cursor-pointer" style="max-width: 220px;"
-                                                 @onclick='() => SelectGraphNode("Patient", "Marcus Vance (MRN450192, DOB 1972-03-25, Male)", "Patient/urn:uuid:patient-1")'>
+                                                 @onclick='() => SelectGraphNode("Patient", Lang.IsRtl ? "ماركوس فانس (رقم الملف MRN450192، تاريخ الميلاد 1972-03-25، ذكر)" : "Marcus Vance (MRN450192, DOB 1972-03-25, Male)", "Patient/urn:uuid:patient-1")'>
                                                 <div class="d-flex align-items-center gap-2">
                                                     <i class="bi bi-person-fill text-primary fs-4"></i>
                                                     <div>
@@ -99,7 +113,7 @@
                                             </div>
 
                                             <div class="card border-success p-2 flex-grow-1 shadow-sm cursor-pointer" style="max-width: 240px;"
-                                                 @onclick='() => SelectGraphNode("Encounter", "Inpatient stay in ICU_CARDIO. Subject references urn:uuid:patient-1.", "Encounter/urn:uuid:enc-1")'>
+                                                 @onclick='() => SelectGraphNode("Encounter", Lang.IsRtl ? "إقامة تنويم داخلي في وحدة عناية القلب ICU_CARDIO. يشير إلى المريض." : "Inpatient stay in ICU_CARDIO. Subject references urn:uuid:patient-1.", "Encounter/urn:uuid:enc-1")'>
                                                 <div class="d-flex align-items-center gap-2">
                                                     <i class="bi bi-hospital-fill text-success fs-4"></i>
                                                     <div>
@@ -117,7 +131,7 @@
                                     <div class="d-flex flex-column align-items-center gap-2">
                                         <!-- Root Bundle -->
                                         <div class="card bg-dark text-white p-2 px-3 shadow-sm cursor-pointer border"
-                                             @onclick='() => SelectGraphNode("Bundle", "Diagnostic lab panel bundle envelope.", "urn:uuid:bundle-lab")'>
+                                             @onclick='() => SelectGraphNode("Bundle", Lang.IsRtl ? "حاوية تقرير التحاليل المخبرية المتكاملة." : "Diagnostic lab panel bundle envelope.", "urn:uuid:bundle-lab")'>
                                             <span class="fw-bold"><i class="bi bi-box-seam me-1"></i> Bundle (Laboratory Panel)</span>
                                         </div>
 
@@ -126,13 +140,13 @@
                                         <!-- Middle Layer -->
                                         <div class="d-flex flex-wrap justify-content-center gap-3 w-100">
                                             <div class="card border-primary p-2 flex-grow-1 shadow-sm cursor-pointer" style="max-width: 200px;"
-                                                 @onclick='() => SelectGraphNode("Patient", "Eleanor Smith (Demographics, MRN982341).", "Patient/Smith")'>
+                                                 @onclick='() => SelectGraphNode("Patient", Lang.IsRtl ? "إليانور سميث (البيانات الديموغرافية، MRN982341)." : "Eleanor Smith (Demographics, MRN982341).", "Patient/Smith")'>
                                                 <div class="fw-bold small text-primary"><i class="bi bi-person-fill"></i> Patient</div>
                                                 <div class="text-muted" style="font-size: 0.75rem;">Eleanor Smith</div>
                                             </div>
 
                                             <div class="card border-warning p-2 flex-grow-1 shadow-sm cursor-pointer" style="max-width: 240px;"
-                                                 @onclick='() => SelectGraphNode("DiagnosticReport", "Comprehensive Metabolic Panel report. Points to Observations.", "DiagnosticReport/cmp-1")'>
+                                                 @onclick='() => SelectGraphNode("DiagnosticReport", Lang.IsRtl ? "تقرير فحص الأيض الشامل CMP. يشير لنتائج الملاحظات." : "Comprehensive Metabolic Panel report. Points to Observations.", "DiagnosticReport/cmp-1")'>
                                                 <div class="fw-bold small text-dark"><i class="bi bi-file-earmark-medical-fill text-warning"></i> DiagnosticReport</div>
                                                 <div class="text-muted" style="font-size: 0.75rem;">Panel Result (F)</div>
                                                 <div class="badge bg-light text-primary border" style="font-size: 0.65rem;">subject &rarr; Patient</div>
@@ -144,13 +158,13 @@
                                         <!-- Bottom Layer: Observations -->
                                         <div class="d-flex flex-wrap justify-content-center gap-2 w-100">
                                             <div class="card border-success p-2 shadow-sm cursor-pointer" style="max-width: 210px;"
-                                                 @onclick='() => SelectGraphNode("Observation (Glucose)", "Serum Glucose: 104 mg/dL. Subject references Patient.", "Observation/glucose")'>
+                                                 @onclick='() => SelectGraphNode("Observation (Glucose)", Lang.IsRtl ? "سكر الدم: 104 mg/dL. يشير إلى المريض." : "Serum Glucose: 104 mg/dL. Subject references Patient.", "Observation/glucose")'>
                                                 <div class="fw-bold small text-success"><i class="bi bi-eyedropper"></i> Glucose Obs</div>
                                                 <div class="text-muted" style="font-size: 0.75rem;">104 mg/dL &bull; LOINC 2339-0</div>
                                             </div>
 
                                             <div class="card border-success p-2 shadow-sm cursor-pointer" style="max-width: 210px;"
-                                                 @onclick='() => SelectGraphNode("Observation (Potassium)", "Serum Potassium: 4.2 mmol/L. Subject references Patient.", "Observation/potassium")'>
+                                                 @onclick='() => SelectGraphNode("Observation (Potassium)", Lang.IsRtl ? "بوتاسيوم الدم: 4.2 mmol/L. يشير إلى المريض." : "Serum Potassium: 4.2 mmol/L. Subject references Patient.", "Observation/potassium")'>
                                                 <div class="fw-bold small text-success"><i class="bi bi-eyedropper"></i> Potassium Obs</div>
                                                 <div class="text-muted" style="font-size: 0.75rem;">4.2 mmol/L &bull; LOINC 2823-3</div>
                                             </div>
@@ -161,10 +175,10 @@
                                 {
                                     <div class="d-flex justify-content-center py-4">
                                         <div class="card border-primary p-3 shadow-sm cursor-pointer text-center" style="max-width: 260px;"
-                                             @onclick='() => SelectGraphNode(resourceType, "Standalone FHIR resource with strongly typed attributes.", resourceType)'>
+                                             @onclick='() => SelectGraphNode(resourceType, Lang.IsRtl ? "مورد FHIR مستقل مع خصائص قوية الأنواع." : "Standalone FHIR resource with strongly typed attributes.", resourceType)'>
                                             <i class="bi bi-file-earmark-code text-primary fs-2"></i>
                                             <h6 class="fw-bold text-primary mb-1 mt-2">@resourceType</h6>
-                                            <div class="text-muted small">Standalone Resource Entity</div>
+                                            <div class="text-muted small">@(Lang.IsRtl ? "كيان مورد سريري مستقل" : "Standalone Resource Entity")</div>
                                         </div>
                                     </div>
                                 }
@@ -191,52 +205,64 @@
                         <div class="p-3 bg-light">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div>
-                                    <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-shield-check text-success me-1"></i> FHIR R4 &amp; US Core Conformance Scorecard</h6>
-                                    <small class="text-muted">Automated schema validation against HL7 International specifications</small>
+                                    <h6 class="fw-bold mb-0 text-dark">
+                                        <i class="bi bi-shield-check text-success me-1"></i> 
+                                        @(Lang.IsRtl ? "بطاقة تقييم المطابقة لمعايير FHIR R4 و US Core" : "FHIR R4 & US Core Conformance Scorecard")
+                                    </h6>
+                                    <small class="text-muted">
+                                        @(Lang.IsRtl ? "التحقق الآلي من المخططات التوافقية وفق مواصفات منظمة HL7 الدولية" : "Automated schema validation against HL7 International specifications")
+                                    </small>
                                 </div>
-                                <span class="badge bg-success fs-6">100% Conforming</span>
+                                <span class="badge bg-success fs-6">@(Lang.IsRtl ? "مطابق بنسبة 100%" : "100% Conforming")</span>
                             </div>
 
                             <div class="list-group list-group-flush border rounded bg-white small mb-3">
                                 <div class="list-group-item d-flex justify-content-between align-items-center py-2">
                                     <div>
                                         <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                        <strong>Resource Identity (`id` &amp; `resourceType`):</strong> Valid RFC-4122 GUID or unique string assigned.
+                                        <strong>@(Lang.IsRtl ? "هوية المورد (id و resourceType):" : "Resource Identity (`id` & `resourceType`):")</strong> 
+                                        @(Lang.IsRtl ? "معرف GUID صالح ومسجل وفق معيار RFC-4122." : "Valid RFC-4122 GUID or unique string assigned.")
                                     </div>
-                                    <span class="badge bg-success-subtle text-success border border-success">PASSED</span>
+                                    <span class="badge bg-success-subtle text-success border border-success">@(Lang.IsRtl ? "ناجح" : "PASSED")</span>
                                 </div>
                                 <div class="list-group-item d-flex justify-content-between align-items-center py-2">
                                     <div>
                                         <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                        <strong>Clinical Coding System URIs:</strong> Standard terminology systems (`http://loinc.org`, `http://terminology.hl7.org/CodeSystem/v2-0203`) present.
+                                        <strong>@(Lang.IsRtl ? "عناوين أنظمة الترميز السريري:" : "Clinical Coding System URIs:")</strong> 
+                                        @(Lang.IsRtl ? "حضور روابط الأنظمة القياسية (loinc.org, terminology.hl7.org)." : "Standard terminology systems (`http://loinc.org`, `http://terminology.hl7.org/CodeSystem/v2-0203`) present.")
                                     </div>
-                                    <span class="badge bg-success-subtle text-success border border-success">PASSED</span>
+                                    <span class="badge bg-success-subtle text-success border border-success">@(Lang.IsRtl ? "ناجح" : "PASSED")</span>
                                 </div>
                                 <div class="list-group-item d-flex justify-content-between align-items-center py-2">
                                     <div>
                                         <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                        <strong>Temporal &amp; Datetime Validation:</strong> All timestamps satisfy ISO 8601 extended UTC format with timezone offsets.
+                                        <strong>@(Lang.IsRtl ? "صحة التواريخ والأختام الزمنية:" : "Temporal & Datetime Validation:")</strong> 
+                                        @(Lang.IsRtl ? "كافة التواريخ تحقق صيغة ISO-8601 UTC الموسعة مع فروق التوقيت." : "All timestamps satisfy ISO 8601 extended UTC format with timezone offsets.")
                                     </div>
-                                    <span class="badge bg-success-subtle text-success border border-success">PASSED</span>
+                                    <span class="badge bg-success-subtle text-success border border-success">@(Lang.IsRtl ? "ناجح" : "PASSED")</span>
                                 </div>
                                 <div class="list-group-item d-flex justify-content-between align-items-center py-2">
                                     <div>
                                         <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                        <strong>UCUM Units of Measure:</strong> Measured laboratory values include valid standardized UCUM string units.
+                                        <strong>@(Lang.IsRtl ? "وحدات القياس المعيارية UCUM:" : "UCUM Units of Measure:")</strong> 
+                                        @(Lang.IsRtl ? "كافة النتائج المخبرية المقاسة تقترن بوحدات قياس UCUM معتمدة." : "Measured laboratory values include valid standardized UCUM string units.")
                                     </div>
-                                    <span class="badge bg-success-subtle text-success border border-success">PASSED</span>
+                                    <span class="badge bg-success-subtle text-success border border-success">@(Lang.IsRtl ? "ناجح" : "PASSED")</span>
                                 </div>
                                 <div class="list-group-item d-flex justify-content-between align-items-center py-2">
                                     <div>
                                         <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                        <strong>Reference Graph Integrity:</strong> All nested resource references resolve to known endpoints inside the current bundle.
+                                        <strong>@(Lang.IsRtl ? "سلامة شبكة المراجع:" : "Reference Graph Integrity:")</strong> 
+                                        @(Lang.IsRtl ? "كافة مراجع الموارد المتداخلة تشير إلى أهداف معروفة داخل الحزمة الحالية." : "All nested resource references resolve to known endpoints inside the current bundle.")
                                     </div>
-                                    <span class="badge bg-success-subtle text-success border border-success">PASSED</span>
+                                    <span class="badge bg-success-subtle text-success border border-success">@(Lang.IsRtl ? "ناجح" : "PASSED")</span>
                                 </div>
                             </div>
 
                             <div class="alert alert-success py-2 px-3 small mb-0">
-                                <strong><i class="bi bi-award-fill"></i> Production Ready:</strong> This resource payload can be safely persisted into HAPI FHIR, Google Cloud Healthcare API, Azure Health Data Services, or AWS HealthLake without schema rejection.
+                                <strong><i class="bi bi-award-fill me-1"></i> @(Lang.IsRtl ? "جاهز للإنتاج الفعلي:" : "Production Ready:")</strong> 
+                                @(Lang.IsRtl ? "يمكن تخزين واستدعاء هذه الحمولة بأمان تام داخل خوادم HAPI FHIR، و Google Cloud Healthcare API، و Azure Health Data Services، و AWS HealthLake دون أي رفض هيكلي."
+                                             : "This resource payload can be safely persisted into HAPI FHIR, Google Cloud Healthcare API, Azure Health Data Services, or AWS HealthLake without schema rejection.")
                             </div>
                         </div>
                     }
@@ -249,13 +275,18 @@
             <!-- Scenario Overview -->
             <div class="card shadow-sm mb-3">
                 <div class="card-header bg-light fw-semibold small">
-                    <i class="bi bi-info-circle text-primary"></i> Scenario Clinical Significance
+                    <i class="bi bi-info-circle text-primary me-1"></i> 
+                    @(Lang.IsRtl ? "الأهمية السريرية للسيناريو" : "Scenario Clinical Significance")
                 </div>
                 <div class="card-body p-3 small">
-                    <h6 class="fw-bold text-dark">@currentPreset?.Title</h6>
-                    <p class="text-muted mb-2">@currentPreset?.Summary</p>
+                    <h6 class="fw-bold text-dark">
+                        @(Lang.IsRtl && !string.IsNullOrEmpty(currentPreset?.TitleAr) ? currentPreset.TitleAr : currentPreset?.Title)
+                    </h6>
+                    <p class="text-muted mb-2">
+                        @(Lang.IsRtl && !string.IsNullOrEmpty(currentPreset?.SummaryAr) ? currentPreset.SummaryAr : currentPreset?.Summary)
+                    </p>
                     <div class="p-2 bg-light rounded border text-muted" style="white-space: pre-line;">
-                        @currentPreset?.TeachingNotes
+                        @(Lang.IsRtl && !string.IsNullOrEmpty(currentPreset?.SummaryAr) ? currentPreset.SummaryAr : currentPreset?.TeachingNotes)
                     </div>
                 </div>
             </div>
@@ -263,20 +294,21 @@
             <!-- FHIR Primitive & Complex Datatypes Cheat Sheet -->
             <div class="card shadow-sm">
                 <div class="card-header bg-light fw-semibold small">
-                    <i class="bi bi-mortarboard text-success"></i> FHIR Core Data Types Reference
+                    <i class="bi bi-mortarboard text-success me-1"></i> 
+                    @(Lang.IsRtl ? "مرجع أنواع البيانات الأساسية في FHIR" : "FHIR Core Data Types Reference")
                 </div>
                 <div class="card-body p-3 small overflow-auto" style="max-height: 40vh;">
                     <div class="accordion accordion-flush" id="datatypesAccordion">
                         <div class="accordion-item">
                             <h2 class="accordion-header">
                                 <button class="accordion-button collapsed py-2 px-0 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#dtId">
-                                    Identifier (CX in v2)
+                                    Identifier (@(Lang.IsRtl ? "يقابل CX في v2" : "CX in v2"))
                                 </button>
                             </h2>
                             <div id="dtId" class="accordion-collapse collapse" data-bs-parent="#datatypesAccordion">
                                 <div class="accordion-body px-0 text-muted">
-                                    Uniquely identifies a business entity (e.g. MRN, SSN, Account Number).<br />
-                                    <strong>Properties:</strong> <code>system</code> (URI of assigning domain), <code>value</code> (the actual ID string), <code>type</code> (CodeableConcept like MR).
+                                    @(Lang.IsRtl ? "يميز الكيان المهني فريداً (مثل رقم الملف الطبي MRN، أو الرقم القومي، أو رقم الحساب)." : "Uniquely identifies a business entity (e.g. MRN, SSN, Account Number).")<br />
+                                    <strong>@(Lang.IsRtl ? "الخصائص:" : "Properties:")</strong> <code>system</code> (URI @(Lang.IsRtl ? "جهة الإصدار" : "assigning domain")), <code>value</code> (@(Lang.IsRtl ? "القيمة النصية للمعرف" : "actual ID string")), <code>type</code> (CodeableConcept MR).
                                 </div>
                             </div>
                         </div>
@@ -284,12 +316,13 @@
                         <div class="accordion-item">
                             <h2 class="accordion-header">
                                 <button class="accordion-button collapsed py-2 px-0 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#dtName">
-                                    HumanName (XPN in v2)
+                                    HumanName (@(Lang.IsRtl ? "يقابل XPN في v2" : "XPN in v2"))
                                 </button>
                             </h2>
                             <div id="dtName" class="accordion-collapse collapse" data-bs-parent="#datatypesAccordion">
                                 <div class="accordion-body px-0 text-muted">
-                                    A person's name with parts: <code>family</code> (surname), <code>given[]</code> (first and middle names as string array), <code>prefix[]</code> (Dr.), <code>suffix[]</code> (Jr.).
+                                    @(Lang.IsRtl ? "اسم الشخص بأجزائه: العائلة (family)، والأسماء الشخصية والوسطى كمصفوفة (given[])، والألقاب (prefix/suffix)."
+                                                 : "A person's name with parts: family (surname), given[] (first and middle names as string array), prefix[] (Dr.), suffix[] (Jr.).")
                                 </div>
                             </div>
                         </div>
@@ -297,15 +330,16 @@
                         <div class="accordion-item">
                             <h2 class="accordion-header">
                                 <button class="accordion-button collapsed py-2 px-0 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#dtCoding">
-                                    CodeableConcept & Coding (CE / CWE in v2)
+                                    CodeableConcept &amp; Coding (@(Lang.IsRtl ? "يقابل CE / CWE في v2" : "CE / CWE in v2"))
                                 </button>
                             </h2>
                             <div id="dtCoding" class="accordion-collapse collapse" data-bs-parent="#datatypesAccordion">
                                 <div class="accordion-body px-0 text-muted">
-                                    Represents clinical concepts tied to terminology systems.<br />
-                                    <code>system</code>: URI like <code>http://loinc.org</code> or <code>http://snomed.info/sct</code>.<br />
-                                    <code>code</code>: standard code (e.g., 2345-7).<br />
-                                    <code>display</code>: human-readable name.
+                                    @(Lang.IsRtl ? "يمثل المفاهيم السريرية المرتبطة بأنظمة المصطلحات القياسية (مثل LOINC أو SNOMED CT)."
+                                                 : "Represents clinical concepts tied to terminology systems.")<br />
+                                    <code>system</code>: URI @(Lang.IsRtl ? "مثل" : "like") <code>http://loinc.org</code>.<br />
+                                    <code>code</code>: @(Lang.IsRtl ? "الرمز القياسي" : "standard code") (e.g., 2345-7).<br />
+                                    <code>display</code>: @(Lang.IsRtl ? "الاسم البشري المقروء." : "human-readable name.")
                                 </div>
                             </div>
                         </div>
@@ -313,13 +347,13 @@
                         <div class="accordion-item">
                             <h2 class="accordion-header">
                                 <button class="accordion-button collapsed py-2 px-0 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#dtQuantity">
-                                    Quantity (NM + CE in v2)
+                                    Quantity (@(Lang.IsRtl ? "يقابل NM + CE في v2" : "NM + CE in v2"))
                                 </button>
                             </h2>
                             <div id="dtQuantity" class="accordion-collapse collapse" data-bs-parent="#datatypesAccordion">
                                 <div class="accordion-body px-0 text-muted">
-                                    Measured amounts (lab results, dosages, vital signs).<br />
-                                    Pairs <code>value</code> (decimal number) with <code>unit</code> and <code>system</code> (standardized to UCUM: <code>http://unitsofmeasure.org</code>).
+                                    @(Lang.IsRtl ? "الكميات المقاسة (النتائج المخبرية، الجرعات، المؤشرات الحيوية). يقرن القيمة الرقمية بالوحدة المعيارية من نظام UCUM."
+                                                 : "Measured amounts (lab results, dosages, vital signs). Pairs value (decimal number) with unit and system (standardized to UCUM: http://unitsofmeasure.org).")
                                 </div>
                             </div>
                         </div>
@@ -327,12 +361,13 @@
                         <div class="accordion-item">
                             <h2 class="accordion-header">
                                 <button class="accordion-button collapsed py-2 px-0 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#dtRef">
-                                    Reference (Pointer between resources)
+                                    Reference (@(Lang.IsRtl ? "المؤشرات والروابط بين الموارد" : "Pointer between resources"))
                                 </button>
                             </h2>
                             <div id="dtRef" class="accordion-collapse collapse" data-bs-parent="#datatypesAccordion">
                                 <div class="accordion-body px-0 text-muted">
-                                    The cornerstone of FHIR graph architecture. Links resources via relative or UUID URIs: e.g. <code>Encounter.subject = { reference: "Patient/123" }</code>.
+                                    @(Lang.IsRtl ? "حجر الزاوية في بنية مخططات FHIR؛ يربط الموارد ببعضها عبر معرفات URIs نسبية أو UUID مثل: Encounter.subject = { reference: 'Patient/123' }."
+                                                 : "The cornerstone of FHIR graph architecture. Links resources via relative or UUID URIs: e.g. Encounter.subject = { reference: \"Patient/123\" }.")
                                 </div>
                             </div>
                         </div>
@@ -363,6 +398,7 @@
 
     protected override void OnInitialized()
     {
+        Lang.OnLanguageChanged += StateHasChanged;
         var targetId = !string.IsNullOrEmpty(Preset) ? Preset : "registration";
         SelectScenario(targetId);
     }
@@ -382,5 +418,10 @@
     private async Task CopyJson()
     {
         await JS.InvokeVoidAsync("navigator.clipboard.writeText", fhirJson);
+    }
+
+    public void Dispose()
+    {
+        Lang.OnLanguageChanged -= StateHasChanged;
     }
 }

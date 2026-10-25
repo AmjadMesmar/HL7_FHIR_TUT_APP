@@ -1,22 +1,29 @@
 @page "/project-info"
 @rendermode InteractiveServer
+@implements IDisposable
+@inject LanguageService Lang
 
-<PageTitle>Project Info & Tech Stack - HL7 & FHIR Workbench</PageTitle>
+<PageTitle>@(Lang.IsRtl ? "المواصفات التقنية ومعمارية النظام - منصة HL7 و FHIR" : "Project Info & Tech Stack - HL7 & FHIR Workbench")</PageTitle>
 
 <div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
     <!-- Hero Header -->
     <div class="p-4 mb-4 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #212529 0%, #0d6efd 100%);">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-                <span class="badge bg-primary mb-2 px-3 py-1 fw-semibold">Engineering Specifications</span>
-                <h1 class="h2 fw-bold mb-1">Project Technical Overview &amp; Architecture</h1>
+                <span class="badge bg-primary mb-2 px-3 py-1 fw-semibold">
+                    @(Lang.IsRtl ? "المواصفات الهندسية والمعمارية" : "Engineering Specifications")
+                </span>
+                <h1 class="h2 fw-bold mb-1">
+                    @(Lang.IsRtl ? "المعمارية التقنية للمشروع وحزم التقنيات" : "Project Technical Overview & Architecture")
+                </h1>
                 <p class="mb-0 text-white-50">
-                    Comprehensive technical specifications, NuGet package justifications, and architectural design decisions for your engineering team.
+                    @(Lang.IsRtl ? "مواصفات هندسية متكاملة، ومبررات اختيار حزم NuGet، والقرارات المعمارية لتصميم منصة تعليم تكامل الأنظمة الصحية."
+                                 : "Comprehensive technical specifications, NuGet package justifications, and architectural design decisions for your engineering team.")
                 </p>
             </div>
             <div class="d-flex gap-2">
                 <a href="docs" class="btn btn-warning fw-bold px-3">
-                    <i class="bi bi-book-half me-1"></i> Read Living Docs
+                    <i class="bi bi-book-half me-1"></i> @(Lang.IsRtl ? "قراءة الوثائق الحية" : "Read Living Docs")
                 </a>
             </div>
         </div>
@@ -26,30 +33,30 @@
     <div class="row g-3 mb-4">
         <div class="col-md-3">
             <div class="card h-100 shadow-sm border-primary border-top border-3 text-center p-3">
-                <span class="text-muted small fw-semibold">Runtime Framework</span>
+                <span class="text-muted small fw-semibold">@(Lang.IsRtl ? "إطار العمل" : "Runtime Framework")</span>
                 <h4 class="fw-bold text-primary mb-0 mt-1">.NET 10.0</h4>
                 <small class="text-muted">Target: <code>net10.0</code></small>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card h-100 shadow-sm border-success border-top border-3 text-center p-3">
-                <span class="text-muted small fw-semibold">Rendering Architecture</span>
+                <span class="text-muted small fw-semibold">@(Lang.IsRtl ? "معمارية العرض التفاعلي" : "Rendering Architecture")</span>
                 <h4 class="fw-bold text-success mb-0 mt-1">Blazor Server</h4>
-                <small class="text-muted">Real-time SignalR Circuits</small>
+                <small class="text-muted">@(Lang.IsRtl ? "دوائر تفاعلية عبر SignalR" : "Real-time SignalR Circuits")</small>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card h-100 shadow-sm border-warning border-top border-3 text-center p-3">
-                <span class="text-muted small fw-semibold">FHIR SDK Engine</span>
+                <span class="text-muted small fw-semibold">@(Lang.IsRtl ? "محرك حزمة FHIR" : "FHIR SDK Engine")</span>
                 <h4 class="fw-bold text-warning text-dark mb-0 mt-1">Firely R4</h4>
                 <small class="text-muted">Package v6.6.0</small>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card h-100 shadow-sm border-info border-top border-3 text-center p-3">
-                <span class="text-muted small fw-semibold">Runtime Footprint</span>
+                <span class="text-muted small fw-semibold">@(Lang.IsRtl ? "استهلاك الذاكرة" : "Runtime Footprint")</span>
                 <h4 class="fw-bold text-info text-dark mb-0 mt-1">~140 MB</h4>
-                <small class="text-muted">Zero Local Database Required</small>
+                <small class="text-muted">@(Lang.IsRtl ? "دون الحاجة لقاعدة بيانات محلية" : "Zero Local Database Required")</small>
             </div>
         </div>
     </div>
@@ -57,7 +64,10 @@
     <!-- NuGet Packages Bill of Materials -->
     <div class="card shadow-sm border mb-4">
         <div class="card-header bg-light py-2 fw-bold text-dark d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-box-seam text-primary me-2"></i> Installed NuGet Packages &amp; Dependencies</span>
+            <span>
+                <i class="bi bi-box-seam text-primary me-2"></i> 
+                @(Lang.IsRtl ? "حزم وتغذيات NuGet المركبة في المشروع" : "Installed NuGet Packages & Dependencies")
+            </span>
             <span class="badge bg-secondary">Bill of Materials</span>
         </div>
         <div class="card-body p-0">
@@ -65,42 +75,42 @@
                 <table class="table table-hover table-sm mb-0 small">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 20%;">Package</th>
-                            <th style="width: 10%;">Version</th>
-                            <th style="width: 35%;">What It Does</th>
-                            <th style="width: 35%;">Why It Was Chosen (The Rationale)</th>
+                            <th style="width: 20%;">@(Lang.IsRtl ? "الحزمة" : "Package")</th>
+                            <th style="width: 10%;">@(Lang.IsRtl ? "الإصدار" : "Version")</th>
+                            <th style="width: 35%;">@(Lang.IsRtl ? "الدور والوظيفة" : "What It Does")</th>
+                            <th style="width: 35%;">@(Lang.IsRtl ? "المبرر الهندسي للاختيار" : "Why It Was Chosen (The Rationale)")</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="font-monospace fw-bold text-primary">Hl7.Fhir.R4</td>
+                            <td class="font-monospace fw-bold text-primary" style="direction: ltr !important; unicode-bidi: isolate;">Hl7.Fhir.R4</td>
                             <td><span class="badge bg-dark">6.6.0</span></td>
-                            <td>Official Firely .NET SDK for FHIR Release 4 models, serializers, and clinical datatypes.</td>
-                            <td>Writing custom POCO classes for 145+ resources with polymorphic types (<code>value[x]</code>) is unmaintainable. Firely is HL7-endorsed and battle-tested.</td>
+                            <td>@(Lang.IsRtl ? "حزمة Firely .NET SDK الرسمية لنماذج FHIR الإصدار الرابع ومسلسلات JSON والأنواع السريرية." : "Official Firely .NET SDK for FHIR Release 4 models, serializers, and clinical datatypes.")</td>
+                            <td>@(Lang.IsRtl ? "كتابة أصناف POCO مخصصة لأكثر من 145 مورداً سريرياً أمر شبه مستحيل الصيانة. حزمة Firely معتمدة رسمياً ومختبرة ميدانياً." : "Writing custom POCO classes for 145+ resources with polymorphic types (value[x]) is unmaintainable. Firely is HL7-endorsed and battle-tested.")</td>
                         </tr>
                         <tr>
-                            <td class="font-monospace fw-semibold text-secondary">Hl7.Fhir.Base</td>
+                            <td class="font-monospace fw-semibold text-secondary" style="direction: ltr !important; unicode-bidi: isolate;">Hl7.Fhir.Base</td>
                             <td><span class="badge bg-secondary">6.6.0</span></td>
-                            <td>Core serialization engine and base primitive abstractions.</td>
-                            <td>Handles low-level streaming JSON/XML writers and reader reflection pipelines.</td>
+                            <td>@(Lang.IsRtl ? "محرك التسلسل الأساسي والتجريدات الأولية للأنماط والخواص." : "Core serialization engine and base primitive abstractions.")</td>
+                            <td>@(Lang.IsRtl ? "يدير خطوط معالجة القراءة والكتابة عالية الأداء لتدفقات JSON و XML." : "Handles low-level streaming JSON/XML writers and reader reflection pipelines.")</td>
                         </tr>
                         <tr>
-                            <td class="font-monospace fw-semibold text-secondary">Hl7.Fhir.Conformance</td>
+                            <td class="font-monospace fw-semibold text-secondary" style="direction: ltr !important; unicode-bidi: isolate;">Hl7.Fhir.Conformance</td>
                             <td><span class="badge bg-secondary">6.6.0</span></td>
-                            <td>Conformance engine and Profile validator.</td>
-                            <td>Validates whether generated JSON complies with hospital rules and StructureDefinitions.</td>
+                            <td>@(Lang.IsRtl ? "محرك المطابقة والتحقق من الملفات التعريفية Profiles." : "Conformance engine and Profile validator.")</td>
+                            <td>@(Lang.IsRtl ? "يتحقق من مطابقة حمولات JSON لقواعد المستشفيات ومحددات StructureDefinitions." : "Validates whether generated JSON complies with hospital rules and StructureDefinitions.")</td>
                         </tr>
                         <tr>
-                            <td class="font-monospace fw-semibold text-secondary">Fhir.Metrics</td>
+                            <td class="font-monospace fw-semibold text-secondary" style="direction: ltr !important; unicode-bidi: isolate;">Fhir.Metrics</td>
                             <td><span class="badge bg-secondary">1.4.0</span></td>
-                            <td>UCUM clinical unit conversion and dimensional calculus engine.</td>
-                            <td>Validates clinical units (e.g. <code>mg/dL</code> vs <code>mmol/L</code>) to prevent medication and lab measurement unit errors.</td>
+                            <td>@(Lang.IsRtl ? "محرك تحويل وحدات القياس السريرية UCUM والحساب البعدي." : "UCUM clinical unit conversion and dimensional calculus engine.")</td>
+                            <td>@(Lang.IsRtl ? "يتحقق من اتساق وحدات القياس (مثل mg/dL مقابل mmol/L) لمنع أخطاء جرعات الأدوية والتحاليل." : "Validates clinical units (e.g. mg/dL vs mmol/L) to prevent medication and lab measurement unit errors.")</td>
                         </tr>
                         <tr>
-                            <td class="font-monospace fw-semibold text-success">Markdig</td>
+                            <td class="font-monospace fw-semibold text-success" style="direction: ltr !important; unicode-bidi: isolate;">Markdig</td>
                             <td><span class="badge bg-success">1.4.0</span></td>
-                            <td>High-performance, zero-allocation Markdown to HTML pipeline.</td>
-                            <td>Renders in-app Living Documentation (Docs-as-Code) directly from version-controlled Markdown files in the project root.</td>
+                            <td>@(Lang.IsRtl ? "محرك فائق الأداء لتحويل نصوص Markdown إلى HTML دون حجز زائد للذاكرة." : "High-performance, zero-allocation Markdown to HTML pipeline.")</td>
+                            <td>@(Lang.IsRtl ? "يعالج الوثائق الحية (Docs-as-Code) مباشرة من ملفات المشروع الخاضعة لمراقبة Git." : "Renders in-app Living Documentation (Docs-as-Code) directly from version-controlled Markdown files in the project root.")</td>
                         </tr>
                     </tbody>
                 </table>
@@ -111,43 +121,44 @@
     <!-- The Deep "Why" Architectural Justifications -->
     <div class="card shadow-sm border border-primary border-top border-3 mb-4">
         <div class="card-header bg-light py-2 fw-bold text-primary">
-            <i class="bi bi-question-circle-fill me-2"></i> The Deep "Why" Behind Architectural Decisions
+            <i class="bi bi-question-circle-fill me-2"></i> 
+            @(Lang.IsRtl ? "الأسس العميقة والمبررات المنطقية للقرارات المعمارية" : "The Deep \"Why\" Behind Architectural Decisions")
         </div>
         <div class="card-body p-3 small text-muted">
             <div class="row g-3">
                 <div class="col-md-6">
                     <div class="p-3 bg-light rounded border h-100">
-                        <h6 class="fw-bold text-dark"><i class="bi bi-cpu-fill text-primary me-1"></i> Why Blazor Server (SignalR) over WebAssembly?</h6>
+                        <h6 class="fw-bold text-dark"><i class="bi bi-cpu-fill text-primary me-1"></i> @(Lang.IsRtl ? "لماذا تم اختيار Blazor Server عبر SignalR بدلاً من WebAssembly؟" : "Why Blazor Server (SignalR) over WebAssembly?")</h6>
                         <p class="mb-0">
-                            <strong>The Problem:</strong> Blazor WebAssembly compiles IL into browser WebAssembly, downloading a 15–30 MB runtime and easily consuming 400–600 MB of browser RAM. On a 2013 laptop or mobile tablet, it is sluggish.<br />
-                            <strong>The Choice:</strong> Blazor Server runs locally in .NET 10, consuming only ~140 MB of memory total. UI diffs are streamed over a persistent 2 KB SignalR binary socket, achieving &lt;50ms latency.
+                            <strong>@(Lang.IsRtl ? "المشكلة:" : "The Problem:")</strong> @(Lang.IsRtl ? "يقوم Blazor WebAssembly بتنزيل بيئة تشغيل بحجم 15-30 ميغابايت داخل المتصفح، ويستهلك بسهولة 400-600 ميغابايت من ذاكرة الرام، مما يجعله ثقيلاً على الأجهزة البسيطة." : "Blazor WebAssembly compiles IL into browser WebAssembly, downloading a 15–30 MB runtime and easily consuming 400–600 MB of browser RAM.")<br />
+                            <strong>@(Lang.IsRtl ? "الخيار الهندسي:" : "The Choice:")</strong> @(Lang.IsRtl ? "يعمل Blazor Server محلياً في .NET 10، ويستهلك فقط ~140 ميغابايت إجمالاً، وتنقل الفروقات البصرية عبر مقبس SignalR فوري بحجم 2 كيلوبايت فقط، محققاً سرعة استجابة أقل من 50 ميلي ثانية." : "Blazor Server runs locally in .NET 10, consuming only ~140 MB of memory total. UI diffs are streamed over a persistent 2 KB SignalR binary socket, achieving <50ms latency.")
                         </p>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="p-3 bg-light rounded border h-100">
-                        <h6 class="fw-bold text-dark"><i class="bi bi-box-fill text-warning me-1"></i> Why a Custom ER7 Parser over NHapi?</h6>
+                        <h6 class="fw-bold text-dark"><i class="bi bi-box-fill text-warning me-1"></i> @(Lang.IsRtl ? "لماذا تم بناء محلل ER7 خفيف مخصص بدلاً من استخدام NHapi؟" : "Why a Custom ER7 Parser over NHapi?")</h6>
                         <p class="mb-0">
-                            <strong>The Problem:</strong> <code>NHapi</code> is a 15-year-old port of Java HAPI. It brings over 40 MB of monolithic assemblies for HL7 versions 2.1 through 2.8 with verbose Java-style factories.<br />
-                            <strong>The Choice:</strong> A custom 100-line C# pipe-and-hat parser teaches developers the actual delimiter rules (<code>|</code>, <code>^</code>, <code>~</code>, <code>\</code>, <code>&amp;</code>) cleanly, with zero external DLL bloat.
+                            <strong>@(Lang.IsRtl ? "المشكلة:" : "The Problem:")</strong> @(Lang.IsRtl ? "مكتبة NHapi منقولة من لغة Java منذ 15 عاماً، وتجلب معها أكثر من 40 ميغابايت من التجميعات الضخمة المعقدة." : "NHapi is a 15-year-old port of Java HAPI. It brings over 40 MB of monolithic assemblies for HL7 versions 2.1 through 2.8.")<br />
+                            <strong>@(Lang.IsRtl ? "الخيار الهندسي:" : "The Choice:")</strong> @(Lang.IsRtl ? "محلل نصوص خفيف في 100 سطر بلغة C# يعلم المهندسين قواعد الفواصل الحقيقية (| و ^ و ~ و \\ و &) بوضوح تام، وخالٍ تماماً من التبعيات الخارجية." : "A custom 100-line C# pipe-and-hat parser teaches developers the actual delimiter rules cleanly, with zero external DLL bloat.")
                         </p>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="p-3 bg-light rounded border h-100">
-                        <h6 class="fw-bold text-dark"><i class="bi bi-hdd-network-fill text-success me-1"></i> Why In-Memory Processing (Zero Local DB)?</h6>
+                        <h6 class="fw-bold text-dark"><i class="bi bi-hdd-network-fill text-success me-1"></i> @(Lang.IsRtl ? "لماذا المعالجة اللحظية في الذاكرة دون قاعدة بيانات محلية؟" : "Why In-Memory Processing (Zero Local DB)?")</h6>
                         <p class="mb-0">
-                            <strong>The Problem:</strong> Installing SQL Server Express or Docker containers on low-end hardware causes severe CPU spikes and disk thrashing.<br />
-                            <strong>The Choice:</strong> HL7 v2 and FHIR are <em>wire transfer protocols</em> (data in flight). In-memory models make this repo 100% portable: any engineer can clone and run it immediately with zero database migration steps.
+                            <strong>@(Lang.IsRtl ? "المشكلة:" : "The Problem:")</strong> @(Lang.IsRtl ? "تثبيت خوادم SQL Server Express أو حاويات Docker يرهق الأجهزة البسيطة ويسبب بطئاً شديداً في سرعة الإقلاع." : "Installing SQL Server Express or Docker containers on low-end hardware causes severe CPU spikes and disk thrashing.")<br />
+                            <strong>@(Lang.IsRtl ? "الخيار الهندسي:" : "The Choice:")</strong> @(Lang.IsRtl ? "معايير HL7 و FHIR هي بروتوكولات لنقل البيانات أثناء الحركة (Data in Flight). المعالجة في الذاكرة تجعل المستودع محمولاً بالكامل: يمكن لأي مهندس استنساخه وتشغيله فوراً دون أي خطوات ترحيل لقواعد البيانات." : "HL7 v2 and FHIR are wire transfer protocols (data in flight). In-memory models make this repo 100% portable: any engineer can clone and run it immediately with zero database migration steps.")
                         </p>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="p-3 bg-light rounded border h-100">
-                        <h6 class="fw-bold text-dark"><i class="bi bi-file-earmark-medical-fill text-info me-1"></i> Why Docs-as-Code (In-App Living Documentation)?</h6>
+                        <h6 class="fw-bold text-dark"><i class="bi bi-file-earmark-medical-fill text-info me-1"></i> @(Lang.IsRtl ? "لماذا توثيق Docs-as-Code داخل التطبيق؟" : "Why Docs-as-Code (In-App Living Documentation)?")</h6>
                         <p class="mb-0">
-                            <strong>The Problem:</strong> External wikis (Confluence, SharePoint) get out of sync with code within months.<br />
-                            <strong>The Choice:</strong> Documentation lives as version-controlled Markdown files inside <code>Docs/</code>. Using Markdig, team members can read, search, and copy verified docs directly inside the web app.
+                            <strong>@(Lang.IsRtl ? "المشكلة:" : "The Problem:")</strong> @(Lang.IsRtl ? "تفقد صفحات Wiki الخارجية (مثل Confluence) مواكبتها للشفرة البرمجية خلال بضعة أشهر." : "External wikis (Confluence, SharePoint) get out of sync with code within months.")<br />
+                            <strong>@(Lang.IsRtl ? "الخيار الهندسي:" : "The Choice:")</strong> @(Lang.IsRtl ? "تعيش الوثائق كملفات Markdown متزامنة مع الشفرة داخل مجلد Docs/، وتُعرض للمهندسين مباشرة داخل المنصة مع خيار النسخ الفوري." : "Documentation lives as version-controlled Markdown files inside Docs/. Using Markdig, team members can read, search, and copy verified docs directly inside the web app.")
                         </p>
                     </div>
                 </div>
@@ -158,24 +169,26 @@
     <!-- Department Onboarding Quickstart -->
     <div class="card shadow-sm border-info border-top border-3">
         <div class="card-header bg-light py-2 fw-bold text-info">
-            <i class="bi bi-terminal text-dark me-2"></i> Department Developer Onboarding (10-Second Setup)
+            <i class="bi bi-terminal text-dark me-2"></i> 
+            @(Lang.IsRtl ? "دليل تشغيل المهندسين السريع (إعداد وتشغيل في 10 ثوانٍ)" : "Department Developer Onboarding (10-Second Setup)")
         </div>
         <div class="card-body p-3 small">
             <p class="text-muted mb-2">
-                Any member of your engineering department can clone, build, and run this application in less than 30 seconds:
+                @(Lang.IsRtl ? "يمكن لأي مهندس في فريقك استنساخ المستودع، وبناء المشروع، وتشغيله خلال أقل من 30 ثانية:"
+                             : "Any member of your engineering department can clone, build, and run this application in less than 30 seconds:")
             </p>
             <div class="row g-3">
                 <div class="col-md-4">
                     <div class="p-2 border rounded bg-light h-100">
-                        <strong class="text-primary">1. Prerequisites:</strong>
+                        <strong class="text-primary">@(Lang.IsRtl ? "1. المتطلبات الأولية:" : "1. Prerequisites:")</strong>
                         <ul class="mb-0 ps-3 mt-1 text-muted">
-                            <li>.NET 10 SDK (or .NET 8/9 compatible)</li>
-                            <li>VS Code, Visual Studio, or Rider</li>
+                            <li>.NET 10 SDK (أو .NET 8/9)</li>
+                            <li>VS Code أو Visual Studio أو Rider</li>
                         </ul>
                     </div>
                 </div>
                 <div class="col-md-8">
-                    <div class="p-2 border rounded bg-dark text-light font-monospace">
+                    <div class="p-2 border rounded bg-dark text-light font-monospace" style="direction: ltr !important; text-align: left !important; unicode-bidi: isolate;">
                         <span class="text-muted"># Navigate to the project directory</span><br />
                         <span class="text-info">cd</span> HL7_FHIR_TUT_APP<br /><br />
                         <span class="text-muted"># Run the app directly on HTTP</span><br />
@@ -192,15 +205,27 @@
     <div class="card shadow-sm border-0 mt-4 text-white" style="background: linear-gradient(135deg, #0d6efd 0%, #198754 100%);">
         <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-                <span class="badge bg-light text-dark mb-1">Architect &amp; Engineering Lead</span>
-                <h5 class="fw-bold mb-0">Amjad Mesmar</h5>
-                <p class="mb-0 small text-white-50">Senior Software Engineer</p>
+                <span class="badge bg-light text-dark mb-1">@(Lang.IsRtl ? "معماري المنصة وقائد الفريق الهندسي" : "Architect & Engineering Lead")</span>
+                <h5 class="fw-bold mb-0">@(Lang.IsRtl ? "أمجد مسمار (Amjad Mesmar)" : "Amjad Mesmar")</h5>
+                <p class="mb-0 small text-white-50">@(Lang.IsRtl ? "مهندس برمجيات أول - أنظمة الرعاية الصحية" : "Senior Software Engineer")</p>
             </div>
             <div>
                 <a href="https://github.com/AmjadMesmar/HL7_FHIR_TUT_APP" target="_blank" class="btn btn-light btn-sm fw-bold">
-                    <i class="bi bi-github me-1"></i> GitHub Repository
+                    <i class="bi bi-github me-1"></i> @(Lang.IsRtl ? "مستودع GitHub" : "GitHub Repository")
                 </a>
             </div>
         </div>
     </div>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Lang.OnLanguageChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        Lang.OnLanguageChanged -= StateHasChanged;
+    }
+}

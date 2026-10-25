@@ -1,23 +1,30 @@
 @page "/data-factory"
 @rendermode InteractiveServer
+@implements IDisposable
+@inject LanguageService Lang
 @inject IJSRuntime JS
 
-<PageTitle>Synthetic Patient &amp; Clinical Data Factory</PageTitle>
+<PageTitle>@(Lang.IsRtl ? "مصنع البيانات السريرية والمرضى الافتراضيين" : "Synthetic Patient & Clinical Data Factory")</PageTitle>
 
 <div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
     <!-- Hero Header -->
     <div class="p-4 mb-4 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%);">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-                <span class="badge bg-light text-primary mb-2 px-3 py-1 fw-semibold">Test Fixture Generator</span>
-                <h1 class="h2 fw-bold mb-1">Synthetic Patient &amp; Clinical Data Factory</h1>
+                <span class="badge bg-light text-primary mb-2 px-3 py-1 fw-semibold">
+                    @(Lang.IsRtl ? "مولد بيانات وبيئات الاختبار السريرية" : "Test Fixture Generator")
+                </span>
+                <h1 class="h2 fw-bold mb-1">
+                    @(Lang.IsRtl ? "مصنع البيانات السريرية والمرضى الافتراضيين" : "Synthetic Patient & Clinical Data Factory")
+                </h1>
                 <p class="mb-0 text-white-50">
-                    Generate realistic, HIPAA-safe test patients, vitals, and lab results in both HL7 v2 ER7 and FHIR R4 JSON for your unit tests and staging databases.
+                    @(Lang.IsRtl ? "توليد مرضى ومؤشرات حيوية ونتائج مخبرية واقعية وآمنة تماماً وفق ضوابط HIPAA بصيغتي HL7 v2 ER7 و FHIR R4 JSON لاختبارات الوحدة وقواعد البيانات التجريبية."
+                                 : "Generate realistic, HIPAA-safe test patients, vitals, and lab results in both HL7 v2 ER7 and FHIR R4 JSON for your unit tests and staging databases.")
                 </p>
             </div>
             <div class="d-flex gap-2">
                 <button class="btn btn-warning fw-bold px-3 shadow-sm" @onclick="GenerateData">
-                    <i class="bi bi-arrow-repeat me-1"></i> Regenerate Data
+                    <i class="bi bi-arrow-repeat me-1"></i> @(Lang.IsRtl ? "إعادة توليد البيانات" : "Regenerate Data")
                 </button>
             </div>
         </div>
@@ -28,22 +35,26 @@
         <div class="card-body p-3">
             <div class="row g-2 align-items-center">
                 <div class="col-md-4">
-                    <label class="form-label small text-muted mb-1 fw-semibold">Select Clinical Persona Profile:</label>
+                    <label class="form-label small text-muted mb-1 fw-semibold">
+                        @(Lang.IsRtl ? "الملف الشخصي والسريري للمريض:" : "Select Clinical Persona Profile:")
+                    </label>
                     <select class="form-select form-select-sm" @bind="selectedProfile" @bind:after="GenerateData">
-                        <option value="diabetic">Diabetic Outpatient (High Glucose &amp; HbA1c)</option>
-                        <option value="cardiac">Acute Inpatient Cardiac (STEMI &amp; Troponin)</option>
-                        <option value="pediatric">Pediatric Outpatient (Child Demographics &amp; Vitals)</option>
-                        <option value="routine">Routine Checkup (Normal Metabolic Panel)</option>
+                        <option value="diabetic">@(Lang.IsRtl ? "مريض سكري عيادات خارجية (سكر وتراكمي مرتفع)" : "Diabetic Outpatient (High Glucose & HbA1c)")</option>
+                        <option value="cardiac">@(Lang.IsRtl ? "مريض قلب طارئ منوم (جلطة STEMI وتروبونين مرتفع)" : "Acute Inpatient Cardiac (STEMI & Troponin)")</option>
+                        <option value="pediatric">@(Lang.IsRtl ? "مريض أطفال عيادات خارجية (بيانات طفل ومؤشرات)" : "Pediatric Outpatient (Child Demographics & Vitals)")</option>
+                        <option value="routine">@(Lang.IsRtl ? "فحص دوري روتيني (تحاليل أيضية طبيعية)" : "Routine Checkup (Normal Metabolic Panel)")</option>
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label small text-muted mb-1 fw-semibold">Assigning Hospital Facility:</label>
-                    <input type="text" class="form-control form-control-sm font-monospace" @bind="facilityName" @bind:after="GenerateData" />
+                    <label class="form-label small text-muted mb-1 fw-semibold">
+                        @(Lang.IsRtl ? "المنشأة الصحية المصدرة:" : "Assigning Hospital Facility:")
+                    </label>
+                    <input type="text" class="form-control form-control-sm font-monospace" @bind="facilityName" @bind:after="GenerateData" style="direction: ltr !important;" />
                 </div>
                 <div class="col-md-4 align-self-end">
                     <div class="d-flex gap-2">
                         <button class="btn btn-primary btn-sm flex-grow-1" @onclick="GenerateData">
-                            <i class="bi bi-magic me-1"></i> Synthesize New Patient
+                            <i class="bi bi-magic me-1"></i> @(Lang.IsRtl ? "توليد مريض افتراضي جديد" : "Synthesize New Patient")
                         </button>
                     </div>
                 </div>
@@ -56,23 +67,23 @@
         <div class="card-body p-3">
             <div class="row g-3 small align-items-center">
                 <div class="col-md-3">
-                    <span class="text-muted d-block">Patient Name:</span>
+                    <span class="text-muted d-block">@(Lang.IsRtl ? "اسم المريض:" : "Patient Name:")</span>
                     <strong class="fs-6 text-dark">@generatedName</strong>
                 </div>
                 <div class="col-md-2">
-                    <span class="text-muted d-block">MRN:</span>
-                    <code class="fs-6 text-primary fw-bold">@generatedMrn</code>
+                    <span class="text-muted d-block">@(Lang.IsRtl ? "رقم الملف الطبي MRN:" : "MRN:")</span>
+                    <code class="fs-6 text-primary fw-bold font-monospace" style="direction: ltr !important; unicode-bidi: isolate;">@generatedMrn</code>
                 </div>
                 <div class="col-md-2">
-                    <span class="text-muted d-block">DOB &amp; Gender:</span>
+                    <span class="text-muted d-block">@(Lang.IsRtl ? "الميلاد والجنس:" : "DOB & Gender:")</span>
                     <strong>@generatedDob (@generatedGender)</strong>
                 </div>
                 <div class="col-md-3">
-                    <span class="text-muted d-block">Clinical Condition:</span>
+                    <span class="text-muted d-block">@(Lang.IsRtl ? "الحالة والتشخيص السريري:" : "Clinical Condition:")</span>
                     <span class="badge bg-danger-subtle text-danger border border-danger">@generatedDiagnosis</span>
                 </div>
                 <div class="col-md-2 text-end">
-                    <span class="badge bg-success">HIPAA Safe (Synthetic)</span>
+                    <span class="badge bg-success">@(Lang.IsRtl ? "آمن وفق HIPAA (افتراضي)" : "HIPAA Safe (Synthetic)")</span>
                 </div>
             </div>
         </div>
@@ -86,21 +97,21 @@
                 <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
                     <div>
                         <span class="badge bg-primary me-2">HL7 v2 ER7</span>
-                        <strong>@er7MessageType Message</strong>
+                        <strong>@er7MessageType @(Lang.IsRtl ? "رسالة" : "Message")</strong>
                     </div>
                     <div class="d-flex gap-1">
                         <button class="btn btn-outline-secondary btn-sm py-0" @onclick="CopyEr7">
-                            @if (copiedEr7) { <span class="text-success fw-bold"><i class="bi bi-check"></i> Copied!</span> }
-                            else { <span><i class="bi bi-clipboard"></i> Copy</span> }
+                            @if (copiedEr7) { <span class="text-success fw-bold"><i class="bi bi-check"></i> @(Lang.IsRtl ? "تم النسخ!" : "Copied!")</span> }
+                            else { <span><i class="bi bi-clipboard"></i> @(Lang.IsRtl ? "نسخ" : "Copy")</span> }
                         </button>
                         <button class="btn btn-outline-primary btn-sm py-0" @onclick='() => DownloadFile(er7Output, $"{generatedMrn}.hl7", "text/plain")'>
-                            <i class="bi bi-download"></i> .hl7
+                            <i class="bi bi-download me-1"></i> .hl7
                         </button>
                     </div>
                 </div>
                 <div class="card-body p-0">
                     <pre class="bg-dark text-light p-3 m-0 font-monospace small overflow-auto" 
-                         style="max-height: 480px; tab-size: 2; white-space: pre-wrap; word-break: break-all; border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius);"><code>@er7Output</code></pre>
+                         style="max-height: 480px; tab-size: 2; white-space: pre-wrap; word-break: break-all; border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius); direction: ltr !important; text-align: left !important; unicode-bidi: isolate;"><code>@er7Output</code></pre>
                 </div>
             </div>
         </div>
@@ -111,21 +122,21 @@
                 <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
                     <div>
                         <span class="badge bg-success me-2">FHIR R4</span>
-                        <strong>Bundle (Transaction)</strong>
+                        <strong>Bundle (@(Lang.IsRtl ? "حزمة معاملات Transaction" : "Transaction"))</strong>
                     </div>
                     <div class="d-flex gap-1">
                         <button class="btn btn-outline-secondary btn-sm py-0" @onclick="CopyFhir">
-                            @if (copiedFhir) { <span class="text-success fw-bold"><i class="bi bi-check"></i> Copied!</span> }
-                            else { <span><i class="bi bi-clipboard"></i> Copy</span> }
+                            @if (copiedFhir) { <span class="text-success fw-bold"><i class="bi bi-check"></i> @(Lang.IsRtl ? "تم النسخ!" : "Copied!")</span> }
+                            else { <span><i class="bi bi-clipboard"></i> @(Lang.IsRtl ? "نسخ" : "Copy")</span> }
                         </button>
                         <button class="btn btn-outline-success btn-sm py-0" @onclick='() => DownloadFile(fhirJsonOutput, $"{generatedMrn}_fhir.json", "application/json")'>
-                            <i class="bi bi-download"></i> .json
+                            <i class="bi bi-download me-1"></i> .json
                         </button>
                     </div>
                 </div>
                 <div class="card-body p-0">
                     <pre class="bg-dark text-light p-3 m-0 font-monospace small overflow-auto" 
-                         style="max-height: 480px; tab-size: 2; white-space: pre-wrap; word-break: break-all; border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius);"><code>@fhirJsonOutput</code></pre>
+                         style="max-height: 480px; tab-size: 2; white-space: pre-wrap; word-break: break-all; border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius); direction: ltr !important; text-align: left !important; unicode-bidi: isolate;"><code>@fhirJsonOutput</code></pre>
                 </div>
             </div>
         </div>
@@ -153,6 +164,7 @@
 
     protected override void OnInitialized()
     {
+        Lang.OnLanguageChanged += StateHasChanged;
         GenerateData();
     }
 
@@ -166,10 +178,10 @@
 
         if (selectedProfile == "diabetic")
         {
-            generatedName = "Taylor, Jordan Alex";
+            generatedName = Lang.IsRtl ? "تايلور، جوردان أليكس" : "Taylor, Jordan Alex";
             generatedDob = "1978-04-12";
-            generatedGender = "Male";
-            generatedDiagnosis = "Type 2 Diabetes (HbA1c 8.4%)";
+            generatedGender = Lang.IsRtl ? "ذكر" : "Male";
+            generatedDiagnosis = Lang.IsRtl ? "السكري النوع الثاني (تراكمي 8.4%)" : "Type 2 Diabetes (HbA1c 8.4%)";
             er7MessageType = "ORU^R01";
 
             er7Output = $@"MSH|^~\&|LIS_LAB|{facilityName}|CENTRAL_EHR|{facilityName}|{timestamp}||ORU^R01|{controlId}|P|2.5
@@ -212,10 +224,10 @@ OBX|2|NM|4548-4^Hemoglobin A1c [Mass fraction] in Blood^LN||8.4|%|4.0-5.6|H|||F|
         }
         else if (selectedProfile == "cardiac")
         {
-            generatedName = "Vance, Marcus T";
+            generatedName = Lang.IsRtl ? "فانس، ماركوس ت." : "Vance, Marcus T";
             generatedDob = "1972-03-25";
-            generatedGender = "Male";
-            generatedDiagnosis = "STEMI (Elevated Troponin 1.82 ng/mL)";
+            generatedGender = Lang.IsRtl ? "ذكر" : "Male";
+            generatedDiagnosis = Lang.IsRtl ? "جلطة قلبية STEMI (تروبونين 1.82 ng/mL)" : "STEMI (Elevated Troponin 1.82 ng/mL)";
             er7MessageType = "ADT^A01";
 
             er7Output = $@"MSH|^~\&|EPIC_ADT|{facilityName}|CENTRAL_EHR|{facilityName}|{timestamp}||ADT^A01|{controlId}|P|2.5
@@ -249,7 +261,7 @@ OBX|1|NM|49563-0^Troponin I^LN||1.82|ng/mL|0.00-0.04|H|||F";
         ""status"": ""in-progress"",
         ""class"": {{ ""code"": ""IMP"", ""display"": ""inpatient encounter"" }},
         ""subject"": {{ ""reference"": ""urn:uuid:patient-{idNum}"" }},
-        ""location"": [{{ ""location"": {{ ""display"": ""Cardiology ICU / Room 402 / Bed B"" }}, ""status"": ""active"" }}]
+        ""period"": {{ ""start"": ""{isoTimestamp}"" }}
       }},
       ""request"": {{ ""method"": ""POST"", ""url"": ""Encounter"" }}
     }}
@@ -258,16 +270,16 @@ OBX|1|NM|49563-0^Troponin I^LN||1.82|ng/mL|0.00-0.04|H|||F";
         }
         else if (selectedProfile == "pediatric")
         {
-            generatedName = "Miller, Sophia Grace";
+            generatedName = Lang.IsRtl ? "تشين، ليو ك." : "Chen, Leo K";
             generatedDob = "2020-09-18";
-            generatedGender = "Female";
-            generatedDiagnosis = "Pediatric Asthma / Reactive Airway";
+            generatedGender = Lang.IsRtl ? "ذكر" : "Male";
+            generatedDiagnosis = Lang.IsRtl ? "ربو أطفال حاد (مراجعة عيادة)" : "Pediatric Asthma (Wheezing)";
             er7MessageType = "ADT^A04";
 
-            er7Output = $@"MSH|^~\&|PEDS_REG|{facilityName}|CENTRAL_EHR|{facilityName}|{timestamp}||ADT^A04|{controlId}|P|2.5
-PID|1||{generatedMrn}^^^{facilityName}^MR||Miller^Sophia^Grace||20200918|F|||120 Sunshine Lane^^Austin^TX^78704^USA||5125550911
-PV1|1|O|PEDS_CLINIC^ROOM_101^^HOSPITAL||||DOC331^Peds^Emily^C
-OBX|1|NM|2708-6^Oxygen saturation in Arterial blood by Pulse oximetry^LN||94|%|95-100|L|||F";
+            er7Output = $@"MSH|^~\&|CLINIC_A|{facilityName}|CENTRAL_EHR|{facilityName}|{timestamp}||ADT^A04|{controlId}|P|2.5
+PID|1||{generatedMrn}^^^{facilityName}^MR||Chen^Leo^K||20200918|M|||124 Blossom Hill^^Boulder^CO^80302^USA||3035550991
+PV1|1|O|PEDS_CLINIC^EXAM_1^^HOSPITAL||||DOC334^Peds^Emily^C
+DG1|1|ICD10|J45.909|Unspecified Asthma|{timestamp}|A";
 
             fhirJsonOutput = $@"{{
   ""resourceType"": ""Bundle"",
@@ -279,8 +291,8 @@ OBX|1|NM|2708-6^Oxygen saturation in Arterial blood by Pulse oximetry^LN||94|%|9
         ""resourceType"": ""Patient"",
         ""id"": ""patient-{idNum}"",
         ""identifier"": [{{ ""system"": ""http://{facilityName.ToLowerInvariant()}.org/mrn"", ""value"": ""{generatedMrn}"" }}],
-        ""name"": [{{ ""family"": ""Miller"", ""given"": [""Sophia"", ""Grace""] }}],
-        ""gender"": ""female"",
+        ""name"": [{{ ""family"": ""Chen"", ""given"": [""Leo"", ""K""] }}],
+        ""gender"": ""male"",
         ""birthDate"": ""2020-09-18""
       }},
       ""request"": {{ ""method"": ""POST"", ""url"": ""Patient"" }}
@@ -290,19 +302,18 @@ OBX|1|NM|2708-6^Oxygen saturation in Arterial blood by Pulse oximetry^LN||94|%|9
         }
         else
         {
-            generatedName = "Adams, Samuel Clark";
-            generatedDob = "1990-11-05";
-            generatedGender = "Male";
-            generatedDiagnosis = "Annual Health Screening (All Normal)";
+            generatedName = Lang.IsRtl ? "سميث، إليانور جيه" : "Smith, Eleanor J";
+            generatedDob = "1985-06-14";
+            generatedGender = Lang.IsRtl ? "أنثى" : "Female";
+            generatedDiagnosis = Lang.IsRtl ? "فحص دوري (كافة القيم طبيعية)" : "Routine Physical (All Vitals Normal)";
             er7MessageType = "ORU^R01";
 
-            er7Output = $@"MSH|^~\&|WELLNESS_SYS|{facilityName}|CENTRAL_EHR|{facilityName}|{timestamp}||ORU^R01|{controlId}|P|2.5
-PID|1||{generatedMrn}^^^{facilityName}^MR||Adams^Samuel^Clark||19901105|M|||500 Oak Hill Rd^^Austin^TX^78745^USA||5125559981
-PV1|1|O|WELLNESS_CENTER^SUITE_A^^HOSPITAL||||DOC442^Adams^John^M
-OBR|1|ORD-{idNum}||24323-8^Basic Metabolic Panel^LN|||{timestamp}
-OBX|1|NM|2345-7^Glucose^LN||88|mg/dL|70-99|N|||F
-OBX|2|NM|2823-3^Potassium^LN||4.1|mmol/L|3.5-5.1|N|||F
-OBX|3|NM|2951-2^Sodium^LN||140|mmol/L|135-145|N|||F";
+            er7Output = $@"MSH|^~\&|LAB_CORP|{facilityName}|CENTRAL_EHR|{facilityName}|{timestamp}||ORU^R01|{controlId}|P|2.5
+PID|1||{generatedMrn}^^^{facilityName}^MR||Smith^Eleanor^J||19850614|F|||550 South Congress^^Austin^TX^78704^USA||5125550199
+PV1|1|O|FAMILY_MED^ROOM_101^^HOSPITAL||||DOC551^Wellness^James^R
+OBR|1|ORD-{idNum}|FILL-{idNum}|24323-8^Basic Metabolic Panel^LN|||{timestamp}
+OBX|1|NM|2345-7^Glucose^LN||92|mg/dL|70-99|N|||F|||{timestamp}
+OBX|2|NM|2823-3^Potassium^LN||4.1|mmol/L|3.5-5.1|N|||F|||{timestamp}";
 
             fhirJsonOutput = $@"{{
   ""resourceType"": ""Bundle"",
@@ -314,9 +325,9 @@ OBX|3|NM|2951-2^Sodium^LN||140|mmol/L|135-145|N|||F";
         ""resourceType"": ""Patient"",
         ""id"": ""patient-{idNum}"",
         ""identifier"": [{{ ""system"": ""http://{facilityName.ToLowerInvariant()}.org/mrn"", ""value"": ""{generatedMrn}"" }}],
-        ""name"": [{{ ""family"": ""Adams"", ""given"": [""Samuel"", ""Clark""] }}],
-        ""gender"": ""male"",
-        ""birthDate"": ""1990-11-05""
+        ""name"": [{{ ""family"": ""Smith"", ""given"": [""Eleanor"", ""J""] }}],
+        ""gender"": ""female"",
+        ""birthDate"": ""1985-06-14""
       }},
       ""request"": {{ ""method"": ""POST"", ""url"": ""Patient"" }}
     }}
@@ -345,17 +356,13 @@ OBX|3|NM|2951-2^Sodium^LN||140|mmol/L|135-145|N|||F";
         StateHasChanged();
     }
 
-    private async Task DownloadFile(string content, string filename, string contentType)
+    private async Task DownloadFile(string content, string fileName, string contentType)
     {
-        var bytes = System.Text.Encoding.UTF8.GetBytes(content);
-        var base64 = Convert.ToBase64String(bytes);
-        await JS.InvokeVoidAsync("eval", $@"
-            var a = document.createElement('a');
-            a.href = 'data:{contentType};base64,{base64}';
-            a.download = '{filename}';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        ");
+        await JS.InvokeVoidAsync("downloadFileBlob", content, fileName, contentType);
+    }
+
+    public void Dispose()
+    {
+        Lang.OnLanguageChanged -= StateHasChanged;
     }
 }

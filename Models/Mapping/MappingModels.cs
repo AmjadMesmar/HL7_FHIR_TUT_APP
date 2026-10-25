@@ -8,7 +8,11 @@ public record FieldMappingLink(
     string TargetLabel,
     string TargetValue,
     string ConceptExplanation,
-    string? InteropGotcha = null
+    string? InteropGotcha = null,
+    string? ConceptExplanationAr = null,
+    string? InteropGotchaAr = null,
+    string? SourceLabelAr = null,
+    string? TargetLabelAr = null
 );
 
 public class TransformationResult

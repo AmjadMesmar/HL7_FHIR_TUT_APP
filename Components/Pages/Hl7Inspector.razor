@@ -1,22 +1,34 @@
 @page "/hl7-inspector"
 @rendermode InteractiveServer
+@implements IDisposable
+@inject LanguageService Lang
 
-<PageTitle>HL7 v2 Message Inspector &amp; Linter</PageTitle>
+<PageTitle>@(Lang.IsRtl ? "فاحص ومحلل رسائل HL7 v2 التفاعلي" : "HL7 v2 Message Inspector & Linter")</PageTitle>
 
 <div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <div>
-            <h2 class="h3 fw-bold mb-0"><i class="bi bi-code-slash text-primary"></i> HL7 v2 Message Inspector &amp; Linter</h2>
-            <p class="text-muted small mb-0">Deconstruct ER7 pipe-and-hat messages and run automated syntax &amp; conformance linting.</p>
+            <h2 class="h3 fw-bold mb-0">
+                <i class="bi bi-code-slash text-primary me-1"></i> 
+                @(Lang.IsRtl ? "فاحص ومحلل رسائل HL7 v2 المعيارية" : "HL7 v2 Message Inspector & Linter")
+            </h2>
+            <p class="text-muted small mb-0">
+                @(Lang.IsRtl ? "تفكيك وتشريح رسائل ER7 القائمة على الفواصل والقبعات، مع تدقيق نحوي ومعياري آلي للأخطاء السريرية."
+                             : "Deconstruct ER7 pipe-and-hat messages and run automated syntax & conformance linting.")
+            </p>
         </div>
         <div class="btn-group">
             <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown">
-                Load Preset Message
+                @(Lang.IsRtl ? "تحميل رسالة نموذجية" : "Load Preset Message")
             </button>
             <ul class="dropdown-menu dropdown-menu-end shadow">
                 @foreach (var p in ClinicalPresets.All)
                 {
-                    <li><a class="dropdown-item" href="javascript:void(0)" @onclick="() => LoadPreset(p.Id)">@p.Title (@p.TriggerEvent)</a></li>
+                    <li>
+                        <a class="dropdown-item" href="javascript:void(0)" @onclick="() => LoadPreset(p.Id)">
+                            @(Lang.IsRtl && !string.IsNullOrEmpty(p.TitleAr) ? p.TitleAr : p.Title) (@p.TriggerEvent)
+                        </a>
+                    </li>
                 }
             </ul>
         </div>
@@ -24,7 +36,7 @@
 
     <!-- Quick Preset Buttons -->
     <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
-        <span class="text-muted small fw-semibold me-1">Quick Presets:</span>
+        <span class="text-muted small fw-semibold me-1">@(Lang.IsRtl ? "نماذج سريعة:" : "Quick Presets:")</span>
         @foreach (var p in ClinicalPresets.All)
         {
             <button class="btn btn-sm @(selectedPresetId == p.Id ? "btn-primary shadow-sm" : "btn-outline-secondary")"
@@ -39,23 +51,23 @@
         <div class="col-lg-5">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
-                    <span class="fw-semibold small">Raw ER7 Message Input</span>
+                    <span class="fw-semibold small">@(Lang.IsRtl ? "محرر رسائل ER7 الخام" : "Raw ER7 Message Input")</span>
                     <button class="btn btn-sm btn-primary py-0" @onclick="ParseCurrentMessage">
-                        <i class="bi bi-play-fill"></i> Re-Lint &amp; Parse
+                        <i class="bi bi-play-fill me-1"></i> @(Lang.IsRtl ? "إعادة الفحص والتحليل" : "Re-Lint & Parse")
                     </button>
                 </div>
                 <div class="card-body p-2 d-flex flex-column">
                     <textarea class="form-control font-monospace flex-grow-1 small" 
-                              style="min-height: 260px; resize: vertical;" 
+                              style="min-height: 260px; resize: vertical; direction: ltr !important; text-align: left !important; unicode-bidi: isolate;" 
                               @bind="rawHl7Input" 
                               @bind:after="ParseCurrentMessage"
-                              placeholder="Paste any HL7 v2 pipe-delimited message here..."></textarea>
+                              placeholder="@(Lang.IsRtl ? "الصق أي رسالة HL7 v2 مفصولة بفواصل هنا..." : "Paste any HL7 v2 pipe-delimited message here...")"></textarea>
                     
                     @if (currentPreset != null)
                     {
                         <div class="alert alert-info mt-2 mb-0 p-2 small">
-                            <strong><i class="bi bi-info-circle"></i> Scenario Notes:</strong>
-                            <div class="mt-1" style="white-space: pre-line;">@currentPreset.TeachingNotes</div>
+                            <strong><i class="bi bi-info-circle me-1"></i> @(Lang.IsRtl ? "ملاحظات السيناريو السريري:" : "Scenario Notes:")</strong>
+                            <div class="mt-1" style="white-space: pre-line;">@(Lang.IsRtl && !string.IsNullOrEmpty(currentPreset.SummaryAr) ? currentPreset.SummaryAr : currentPreset.TeachingNotes)</div>
                         </div>
                     }
                 </div>
@@ -69,16 +81,16 @@
                     <!-- Tab Switcher -->
                     <div class="btn-group btn-group-sm">
                         <button class="btn @(activeTab == "tree" ? "btn-dark" : "btn-outline-secondary")" @onclick='() => activeTab = "tree"'>
-                            <i class="bi bi-diagram-2 me-1"></i> Tree
+                            <i class="bi bi-diagram-2 me-1"></i> @(Lang.IsRtl ? "شجرة المقاطع" : "Tree")
                         </button>
                         <button class="btn @(activeTab == "microscope" ? "btn-dark" : "btn-outline-secondary")" @onclick='() => activeTab = "microscope"'>
-                            <i class="bi bi-zoom-in me-1"></i> Microscope
+                            <i class="bi bi-zoom-in me-1"></i> @(Lang.IsRtl ? "مجهر الفواصل" : "Microscope")
                         </button>
                         <button class="btn @(activeTab == "builder" ? "btn-dark" : "btn-outline-secondary")" @onclick='() => activeTab = "builder"'>
-                            <i class="bi bi-pencil-square me-1"></i> Builder
+                            <i class="bi bi-pencil-square me-1"></i> @(Lang.IsRtl ? "منشئ الرسائل" : "Builder")
                         </button>
                         <button class="btn @(activeTab == "linter" ? "btn-dark" : "btn-outline-secondary")" @onclick='() => activeTab = "linter"'>
-                            <i class="bi bi-shield-check me-1"></i> Linter
+                            <i class="bi bi-shield-check me-1"></i> @(Lang.IsRtl ? "مدقق الأخطاء" : "Linter")
                             @if (linterIssues.Any(i => i.Severity == "Error"))
                             {
                                 <span class="badge bg-danger ms-1">@linterIssues.Count(i => i.Severity == "Error")</span>
@@ -95,8 +107,8 @@
                     </div>
 
                     <div class="d-flex gap-2">
-                        <span class="badge bg-dark">Msg: @(string.IsNullOrEmpty(parsedMessage.MessageType) ? "Unknown" : $"{parsedMessage.MessageType}^{parsedMessage.TriggerEvent}")</span>
-                        <span class="badge bg-secondary">Ctrl ID: @parsedMessage.MessageControlId</span>
+                        <span class="badge bg-dark font-monospace">@(Lang.IsRtl ? "الرسالة:" : "Msg:") @(string.IsNullOrEmpty(parsedMessage.MessageType) ? "Unknown" : $"{parsedMessage.MessageType}^{parsedMessage.TriggerEvent}")</span>
+                        <span class="badge bg-secondary font-monospace">Ctrl: @parsedMessage.MessageControlId</span>
                     </div>
                 </div>
 
@@ -105,14 +117,18 @@
                     {
                         <!-- LINTER VIEW -->
                         <div class="mb-3">
-                            <h6 class="fw-bold small text-dark mb-2"><i class="bi bi-shield-check text-primary me-1"></i> Automated Syntax &amp; Conformance Check:</h6>
+                            <h6 class="fw-bold small text-dark mb-2">
+                                <i class="bi bi-shield-check text-primary me-1"></i> 
+                                @(Lang.IsRtl ? "التدقيق الآلي للبنية النحوية والمطابقة المعيارية:" : "Automated Syntax & Conformance Check:")
+                            </h6>
                             @if (linterIssues.Count == 0)
                             {
                                 <div class="alert alert-success d-flex align-items-center p-3 small mb-0">
                                     <i class="bi bi-check-circle-fill fs-4 me-3 text-success"></i>
                                     <div>
-                                        <strong>100% Clean! All Standards Checks Passed.</strong><br />
-                                        Valid MSH delimiters, Trigger Event detected, Assigning Authority specified, and valid timestamp formatting.
+                                        <strong>@(Lang.IsRtl ? "مطابقة 100%! اجتازت الرسالة كافة الفحوصات المعيارية." : "100% Clean! All Standards Checks Passed.")</strong><br />
+                                        @(Lang.IsRtl ? "فواصل MSH سليمة، والحدث المسبب محدد بدقة، وجهة إصدار المعرف موجودة، وتنسيق الأختام الزمنية متوافق."
+                                                     : "Valid MSH delimiters, Trigger Event detected, Assigning Authority specified, and valid timestamp formatting.")
                                     </div>
                                 </div>
                             }
@@ -124,20 +140,23 @@
                                         <div class="list-group-item d-flex align-items-start gap-2 py-2">
                                             @if (issue.Severity == "Error")
                                             {
-                                                <span class="badge bg-danger mt-1">ERROR</span>
+                                                <span class="badge bg-danger mt-1">@(Lang.IsRtl ? "خطأ جسيم" : "ERROR")</span>
                                             }
                                             else if (issue.Severity == "Warning")
                                             {
-                                                <span class="badge bg-warning text-dark mt-1">WARNING</span>
+                                                <span class="badge bg-warning text-dark mt-1">@(Lang.IsRtl ? "تحذير" : "WARNING")</span>
                                             }
                                             else
                                             {
-                                                <span class="badge bg-info text-dark mt-1">INFO</span>
+                                                <span class="badge bg-info text-dark mt-1">@(Lang.IsRtl ? "معلومة" : "INFO")</span>
                                             }
                                             <div class="flex-grow-1">
-                                                <strong class="text-dark">@issue.Title</strong>
-                                                <div class="text-muted">@issue.Description</div>
-                                                <div class="text-primary mt-1" style="font-size: 0.75rem;"><strong>Recommendation:</strong> @issue.Remedy</div>
+                                                <strong class="text-dark">@(Lang.IsRtl && !string.IsNullOrEmpty(issue.TitleAr) ? issue.TitleAr : issue.Title)</strong>
+                                                <div class="text-muted">@(Lang.IsRtl && !string.IsNullOrEmpty(issue.DescriptionAr) ? issue.DescriptionAr : issue.Description)</div>
+                                                <div class="text-primary mt-1" style="font-size: 0.75rem;">
+                                                    <strong>@(Lang.IsRtl ? "التوصية الهندسية:" : "Recommendation:")</strong> 
+                                                    @(Lang.IsRtl && !string.IsNullOrEmpty(issue.RemedyAr) ? issue.RemedyAr : issue.Remedy)
+                                                </div>
                                             </div>
                                         </div>
                                     }
@@ -152,18 +171,20 @@
                             <div class="alert alert-primary p-2 small mb-3 d-flex align-items-center gap-2">
                                 <i class="bi bi-zoom-in fs-4 text-primary"></i>
                                 <div>
-                                    <strong>Interactive Delimiter Microscope:</strong> Click any token in the breakdown below to inspect its exact hierarchy tier, coordinate, and clinical meaning.
+                                    <strong>@(Lang.IsRtl ? "مجهر الفواصل التفاعلي:" : "Interactive Delimiter Microscope:")</strong> 
+                                    @(Lang.IsRtl ? "انقر على أي رمز في التحليل الملون أدناه لمعاينة مستواه الهرمي، وإحداثياته المحددة، ومعناه السريري الدقيق."
+                                                 : "Click any token in the breakdown below to inspect its exact hierarchy tier, coordinate, and clinical meaning.")
                                 </div>
                             </div>
 
                             <!-- Legend -->
                             <div class="d-flex flex-wrap gap-2 mb-3 small">
-                                <span class="badge bg-danger">| Field Separator</span>
-                                <span class="badge bg-primary">^ Component</span>
-                                <span class="badge bg-warning text-dark">~ Repetition</span>
-                                <span class="badge bg-info text-dark">&amp; Subcomponent</span>
-                                <span class="badge bg-dark">\ Escape</span>
-                                <span class="badge bg-secondary">Segment Tag</span>
+                                <span class="badge bg-danger">| @(Lang.IsRtl ? "فاصل الحقول" : "Field Separator")</span>
+                                <span class="badge bg-primary">^ @(Lang.IsRtl ? "فاصل المكونات" : "Component")</span>
+                                <span class="badge bg-warning text-dark">~ @(Lang.IsRtl ? "رمز التكرار" : "Repetition")</span>
+                                <span class="badge bg-info text-dark">&amp; @(Lang.IsRtl ? "فاصل المكونات الفرعية" : "Subcomponent")</span>
+                                <span class="badge bg-dark">\ @(Lang.IsRtl ? "محرف الهروب" : "Escape")</span>
+                                <span class="badge bg-secondary">@(Lang.IsRtl ? "وسم المقطع" : "Segment Tag")</span>
                             </div>
 
                             <!-- Active Token Inspector Card -->
@@ -173,28 +194,29 @@
                                     <div class="card-body p-2">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <span class="fw-bold text-primary">
-                                                <i class="bi bi-crosshair me-1"></i> Token: <code class="fs-6 px-1 bg-white rounded">@selectedMicroscopeToken.Token</code>
+                                                <i class="bi bi-crosshair me-1"></i> @(Lang.IsRtl ? "الرمز:" : "Token:") 
+                                                <code class="fs-6 px-1 bg-white rounded">@selectedMicroscopeToken.Token</code>
                                             </span>
                                             <span class="badge bg-primary">@selectedMicroscopeToken.HierarchyLevel</span>
                                         </div>
                                         <div class="small text-dark mt-1">
-                                            <strong>Coordinate / Role:</strong> @selectedMicroscopeToken.Coordinate &bull; @selectedMicroscopeToken.Description
+                                            <strong>@(Lang.IsRtl ? "الإحداثي / الدور:" : "Coordinate / Role:")</strong> @selectedMicroscopeToken.Coordinate &bull; @selectedMicroscopeToken.Description
                                         </div>
                                         <div class="small text-muted mt-1" style="font-size: 0.75rem;">
-                                            <strong>Standards Rule:</strong> @selectedMicroscopeToken.Rule
+                                            <strong>@(Lang.IsRtl ? "القاعدة المعيارية:" : "Standards Rule:")</strong> @selectedMicroscopeToken.Rule
                                         </div>
                                     </div>
                                 </div>
                             }
 
                             <!-- Tokenized Message Grid -->
-                            <div class="border rounded p-3 bg-dark font-monospace small">
+                            <div class="border rounded p-3 bg-dark font-monospace small" style="direction: ltr !important; text-align: left !important; unicode-bidi: isolate;">
                                 @for (int l = 0; l < parsedMessage.Segments.Count; l++)
                                 {
                                     var seg = parsedMessage.Segments[l];
                                     <div class="mb-2 text-break">
                                         <span class="badge bg-secondary cursor-pointer me-1" 
-                                              @onclick='() => SelectToken(seg.SegmentId, "Segment Header", seg.SegmentId, seg.Description, "Segment tag defines the clinical domain of the record.")'>
+                                              @onclick='() => SelectToken(seg.SegmentId, Lang.IsRtl ? "ترويسة المقطع" : "Segment Header", seg.SegmentId, seg.Description, Lang.IsRtl ? "يحدد وسم المقطع المجال السريري للسجل." : "Segment tag defines the clinical domain of the record.")'>
                                             @seg.SegmentId
                                         </span>
                                         @for (int f = 1; f < seg.Fields.Count; f++)
@@ -202,7 +224,7 @@
                                             var field = seg.Fields[f];
                                             var fIndex = f;
                                             <span class="badge bg-danger cursor-pointer mx-1" 
-                                                  @onclick='() => SelectToken("|", "Level 1: Field Separator", $"{seg.SegmentId}-{fIndex}", field.Description, "Separates major data fields within the segment.")'>|</span>
+                                                  @onclick='() => SelectToken("|", Lang.IsRtl ? "المستوى 1: فاصل الحقول" : "Level 1: Field Separator", $"{seg.SegmentId}-{fIndex}", field.Description, Lang.IsRtl ? "يفصل بين حقول البيانات الرئيسية داخل المقطع." : "Separates major data fields within the segment.")'>|</span>
                                             @if (field.Components.Count > 1)
                                             {
                                                 @for (int c = 0; c < field.Components.Count; c++)
@@ -212,10 +234,10 @@
                                                     if (c > 0)
                                                     {
                                                         <span class="badge bg-primary cursor-pointer mx-1" 
-                                                              @onclick='() => SelectToken("^", "Level 2: Component Separator", $"{seg.SegmentId}-{fIndex}.{cIndex}", $"Sub-part of {field.Description}", "Splits composite datatype into specific atoms.")'>^</span>
+                                                              @onclick='() => SelectToken("^", Lang.IsRtl ? "المستوى 2: فاصل المكونات" : "Level 2: Component Separator", $"{seg.SegmentId}-{fIndex}.{cIndex}", Lang.IsRtl ? $"جزء فرعي من {field.Description}" : $"Sub-part of {field.Description}", Lang.IsRtl ? "يجزئ نوع البيانات المركب إلى عناصره الأولية." : "Splits composite datatype into specific atoms.")'>^</span>
                                                     }
                                                     <span class="text-info cursor-pointer" 
-                                                          @onclick='() => SelectToken(comp.Value, "Component Value", $"{seg.SegmentId}-{fIndex}.{cIndex}", comp.Value, "Clinical data stored at this exact sub-coordinate.")'>
+                                                          @onclick='() => SelectToken(comp.Value, Lang.IsRtl ? "قيمة المكون" : "Component Value", $"{seg.SegmentId}-{fIndex}.{cIndex}", comp.Value, Lang.IsRtl ? "قيمة سريرية مخزنة عند هذا الإحداثي الفرعي." : "Clinical data stored at this exact sub-coordinate.")'>
                                                         @(string.IsNullOrEmpty(comp.Value) ? "•" : comp.Value)
                                                     </span>
                                                 }
@@ -223,7 +245,7 @@
                                             else
                                             {
                                                 <span class="text-light cursor-pointer" 
-                                                      @onclick='() => SelectToken(field.Value, "Field Value", $"{seg.SegmentId}-{fIndex}", field.Description, "Direct clinical data value.")'>
+                                                      @onclick='() => SelectToken(field.Value, Lang.IsRtl ? "قيمة الحقل" : "Field Value", $"{seg.SegmentId}-{fIndex}", field.Description, Lang.IsRtl ? "قيمة البيانات السريرية المباشرة." : "Direct clinical data value.")'>
                                                     @(string.IsNullOrEmpty(field.Value) ? "•" : field.Value)
                                                 </span>
                                             }
@@ -238,88 +260,91 @@
                         <!-- FORM-BASED ER7 MESSAGE BUILDER -->
                         <div class="mb-3">
                             <div class="alert alert-info p-2 small mb-3">
-                                <strong><i class="bi bi-pencil-square"></i> Interactive ER7 Message Builder:</strong> Fill out the clinical form fields below. The engine will dynamically assemble the exact pipe-and-hat ER7 syntax in real time!
+                                <strong><i class="bi bi-pencil-square me-1"></i> @(Lang.IsRtl ? "منشئ رسائل ER7 التفاعلي عبر النماذج:" : "Interactive ER7 Message Builder:")</strong> 
+                                @(Lang.IsRtl ? "املأ حقول النموذج السريري أدناه، وسيقوم المحرك بتركيب وتجميع بنية ER7 القياسية لحظياً في الوقت الفعلي!"
+                                             : "Fill out the clinical form fields below. The engine will dynamically assemble the exact pipe-and-hat ER7 syntax in real time!")
                             </div>
 
                             <div class="row g-2 mb-3">
                                 <div class="col-md-4">
-                                    <label class="form-label small fw-semibold text-muted mb-0">Message Trigger Event</label>
+                                    <label class="form-label small fw-semibold text-muted mb-0">@(Lang.IsRtl ? "الحدث المسبب للرسالة" : "Message Trigger Event")</label>
                                     <select class="form-select form-select-sm" @bind="builderEvent" @bind:after="UpdateGeneratedEr7">
-                                        <option value="ADT^A01">ADT^A01 (Inpatient Admission)</option>
-                                        <option value="ADT^A04">ADT^A04 (Outpatient Registration)</option>
-                                        <option value="ADT^A08">ADT^A08 (Update Patient Info)</option>
-                                        <option value="ORU^R01">ORU^R01 (Lab Result / Observation)</option>
+                                        <option value="ADT^A01">ADT^A01 @(Lang.IsRtl ? "(تنويم مريض داخلي)" : "(Inpatient Admission)")</option>
+                                        <option value="ADT^A04">ADT^A04 @(Lang.IsRtl ? "(تسجيل مريض عيادات خارجية)" : "(Outpatient Registration)")</option>
+                                        <option value="ADT^A08">ADT^A08 @(Lang.IsRtl ? "(تحديث بيانات المريض)" : "(Update Patient Info)")</option>
+                                        <option value="ORU^R01">ORU^R01 @(Lang.IsRtl ? "(تقرير نتيجة فحص مخبري)" : "(Lab Result / Observation)")</option>
                                     </select>
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label small fw-semibold text-muted mb-0">MRN / Patient ID (PID-3.1)</label>
+                                    <label class="form-label small fw-semibold text-muted mb-0">@(Lang.IsRtl ? "رقم الملف الطبي MRN (PID-3.1)" : "MRN / Patient ID (PID-3.1)")</label>
                                     <input type="text" class="form-control form-control-sm font-monospace" @bind="builderMrn" @bind:after="UpdateGeneratedEr7" />
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label small fw-semibold text-muted mb-0">Assigning Authority (PID-3.4)</label>
+                                    <label class="form-label small fw-semibold text-muted mb-0">@(Lang.IsRtl ? "جهة إصدار المعرف (PID-3.4)" : "Assigning Authority (PID-3.4)")</label>
                                     <input type="text" class="form-control form-control-sm font-monospace" @bind="builderAuthority" @bind:after="UpdateGeneratedEr7" />
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label small fw-semibold text-muted mb-0">Family Surname (PID-5.1)</label>
+                                    <label class="form-label small fw-semibold text-muted mb-0">@(Lang.IsRtl ? "اسم العائلة / اللقب (PID-5.1)" : "Family Surname (PID-5.1)")</label>
                                     <input type="text" class="form-control form-control-sm" @bind="builderLastName" @bind:after="UpdateGeneratedEr7" />
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label small fw-semibold text-muted mb-0">Given Name (PID-5.2)</label>
+                                    <label class="form-label small fw-semibold text-muted mb-0">@(Lang.IsRtl ? "الاسم الشخصي الأول (PID-5.2)" : "Given Name (PID-5.2)")</label>
                                     <input type="text" class="form-control form-control-sm" @bind="builderFirstName" @bind:after="UpdateGeneratedEr7" />
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label small fw-semibold text-muted mb-0">Date of Birth (PID-7)</label>
+                                    <label class="form-label small fw-semibold text-muted mb-0">@(Lang.IsRtl ? "تاريخ الميلاد (PID-7)" : "Date of Birth (PID-7)")</label>
                                     <input type="text" class="form-control form-control-sm font-monospace" placeholder="YYYYMMDD" @bind="builderDob" @bind:after="UpdateGeneratedEr7" />
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label small fw-semibold text-muted mb-0">Gender (PID-8)</label>
+                                    <label class="form-label small fw-semibold text-muted mb-0">@(Lang.IsRtl ? "الجنس (PID-8)" : "Gender (PID-8)")</label>
                                     <select class="form-select form-select-sm" @bind="builderGender" @bind:after="UpdateGeneratedEr7">
-                                        <option value="M">M (Male)</option>
-                                        <option value="F">F (Female)</option>
-                                        <option value="O">O (Other)</option>
-                                        <option value="U">U (Unknown)</option>
+                                        <option value="M">M @(Lang.IsRtl ? "(ذكر)" : "(Male)")</option>
+                                        <option value="F">F @(Lang.IsRtl ? "(أنثى)" : "(Female)")</option>
+                                        <option value="O">O @(Lang.IsRtl ? "(آخر)" : "(Other)")</option>
+                                        <option value="U">U @(Lang.IsRtl ? "(غير محدد)" : "(Unknown)")</option>
                                     </select>
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label small fw-semibold text-muted mb-0">Patient Class (PV1-2)</label>
+                                    <label class="form-label small fw-semibold text-muted mb-0">@(Lang.IsRtl ? "تصنيف الإقامة (PV1-2)" : "Patient Class (PV1-2)")</label>
                                     <select class="form-select form-select-sm" @bind="builderPatientClass" @bind:after="UpdateGeneratedEr7">
-                                        <option value="I">I (Inpatient)</option>
-                                        <option value="O">O (Outpatient)</option>
-                                        <option value="E">E (Emergency)</option>
+                                        <option value="I">I @(Lang.IsRtl ? "(مريض منوم داخلي)" : "(Inpatient)")</option>
+                                        <option value="O">O @(Lang.IsRtl ? "(عيادات خارجية)" : "(Outpatient)")</option>
+                                        <option value="E">E @(Lang.IsRtl ? "(طوارئ وإسعاف)" : "(Emergency)")</option>
                                     </select>
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label small fw-semibold text-muted mb-0">Bed / Room Location (PV1-3)</label>
+                                    <label class="form-label small fw-semibold text-muted mb-0">@(Lang.IsRtl ? "موقع السرير والغرفة (PV1-3)" : "Bed / Room Location (PV1-3)")</label>
                                     <input type="text" class="form-control form-control-sm font-monospace" @bind="builderLocation" @bind:after="UpdateGeneratedEr7" />
                                 </div>
                                 @if (builderEvent.StartsWith("ORU"))
                                 {
                                     <div class="col-md-4">
-                                        <label class="form-label small fw-semibold text-muted mb-0">LOINC Code (OBX-3.1)</label>
+                                        <label class="form-label small fw-semibold text-muted mb-0">@(Lang.IsRtl ? "رمز LOINC المخبري (OBX-3.1)" : "LOINC Code (OBX-3.1)")</label>
                                         <input type="text" class="form-control form-control-sm font-monospace" @bind="builderLoinc" @bind:after="UpdateGeneratedEr7" />
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label small fw-semibold text-muted mb-0">Test Name (OBX-3.2)</label>
+                                        <label class="form-label small fw-semibold text-muted mb-0">@(Lang.IsRtl ? "اسم التحليل (OBX-3.2)" : "Test Name (OBX-3.2)")</label>
                                         <input type="text" class="form-control form-control-sm" @bind="builderTestName" @bind:after="UpdateGeneratedEr7" />
                                     </div>
                                     <div class="col-md-2">
-                                        <label class="form-label small fw-semibold text-muted mb-0">Result Value (OBX-5)</label>
+                                        <label class="form-label small fw-semibold text-muted mb-0">@(Lang.IsRtl ? "النتيجة (OBX-5)" : "Result Value (OBX-5)")</label>
                                         <input type="text" class="form-control form-control-sm font-monospace" @bind="builderResultValue" @bind:after="UpdateGeneratedEr7" />
                                     </div>
                                     <div class="col-md-2">
-                                        <label class="form-label small fw-semibold text-muted mb-0">Units (OBX-6)</label>
+                                        <label class="form-label small fw-semibold text-muted mb-0">@(Lang.IsRtl ? "الوحدة (OBX-6)" : "Units (OBX-6)")</label>
                                         <input type="text" class="form-control form-control-sm font-monospace" @bind="builderUnits" @bind:after="UpdateGeneratedEr7" />
                                     </div>
                                 }
                             </div>
 
                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="fw-bold small text-muted">Generated Real-Time HL7 v2 Output:</span>
+                                <span class="fw-bold small text-muted">@(Lang.IsRtl ? "رسالة HL7 v2 المجمعة في الوقت الفعلي:" : "Generated Real-Time HL7 v2 Output:")</span>
                                 <button class="btn btn-sm btn-success fw-semibold" @onclick="LoadBuilderIntoInspector">
-                                    <i class="bi bi-box-arrow-in-left me-1"></i> Send to Inspector &amp; Linter
+                                    <i class="bi bi-box-arrow-in-left me-1"></i> @(Lang.IsRtl ? "إرسال للفاحص والمدقق" : "Send to Inspector & Linter")
                                 </button>
                             </div>
-                            <pre class="bg-dark text-light p-3 rounded font-monospace small mb-0 overflow-auto" style="max-height: 160px; white-space: pre-wrap; word-break: break-all;"><code>@generatedEr7</code></pre>
+                            <pre class="bg-dark text-light p-3 rounded font-monospace small mb-0 overflow-auto" 
+                                 style="max-height: 160px; white-space: pre-wrap; word-break: break-all; direction: ltr !important; text-align: left !important; unicode-bidi: isolate;"><code>@generatedEr7</code></pre>
                         </div>
                     }
                     else
@@ -327,18 +352,18 @@
                         <!-- TREE VIEW -->
                         <!-- Delimiters Explainer -->
                         <div class="p-2 mb-3 bg-light rounded border d-flex flex-wrap gap-3 small">
-                            <div><strong>Field:</strong> <code>@parsedMessage.FieldDelimiter</code></div>
-                            <div><strong>Component:</strong> <code>@parsedMessage.ComponentDelimiter</code></div>
-                            <div><strong>Repetition:</strong> <code>@parsedMessage.RepetitionDelimiter</code></div>
-                            <div><strong>Escape:</strong> <code>@parsedMessage.EscapeCharacter</code></div>
-                            <div><strong>Subcomponent:</strong> <code>@parsedMessage.SubcomponentDelimiter</code></div>
+                            <div><strong>@(Lang.IsRtl ? "الحقل:" : "Field:")</strong> <code>@parsedMessage.FieldDelimiter</code></div>
+                            <div><strong>@(Lang.IsRtl ? "المكون:" : "Component:")</strong> <code>@parsedMessage.ComponentDelimiter</code></div>
+                            <div><strong>@(Lang.IsRtl ? "التكرار:" : "Repetition:")</strong> <code>@parsedMessage.RepetitionDelimiter</code></div>
+                            <div><strong>@(Lang.IsRtl ? "الهروب:" : "Escape:")</strong> <code>@parsedMessage.EscapeCharacter</code></div>
+                            <div><strong>@(Lang.IsRtl ? "المكون الفرعي:" : "Subcomponent:")</strong> <code>@parsedMessage.SubcomponentDelimiter</code></div>
                         </div>
 
                         @if (parsedMessage.Segments.Count == 0)
                         {
                             <div class="text-center text-muted py-5">
                                 <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                Paste a message or select a preset to view the breakdown.
+                                @(Lang.IsRtl ? "الصق رسالة أو اختر نموذجاً لمعاينة الشجرة التشريحية." : "Paste a message or select a preset to view the breakdown.")
                             </div>
                         }
                         else
@@ -358,30 +383,31 @@
                                                     data-bs-target="#@collapseId">
                                                 <span class="badge @GetBadgeColor(seg.SegmentId) me-2 font-monospace">@seg.SegmentId</span>
                                                 <span class="fw-semibold small me-2">@seg.Description</span>
-                                                <span class="text-muted small ms-auto me-3 font-monospace">(@seg.Fields.Count fields)</span>
+                                                <span class="text-muted small ms-auto me-3 font-monospace">(@seg.Fields.Count @(Lang.IsRtl ? "حقول" : "fields"))</span>
                                             </button>
                                         </h2>
                                         <div id="@collapseId" class="accordion-collapse collapse @(isFirst ? "show" : "")">
                                             <div class="accordion-body p-2 bg-light">
-                                                <div class="p-2 mb-2 bg-white rounded border font-monospace small text-break text-muted">
+                                                <div class="p-2 mb-2 bg-white rounded border font-monospace small text-break text-muted" 
+                                                     style="direction: ltr !important; text-align: left !important; unicode-bidi: isolate;">
                                                     <strong>Raw:</strong> @seg.RawContent
                                                 </div>
                                                 <div class="table-responsive bg-white rounded border">
                                                     <table class="table table-sm table-hover mb-0 small">
                                                         <thead class="table-light">
                                                             <tr>
-                                                                <th style="width: 15%;">Field</th>
-                                                                <th style="width: 35%;">Standard Name</th>
-                                                                <th style="width: 50%;">Value / Components</th>
+                                                                <th style="width: 15%;">@(Lang.IsRtl ? "الحقل" : "Field")</th>
+                                                                <th style="width: 35%;">@(Lang.IsRtl ? "الاسم المعياري" : "Standard Name")</th>
+                                                                <th style="width: 50%;">@(Lang.IsRtl ? "القيمة / المكونات" : "Value / Components")</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
                                                             @foreach (var field in seg.Fields.Where(f => !string.IsNullOrEmpty(f.Value)))
                                                             {
                                                                 <tr>
-                                                                    <td class="font-monospace fw-semibold text-primary">@field.Name</td>
+                                                                    <td class="font-monospace fw-semibold text-primary" style="direction: ltr !important; unicode-bidi: isolate;">@field.Name</td>
                                                                     <td class="text-muted">@field.Description</td>
-                                                                    <td class="font-monospace text-break">
+                                                                    <td class="font-monospace text-break" style="direction: ltr !important; unicode-bidi: isolate;">
                                                                         @if (field.Components.Count > 1)
                                                                         {
                                                                             <div class="text-dark fw-semibold mb-1">@field.Value</div>
@@ -429,10 +455,19 @@
     private Hl7Message parsedMessage = new();
     private List<LinterIssue> linterIssues = new();
 
-    public record LinterIssue(string Severity, string Title, string Description, string Remedy);
+    public record LinterIssue(
+        string Severity, 
+        string Title, 
+        string Description, 
+        string Remedy,
+        string? TitleAr = null,
+        string? DescriptionAr = null,
+        string? RemedyAr = null
+    );
 
     protected override void OnInitialized()
     {
+        Lang.OnLanguageChanged += StateHasChanged;
         var targetId = !string.IsNullOrEmpty(Preset) ? Preset : "registration";
         LoadPreset(targetId);
         UpdateGeneratedEr7();
@@ -458,7 +493,15 @@
 
         if (string.IsNullOrWhiteSpace(rawHl7Input))
         {
-            linterIssues.Add(new("Error", "Empty Payload", "No HL7 message content provided.", "Paste or select an ER7 message."));
+            linterIssues.Add(new(
+                "Error", 
+                "Empty Payload", 
+                "No HL7 message content provided.", 
+                "Paste or select an ER7 message.",
+                "حمولة الرسالة فارغة",
+                "لم يتم تزويد أي محتوى لرسالة HL7.",
+                "الصق رسالة ER7 أو اختر نموذجاً جاهزاً."
+            ));
             return;
         }
 
@@ -466,20 +509,44 @@
         var msh = parsedMessage.GetSegment("MSH");
         if (msh == null)
         {
-            linterIssues.Add(new("Error", "Missing MSH Header", "Every valid HL7 message must start with an MSH header.", "Add MSH segment as line 1."));
+            linterIssues.Add(new(
+                "Error", 
+                "Missing MSH Header", 
+                "Every valid HL7 message must start with an MSH header.", 
+                "Add MSH segment as line 1.",
+                "غياب ترويسة MSH",
+                "يجب أن تبدأ كل رسالة HL7 معتمدة بمقطع MSH في السطر الأول.",
+                "أضف مقطع MSH كأول سطر في الرسالة."
+            ));
         }
         else
         {
             // Trigger Event Check
             if (string.IsNullOrEmpty(parsedMessage.TriggerEvent))
             {
-                linterIssues.Add(new("Error", "Missing Trigger Event (MSH-9.2)", "MSH-9 contains no trigger event (e.g. A01, R01). Interface engines will drop this message.", "Specify both MessageType and TriggerEvent (e.g. ADT^A01)."));
+                linterIssues.Add(new(
+                    "Error", 
+                    "Missing Trigger Event (MSH-9.2)", 
+                    "MSH-9 contains no trigger event (e.g. A01, R01). Interface engines will drop this message.", 
+                    "Specify both MessageType and TriggerEvent (e.g. ADT^A01).",
+                    "غياب الحدث المسبب (MSH-9.2)",
+                    "الحقل MSH-9 لا يحتوي على رمز الحدث المسبب (مثل A01 أو R01). ستتجاهل محركات الربط هذه الرسالة.",
+                    "حدد نوع الرسالة والحدث معاً (مثل ADT^A01)."
+                ));
             }
 
             // Control ID Check
             if (string.IsNullOrEmpty(parsedMessage.MessageControlId))
             {
-                linterIssues.Add(new("Warning", "Missing Control ID (MSH-10)", "Message lacks a unique tracking control ID.", "Provide a unique GUID or sequence number in MSH-10."));
+                linterIssues.Add(new(
+                    "Warning", 
+                    "Missing Control ID (MSH-10)", 
+                    "Message lacks a unique tracking control ID.", 
+                    "Provide a unique GUID or sequence number in MSH-10.",
+                    "غياب معرف التحكم بالرسالة (MSH-10)",
+                    "تفتقر الرسالة إلى معرف تتبع فريد لضمان عدم تكرار المعالجة.",
+                    "زود معرف GUID أو رقم تسلسلي فريد في MSH-10."
+                ));
             }
         }
 
@@ -491,17 +558,41 @@
             var authority = pid.GetValue(3, 4);
             if (string.IsNullOrEmpty(mrn))
             {
-                linterIssues.Add(new("Error", "Missing MRN (PID-3.1)", "Patient Identification segment lacks an MRN.", "Supply a patient ID in PID-3.1."));
+                linterIssues.Add(new(
+                    "Error", 
+                    "Missing MRN (PID-3.1)", 
+                    "Patient Identification segment lacks an MRN.", 
+                    "Supply a patient ID in PID-3.1.",
+                    "غياب رقم الملف الطبي (PID-3.1)",
+                    "مقطع تعريف المريض يفتقر إلى رقم الملف الطبي الرئيسي MRN.",
+                    "أدخل رقم ملف المريض في PID-3.1."
+                ));
             }
             else if (string.IsNullOrEmpty(authority))
             {
-                linterIssues.Add(new("Warning", "Missing Assigning Authority (PID-3.4)", "MRN has no namespace owner. Risk of duplicate chart collision across hospitals.", "Specify assigning authority (e.g. MRN123^^^METRO_HOSP^MR)."));
+                linterIssues.Add(new(
+                    "Warning", 
+                    "Missing Assigning Authority (PID-3.4)", 
+                    "MRN has no namespace owner. Risk of duplicate chart collision across hospitals.", 
+                    "Specify assigning authority (e.g. MRN123^^^METRO_HOSP^MR).",
+                    "غياب جهة إصدار المعرف (PID-3.4)",
+                    "رقم الملف الطبي لا يملك جهة إصدار محددة، مما يسبب خطر تضارب السجلات عند تبادل البيانات.",
+                    "حدد جهة الإصدار بوضوح (مثال: MRN123^^^METRO_HOSP^MR)."
+                ));
             }
 
             var familyName = pid.GetValue(5, 1);
             if (string.IsNullOrEmpty(familyName))
             {
-                linterIssues.Add(new("Warning", "Missing Family Name (PID-5.1)", "Patient name has no family surname.", "Add family name in PID-5.1."));
+                linterIssues.Add(new(
+                    "Warning", 
+                    "Missing Family Name (PID-5.1)", 
+                    "Patient name has no family surname.", 
+                    "Add family name in PID-5.1.",
+                    "غياب اسم العائلة (PID-5.1)",
+                    "اسم المريض لا يحتوي على اسم العائلة أو اللقب.",
+                    "أضف اسم العائلة في PID-5.1."
+                ));
             }
         }
 
@@ -512,10 +603,17 @@
             var line = lines[l].Trim();
             if (line.StartsWith("OBX") || line.StartsWith("NTE"))
             {
-                // Check if line contains bare escaped hazard
                 if (line.Contains("| |") || line.Contains(" | "))
                 {
-                    linterIssues.Add(new("Warning", $"Possible Unescaped Pipe in Line {l + 1}", "Line appears to contain bare pipe characters inside textual content.", "Replace literal '|' with '\\F\\'."));
+                    linterIssues.Add(new(
+                        "Warning", 
+                        $"Possible Unescaped Pipe in Line {l + 1}", 
+                        "Line appears to contain bare pipe characters inside textual content.", 
+                        "Replace literal '|' with '\\F\\'.",
+                        $"احتمال وجود فاصل غير محمي في السطر {l + 1}",
+                        "يبدو أن السطر يحتوي على رمز فاصل صريح داخل النص السريري.",
+                        "استبدل رمز الفاصل بترميز الهروب المعياري \\F\\."
+                    ));
                 }
             }
         }
@@ -587,5 +685,10 @@
         rawHl7Input = generatedEr7;
         ParseCurrentMessage();
         activeTab = "tree";
+    }
+
+    public void Dispose()
+    {
+        Lang.OnLanguageChanged -= StateHasChanged;
     }
 }

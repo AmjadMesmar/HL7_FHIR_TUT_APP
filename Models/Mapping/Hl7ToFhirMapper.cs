@@ -143,7 +143,11 @@ public static class Hl7ToFhirMapper
                 TargetLabel: "Identifier.value",
                 TargetValue: mrnVal,
                 ConceptExplanation: "In HL7 v2, PID-3 is a composite field (CX). Component 1 is ID number, Component 4 is Assigning Authority.",
-                InteropGotcha: "HL7 v2 uses local strings (e.g. 'HOSPITAL_A'); FHIR requires a globally unique URI for 'system' to prevent cross-institution ID collisions."
+                InteropGotcha: "HL7 v2 uses local strings (e.g. 'HOSPITAL_A'); FHIR requires a globally unique URI for 'system' to prevent cross-institution ID collisions.",
+                ConceptExplanationAr: "في معيار HL7 v2، الحقل PID-3 مركب (CX)؛ المكون الأول يمثل رقم الملف والمكون الرابع جهة الإصدار.",
+                InteropGotchaAr: "معيار HL7 v2 يكتفي بنصوص محلية، بينما يشترط FHIR معرف URI عالمي فريد لمنع تضارب أرقام الملفات بين المنشآت.",
+                SourceLabelAr: "معرف المريض (رقم الملف MRN)",
+                TargetLabelAr: "قيمة المعرف (Identifier.value)"
             ));
         }
 
@@ -172,7 +176,11 @@ public static class Hl7ToFhirMapper
                 TargetLabel: "HumanName",
                 TargetValue: $"{given} {family}",
                 ConceptExplanation: "HL7 v2 XPN datatype splits names with hats (^). FHIR uses a structured HumanName object with 'family' and a list of 'given' strings.",
-                InteropGotcha: "In FHIR, middle names belong in the 'given' array as second elements, not in a separate 'middle' property."
+                InteropGotcha: "In FHIR, middle names belong in the 'given' array as second elements, not in a separate 'middle' property.",
+                ConceptExplanationAr: "يقسم نوع البيانات XPN في HL7 v2 الاسم برموز القبعة (^)، بينما يبنيه FHIR ككائن HumanName يحتوي العائلة وقائمة الأسماء الشخصية.",
+                InteropGotchaAr: "في FHIR، توضع الأسماء الوسطى والجد داخل مصفوفة given كعناصر تالية، وليس في خاصية منفصلة.",
+                SourceLabelAr: "اسم المريض (العائلة^الشخصي)",
+                TargetLabelAr: "كائن الاسم البشري (HumanName)"
             ));
         }
 
@@ -191,7 +199,11 @@ public static class Hl7ToFhirMapper
                 TargetLabel: "Date (YYYY-MM-DD)",
                 TargetValue: fhirDate,
                 ConceptExplanation: "HL7 v2 stores timestamps in compact YYYYMMDD[HHMMSS] format. FHIR enforces ISO-8601 (YYYY-MM-DD).",
-                InteropGotcha: "If v2 sends time of birth (e.g., in neonatology), FHIR requires an extension 'patient-birthTime' since birthDate only holds the date."
+                InteropGotcha: "If v2 sends time of birth (e.g., in neonatology), FHIR requires an extension 'patient-birthTime' since birthDate only holds the date.",
+                ConceptExplanationAr: "يخزن HL7 v2 التاريخ بصيغة YYYYMMDD مدمجة، بينما يفرض FHIR معيار ISO-8601 الدولي (YYYY-MM-DD).",
+                InteropGotchaAr: "إذا أرسل v2 وقت الولادة (كما في أقسام حديثي الولادة)، يتطلب FHIR إضافة ملحق extension مخصص لأن birthDate يحمل التاريخ فقط.",
+                SourceLabelAr: "تاريخ وساعة الولادة",
+                TargetLabelAr: "التاريخ بصيغة ISO"
             ));
         }
 
@@ -215,7 +227,10 @@ public static class Hl7ToFhirMapper
                 TargetFhirPath: "Patient.gender",
                 TargetLabel: "AdministrativeGender code",
                 TargetValue: gender.ToString()?.ToLowerInvariant() ?? "unknown",
-                ConceptExplanation: "HL7 v2 uses User-defined Table 0001 (M, F, O, U, A, N). FHIR binds strictly to a 4-value required ValueSet (male, female, other, unknown)."
+                ConceptExplanation: "HL7 v2 uses User-defined Table 0001 (M, F, O, U, A, N). FHIR binds strictly to a 4-value required ValueSet (male, female, other, unknown).",
+                ConceptExplanationAr: "يستخدم HL7 v2 جدول 0001 المفتوح، بينما يلتزم FHIR بنطاق إلزامي صارم من 4 قيم (male, female, other, unknown).",
+                SourceLabelAr: "الجنس الإداري",
+                TargetLabelAr: "رمز الجنس الإداري"
             ));
         }
 
@@ -247,7 +262,10 @@ public static class Hl7ToFhirMapper
                 TargetFhirPath: "Patient.address[0]",
                 TargetLabel: "Address",
                 TargetValue: $"{street}, {city}, {state} {zip}",
-                ConceptExplanation: "HL7 v2 XAD composite datatype maps cleanly to FHIR's Address datatype."
+                ConceptExplanation: "HL7 v2 XAD composite datatype maps cleanly to FHIR's Address datatype.",
+                ConceptExplanationAr: "يقابل نوع البيانات المركب XAD في HL7 v2 كائن العنوان المنظم Address في FHIR بكل دقة.",
+                SourceLabelAr: "عنوان المريض (XAD)",
+                TargetLabelAr: "كائن العنوان (Address)"
             ));
         }
 
@@ -269,7 +287,10 @@ public static class Hl7ToFhirMapper
                 TargetFhirPath: "Patient.telecom[0].value",
                 TargetLabel: "ContactPoint.value",
                 TargetValue: phoneVal,
-                ConceptExplanation: "In FHIR, phones, emails, and faxes are unified under the 'ContactPoint' datatype with a 'system' discriminator."
+                ConceptExplanation: "In FHIR, phones, emails, and faxes are unified under the 'ContactPoint' datatype with a 'system' discriminator.",
+                ConceptExplanationAr: "يوحد FHIR أرقام الهواتف والبريد الإلكتروني تحت كائن ContactPoint مع محدد system للتمييز.",
+                SourceLabelAr: "رقم هاتف المنزل",
+                TargetLabelAr: "قيمة نقطة الاتصال"
             ));
         }
 
@@ -309,7 +330,10 @@ public static class Hl7ToFhirMapper
             TargetFhirPath: "Encounter.class",
             TargetLabel: "Coding (ActCode)",
             TargetValue: classCoding.Code ?? "AMB",
-            ConceptExplanation: "HL7 v2 uses Table 0004 (I, O, E, P, R, B). FHIR binds 'class' to the HL7 v3 ActCode vocabulary ('IMP', 'AMB', 'EMER')."
+            ConceptExplanation: "HL7 v2 uses Table 0004 (I, O, E, P, R, B). FHIR binds 'class' to the HL7 v3 ActCode vocabulary ('IMP', 'AMB', 'EMER').",
+            ConceptExplanationAr: "يستخدم HL7 v2 الجدول 0004، بينما يربط FHIR تصنيف التنويم بمصطلحات HL7 v3 ActCode القياسية (IMP, AMB, EMER).",
+            SourceLabelAr: "تصنيف المريض (منوم/عيادات/طوارئ)",
+            TargetLabelAr: "ترميز صنف الزيارة (ActCode)"
         ));
 
         // PV1-19 Visit Number
@@ -330,7 +354,10 @@ public static class Hl7ToFhirMapper
                 TargetFhirPath: "Encounter.identifier[0].value",
                 TargetLabel: "Identifier",
                 TargetValue: visitNum,
-                ConceptExplanation: "The unique visit or encounter identifier generated by the Patient Administration System (PAS)."
+                ConceptExplanation: "The unique visit or encounter identifier generated by the Patient Administration System (PAS).",
+                ConceptExplanationAr: "رقم الزيارة أو الحساب المالي الفريد المولد من نظام إدارة المرضى والقبول (PAS).",
+                SourceLabelAr: "رقم الزيارة / الحساب المالي",
+                TargetLabelAr: "معرف الزيارة الفريد"
             ));
         }
 
@@ -354,7 +381,10 @@ public static class Hl7ToFhirMapper
                 TargetFhirPath: "Encounter.location[0].location.display",
                 TargetLabel: "Location Reference",
                 TargetValue: locDesc,
-                ConceptExplanation: "HL7 v2 sends hierarchical bed locations in a single composite field (PL). In FHIR, Location is its own first-class Resource."
+                ConceptExplanation: "HL7 v2 sends hierarchical bed locations in a single composite field (PL). In FHIR, Location is its own first-class Resource.",
+                ConceptExplanationAr: "يرسل HL7 v2 موقع السرير في حقل مركب هرمي (PL)، بينما يعتبر FHIR الموقع مورداً مستقلاً بذاته (Location).",
+                SourceLabelAr: "موقع المريض وسرير التنويم",
+                TargetLabelAr: "مرجع موقع الإقامة"
             ));
         }
 
@@ -384,7 +414,10 @@ public static class Hl7ToFhirMapper
             TargetFhirPath: "Encounter.period & Encounter.status",
             TargetLabel: "Period & Status",
             TargetValue: $"{encounter.Status} ({encounter.Period.Start} to {encounter.Period.End ?? "now"})",
-            ConceptExplanation: "HL7 v2 uses separate timestamps (PV1-44 admit, PV1-45 discharge). In FHIR, status is an explicit state machine ('in-progress', 'finished') combined with a start/end Period."
+            ConceptExplanation: "HL7 v2 uses separate timestamps (PV1-44 admit, PV1-45 discharge). In FHIR, status is an explicit state machine ('in-progress', 'finished') combined with a start/end Period.",
+            ConceptExplanationAr: "يستخدم HL7 v2 أوقاتاً منفصلة، بينما يدمج FHIR الحالة كآلة حالات واضحة (in-progress/finished) مع فترة زمنية Period.",
+            SourceLabelAr: "تاريخ ووقت الدخول والخروج",
+            TargetLabelAr: "فترة الزيارة وحالة التنويم"
         ));
 
         return encounter;
@@ -426,7 +459,11 @@ public static class Hl7ToFhirMapper
             TargetLabel: "CodeableConcept",
             TargetValue: $"{code} ({name})",
             ConceptExplanation: "OBR-4 represents the ordered battery or panel. In FHIR, this is the DiagnosticReport.code.",
-            InteropGotcha: "HL7 v2 standardizes '^LN' as LOINC, but local legacy systems often use '^99ROC' or '^LOCAL' codes requiring terminology mapping tables."
+            InteropGotcha: "HL7 v2 standardizes '^LN' as LOINC, but local legacy systems often use '^99ROC' or '^LOCAL' codes requiring terminology mapping tables.",
+            ConceptExplanationAr: "يمثل حقل OBR-4 الفحص أو الحزمة المخبرية المطلوبة، ويتحول إلى DiagnosticReport.code في FHIR.",
+            InteropGotchaAr: "يوصي HL7 v2 بترميز LOINC ولكن الأنظمة القديمة ترسل أحياناً رموزاً محلية تتطلب جداول ربط ومطابقة.",
+            SourceLabelAr: "معرف الخدمة الشامل (حزمة التحاليل)",
+            TargetLabelAr: "المفهوم المرمز (CodeableConcept)"
         ));
 
         return report;
@@ -506,7 +543,11 @@ public static class Hl7ToFhirMapper
             TargetLabel: "Observation Resource",
             TargetValue: $"{testName}: {rawVal} {units}",
             ConceptExplanation: "Each OBX segment produces a distinct FHIR Observation resource containing discrete Quantity and Interpretation (abnormal flag) elements.",
-            InteropGotcha: "OBX-2 defines the data type ('NM', 'ST', 'CE'). In FHIR, Observation uses polymorphic value elements: valueQuantity, valueCodeableConcept, valueString, etc."
+            InteropGotcha: "OBX-2 defines the data type ('NM', 'ST', 'CE'). In FHIR, Observation uses polymorphic value elements: valueQuantity, valueCodeableConcept, valueString, etc.",
+            ConceptExplanationAr: "يتحول كل مقطع OBX إلى مورد Observation مستقل يحتوي على كمية رقمية وتفسير سريري واضح.",
+            InteropGotchaAr: "يحدد OBX-2 نوع البيانات، بينما يستخدم FHIR عناصر قيمة متعددة الأشكال مثل valueQuantity و valueString.",
+            SourceLabelAr: $"نتيجة الفحص المخبري #{sequence} ({testName})",
+            TargetLabelAr: "مورد الملاحظة السريرية (Observation)"
         ));
 
         return obs;

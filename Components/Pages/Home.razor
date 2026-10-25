@@ -40,23 +40,25 @@
                 </div>
             </div>
             <div class="col-lg-4 text-end d-none d-lg-block">
-                <div class="card bg-white text-dark shadow-sm border-0 text-start p-3">
-                    <h6 class="fw-bold text-muted text-uppercase mb-2" style="font-size: 0.75rem;">Environment Specs</h6>
+                <div class="card bg-white text-dark shadow-sm border-0 text-start p-3" dir="@Lang.Direction">
+                    <h6 class="fw-bold text-muted text-uppercase mb-2" style="font-size: 0.75rem;">
+                        @(Lang.IsRtl ? "المواصفات التقنية للنظام" : "Environment Specs")
+                    </h6>
                     <div class="d-flex justify-content-between py-1 border-bottom small">
-                        <span class="text-muted">Target:</span>
-                        <span class="fw-bold text-primary">.NET 10 (`net10.0`)</span>
+                        <span class="text-muted">@(Lang.IsRtl ? "إصدار المنصة:" : "Target:")</span>
+                        <span class="fw-bold text-primary font-monospace">.NET 10 (`net10.0`)</span>
                     </div>
                     <div class="d-flex justify-content-between py-1 border-bottom small">
-                        <span class="text-muted">Architecture:</span>
+                        <span class="text-muted">@(Lang.IsRtl ? "النمط المعماري:" : "Architecture:")</span>
                         <span class="badge bg-success">Blazor Server</span>
                     </div>
                     <div class="d-flex justify-content-between py-1 border-bottom small">
-                        <span class="text-muted">FHIR SDK:</span>
+                        <span class="text-muted">@(Lang.IsRtl ? "حزمة FHIR:" : "FHIR SDK:")</span>
                         <span class="fw-semibold">Firely R4 (v6.6)</span>
                     </div>
                     <div class="d-flex justify-content-between py-1 small">
-                        <span class="text-muted">RAM Footprint:</span>
-                        <span class="badge bg-info text-dark">~140 MB (Ultra-Light)</span>
+                        <span class="text-muted">@(Lang.IsRtl ? "استهلاك الذاكرة:" : "RAM Footprint:")</span>
+                        <span class="badge bg-info text-dark">~140 MB (@(Lang.IsRtl ? "خفيف وسريع" : "Ultra-Light"))</span>
                     </div>
                 </div>
             </div>
@@ -69,12 +71,16 @@
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
                 <div>
                     <h5 class="fw-bold mb-0 text-dark">
-                        <i class="bi bi-award-fill text-warning me-1"></i> Interactive Interoperability Mastery Pathway
+                        <i class="bi bi-award-fill text-warning me-1"></i>
+                        @(Lang.IsRtl ? "مسار إتقان هندسة تكامل الأنظمة الصحية التفاعلي" : "Interactive Interoperability Mastery Pathway")
                     </h5>
-                    <small class="text-muted">Track your progress from complete beginner to production-ready healthcare integration engineer</small>
+                    <small class="text-muted">
+                        @(Lang.IsRtl ? "تتبع تقدمك خطوة بخطوة من مبتدئ إلى مهندس تكامل معتمد وجاهز لبيئة الإنتاج بالمستشفيات"
+                                     : "Track your progress from complete beginner to production-ready healthcare integration engineer")
+                    </small>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    <span class="badge @GetBadgeStyle() fs-6 px-3 py-2">@MasteryTitle</span>
+                    <span class="badge @GetBadgeStyle() fs-6 px-3 py-2">@GetMasteryTitle()</span>
                     <span class="fw-bold text-primary font-monospace">@ProgressPercentage%</span>
                 </div>
             </div>
@@ -95,19 +101,21 @@
                 {
                     var taskIndex = t;
                     var task = ChecklistTasks[taskIndex];
-                    <div class="col-md-6 col-lg-4">
+                    <div class="col-md-6 col-lg-3">
                         <div class="p-2 bg-white rounded border d-flex align-items-start gap-2 h-100 shadow-sm">
                             <input class="form-check-input mt-1" type="checkbox" id="@($"chk_{taskIndex}")" 
                                    checked="@task.IsCompleted" 
                                    @onchange="() => ToggleTask(taskIndex)" />
                             <div class="flex-grow-1 small">
                                 <label class="form-check-label fw-bold d-block cursor-pointer @(task.IsCompleted ? "text-decoration-line-through text-muted" : "text-dark")" for="@($"chk_{taskIndex}")">
-                                    @task.Title
+                                    @(Lang.IsRtl ? task.ArabicTitle : task.Title)
                                 </label>
-                                <span class="text-muted" style="font-size: 0.75rem;">@task.Description</span>
+                                <span class="text-muted" style="font-size: 0.75rem;">
+                                    @(Lang.IsRtl ? task.ArabicDescription : task.Description)
+                                </span>
                                 <div class="mt-1">
                                     <a href="@task.Route" class="text-primary fw-semibold" style="font-size: 0.75rem;">
-                                        Open Tool &rarr;
+                                        @(Lang.IsRtl ? "افتح الأداة ←" : "Open Tool →")
                                     </a>
                                 </div>
                             </div>
@@ -121,23 +129,30 @@
     <!-- QUICK START: 3-STEP GUIDED LEARNING PATH -->
     <div class="card border-primary mb-4 shadow-sm">
         <div class="card-header bg-primary text-white py-2 d-flex justify-content-between align-items-center">
-            <span class="fw-bold"><i class="bi bi-compass me-2"></i> How to Use This App: 3-Step Guided Learning Path</span>
-            <span class="badge bg-white text-primary">Beginner Friendly</span>
+            <span class="fw-bold">
+                <i class="bi bi-compass me-2"></i>
+                @(Lang.IsRtl ? "دليل البدء السريع: مسار التعلّم الموجّه في 3 خطوات" : "How to Use This App: 3-Step Guided Learning Path")
+            </span>
+            <span class="badge bg-white text-primary">
+                @(Lang.IsRtl ? "مناسب للمبتدئين" : "Beginner Friendly")
+            </span>
         </div>
         <div class="card-body p-3">
             <div class="row g-3">
                 <div class="col-md-4">
                     <div class="p-3 rounded bg-light border h-100 d-flex flex-column">
                         <div class="d-flex align-items-center mb-2">
-                            <span class="badge bg-warning text-dark fs-6 me-2">Step 1</span>
-                            <h6 class="fw-bold mb-0">Open the Interop Bridge</h6>
+                            <span class="badge bg-warning text-dark fs-6 me-2">@(Lang.IsRtl ? "الخطوة 1" : "Step 1")</span>
+                            <h6 class="fw-bold mb-0">
+                                @(Lang.IsRtl ? "افتح جسر التحويل البيني" : "Open the Interop Bridge")
+                            </h6>
                         </div>
                         <p class="small text-muted flex-grow-1">
-                            This is the main interactive lab. You'll see a legacy HL7 message on the left and the modern FHIR JSON on the right.
-                            <strong>Click any HL7 field button</strong> to see where it lands in FHIR and learn why!
+                            @(Lang.IsRtl ? "المختبر التفاعلي الرئيسي: تشاهد رسالة HL7 v2 على اليسار ومورد FHIR JSON المقابل على اليمين. اضغط على أي زر حقل لتتبع كيفية تحويله وأسبابه."
+                                         : "This is the main interactive lab. You'll see a legacy HL7 message on the left and the modern FHIR JSON on the right. Click any HL7 field button to see where it lands in FHIR.")
                         </p>
                         <a href="bridge" class="btn btn-sm btn-warning fw-semibold mt-2 w-100">
-                            Launch Step 1: Open Bridge &rarr;
+                            @(Lang.IsRtl ? "تشغيل الخطوة 1: جسر التحويل ←" : "Launch Step 1: Open Bridge →")
                         </a>
                     </div>
                 </div>
@@ -145,15 +160,17 @@
                 <div class="col-md-4">
                     <div class="p-3 rounded bg-light border h-100 d-flex flex-column">
                         <div class="d-flex align-items-center mb-2">
-                            <span class="badge bg-primary fs-6 me-2">Step 2</span>
-                            <h6 class="fw-bold mb-0">Deconstruct HL7 Syntax</h6>
+                            <span class="badge bg-primary fs-6 me-2">@(Lang.IsRtl ? "الخطوة 2" : "Step 2")</span>
+                            <h6 class="fw-bold mb-0">
+                                @(Lang.IsRtl ? "فكك صيغة وفواصل HL7" : "Deconstruct HL7 Syntax")
+                            </h6>
                         </div>
                         <p class="small text-muted flex-grow-1">
-                            Go to the <strong>HL7 v2 Inspector</strong> to understand the pipe-and-hat delimiters (<code>|</code>, <code>^</code>, <code>~</code>), 
-                            message headers (<code>MSH</code>), patient demographics (<code>PID</code>), visits (<code>PV1</code>), and labs (<code>OBR/OBX</code>).
+                            @(Lang.IsRtl ? "انتقل إلى فاحص HL7 v2 لفهم فواصل الأنابيب والقبعات (|، ^، ~)، وترويسة الرسائل (MSH)، وبيانات المريض الديموغرافية (PID)، والزيارات (PV1)، والفحوصات (OBR/OBX)."
+                                         : "Go to the HL7 v2 Inspector to understand pipe-and-hat delimiters (|, ^, ~), message headers (MSH), patient demographics (PID), visits (PV1), and labs (OBR/OBX).")
                         </p>
                         <a href="hl7-inspector" class="btn btn-sm btn-outline-primary mt-2 w-100">
-                            Launch Step 2: HL7 Inspector &rarr;
+                            @(Lang.IsRtl ? "تشغيل الخطوة 2: فاحص HL7 ←" : "Launch Step 2: HL7 Inspector →")
                         </a>
                     </div>
                 </div>
@@ -161,14 +178,17 @@
                 <div class="col-md-4">
                     <div class="p-3 rounded bg-light border h-100 d-flex flex-column">
                         <div class="d-flex align-items-center mb-2">
-                            <span class="badge bg-success fs-6 me-2">Step 3</span>
-                            <h6 class="fw-bold mb-0">Try FHIR REST Queries</h6>
+                            <span class="badge bg-success fs-6 me-2">@(Lang.IsRtl ? "الخطوة 3" : "Step 3")</span>
+                            <h6 class="fw-bold mb-0">
+                                @(Lang.IsRtl ? "جرّب استعلامات FHIR REST" : "Try FHIR REST Queries")
+                            </h6>
                         </div>
                         <p class="small text-muted flex-grow-1">
-                            Visit the <strong>REST Playground</strong> to learn how modern health apps query clinical records with HTTP verbs (<code>GET /Patient?name=Smith</code>) instead of socket connections.
+                            @(Lang.IsRtl ? "زُر مختبر استعلامات REST لتتعلم كيف تستعلم التطبيقات الطبية الحديثة عن السجلات عبر بروتوكول HTTP الآمن (مثل GET /Patient?name=Smith) بدلاً من مقابس TCP."
+                                         : "Visit the REST Playground to learn how modern health apps query clinical records with HTTP verbs (GET /Patient?name=Smith) instead of socket connections.")
                         </p>
                         <a href="rest-playground" class="btn btn-sm btn-outline-success mt-2 w-100">
-                            Launch Step 3: REST Playground &rarr;
+                            @(Lang.IsRtl ? "تشغيل الخطوة 3: مختبر REST ←" : "Launch Step 3: REST Playground →")
                         </a>
                     </div>
                 </div>
@@ -183,21 +203,30 @@
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
                         <span class="badge bg-primary fs-6 me-2">v2</span>
-                        <h6 class="card-title mb-0 fw-bold">HL7 Version 2 (Legacy Standard)</h6>
+                        <h6 class="card-title mb-0 fw-bold">
+                            @(Lang.IsRtl ? "معيار HL7 Version 2 (المعيار الموروث)" : "HL7 Version 2 (Legacy Standard)")
+                        </h6>
                     </div>
-                    <p class="text-muted small mb-2">The standard powering hospital interface engines (Cloverleaf, Mirth, Rhapsody) for 35+ years.</p>
+                    <p class="text-muted small mb-2">
+                        @(Lang.IsRtl ? "المعيار المشغّل لمحركات التكامل في المستشفيات (Cloverleaf, Mirth, Rhapsody) منذ أكثر من 35 عاماً."
+                                     : "The standard powering hospital interface engines (Cloverleaf, Mirth, Rhapsody) for 35+ years.")
+                    </p>
                     <ul class="list-group list-group-flush small">
                         <li class="list-group-item px-0 py-1">
-                            <strong>Mental Model:</strong> Event-driven message broadcasting ("A patient was admitted").
+                            <strong>@(Lang.IsRtl ? "النموذج الفكري:" : "Mental Model:")</strong>
+                            @(Lang.IsRtl ? "بث الرسائل المبني على الأحداث (مثال: \"تم إدخال مريض للمستشفى\")." : "Event-driven message broadcasting (\"A patient was admitted\").")
                         </li>
                         <li class="list-group-item px-0 py-1">
-                            <strong>Encoding:</strong> Custom ER7 delimited text (<code>|</code> fields, <code>^</code> components, <code>~</code> repeats).
+                            <strong>@(Lang.IsRtl ? "الترميز:" : "Encoding:")</strong>
+                            @(Lang.IsRtl ? "نص ER7 محدد بفواصل (| للحقول، ^ للمكونات، ~ للتكرار)." : "Custom ER7 delimited text (| fields, ^ components, ~ repeats).")
                         </li>
                         <li class="list-group-item px-0 py-1">
-                            <strong>Transport:</strong> MLLP over persistent raw TCP sockets.
+                            <strong>@(Lang.IsRtl ? "بروتوكول النقل:" : "Transport:")</strong>
+                            @(Lang.IsRtl ? "بروتوكول MLLP عبر مقابس شبكة TCP خام ومستمرة على المنفذ 2575." : "MLLP over persistent raw TCP sockets.")
                         </li>
                         <li class="list-group-item px-0 py-1">
-                            <strong>Challenge:</strong> Heavy hospital-specific customization; each hospital's ADT differs.
+                            <strong>@(Lang.IsRtl ? "التحدي الأكبر:" : "Challenge:")</strong>
+                            @(Lang.IsRtl ? "كثرة التخصيصات المحلية؛ رسالة ADT تختلف من مستشفى إلى آخر." : "Heavy hospital-specific customization; each hospital's ADT differs.")
                         </li>
                     </ul>
                 </div>
@@ -209,21 +238,30 @@
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
                         <span class="badge bg-success fs-6 me-2">FHIR</span>
-                        <h6 class="card-title mb-0 fw-bold">HL7 FHIR R4 (Modern Standard)</h6>
+                        <h6 class="card-title mb-0 fw-bold">
+                            @(Lang.IsRtl ? "معيار HL7 FHIR R4 (المعيار الحديث)" : "HL7 FHIR R4 (Modern Standard)")
+                        </h6>
                     </div>
-                    <p class="text-muted small mb-2">Fast Healthcare Interoperability Resources: Web-native RESTful APIs built on modern developer primitives.</p>
+                    <p class="text-muted small mb-2">
+                        @(Lang.IsRtl ? "موارد التشغيل البيني السريع للرعاية الصحية: خدمات ويب RESTful مبنية على معايير المطورين الحديثة."
+                                     : "Fast Healthcare Interoperability Resources: Web-native RESTful APIs built on modern developer primitives.")
+                    </p>
                     <ul class="list-group list-group-flush small">
                         <li class="list-group-item px-0 py-1">
-                            <strong>Mental Model:</strong> Modular Resources (<code>Patient</code>, <code>Encounter</code>, <code>Observation</code>) linked via URIs.
+                            <strong>@(Lang.IsRtl ? "النموذج الفكري:" : "Mental Model:")</strong>
+                            @(Lang.IsRtl ? "موارد معيارية مستقلة (Patient, Encounter, Observation) مرتبطة بروابط URIs." : "Modular Resources (Patient, Encounter, Observation) linked via URIs.")
                         </li>
                         <li class="list-group-item px-0 py-1">
-                            <strong>Encoding:</strong> Standard JSON or XML with strict schema validation.
+                            <strong>@(Lang.IsRtl ? "الترميز:" : "Encoding:")</strong>
+                            @(Lang.IsRtl ? "صيغ JSON و XML القياسية مع مخططات تحقق صارمة (Schema Validation)." : "Standard JSON or XML with strict schema validation.")
                         </li>
                         <li class="list-group-item px-0 py-1">
-                            <strong>Transport:</strong> Stateless HTTP REST (<code>GET /Patient/123</code>), OAuth2 (SMART on FHIR).
+                            <strong>@(Lang.IsRtl ? "بروتوكول النقل:" : "Transport:")</strong>
+                            @(Lang.IsRtl ? "بروتوكول HTTP REST عديم الحالة، وأمان OAuth2 (SMART on FHIR)." : "Stateless HTTP REST (GET /Patient/123), OAuth2 (SMART on FHIR).")
                         </li>
                         <li class="list-group-item px-0 py-1">
-                            <strong>Advantage:</strong> Standardized vocabularies (LOINC, SNOMED) out of the box.
+                            <strong>@(Lang.IsRtl ? "الميزة الكبرى:" : "Advantage:")</strong>
+                            @(Lang.IsRtl ? "معاجم مصطلحات طبية قياسية جاهزة (LOINC, SNOMED, ICD-10)." : "Standardized vocabularies (LOINC, SNOMED) out of the box.")
                         </li>
                     </ul>
                 </div>
@@ -232,22 +270,29 @@
     </div>
 
     <!-- 4 Clinical Scenarios Grid -->
-    <h5 class="fw-bold mb-3"><i class="bi bi-journal-medical text-primary"></i> 4 Pre-Configured Clinical Scenarios to Explore</h5>
+    <h5 class="fw-bold mb-3">
+        <i class="bi bi-journal-medical text-primary"></i>
+        @(Lang.IsRtl ? "4 سيناريوهات سريرية عملية جاهزة للاستكشاف والتحويل" : "4 Pre-Configured Clinical Scenarios to Explore")
+    </h5>
     <div class="row g-3">
         @foreach (var preset in ClinicalPresets.All)
         {
             <div class="col-md-6 col-lg-3">
                 <div class="card h-100 shadow-sm">
                     <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
-                        <span class="badge bg-dark">@preset.TriggerEvent</span>
-                        <small class="text-muted">@preset.Category</small>
+                        <span class="badge bg-dark font-monospace">@preset.TriggerEvent</span>
+                        <small class="text-muted">@(Lang.IsRtl ? preset.ArabicCategory ?? preset.Category : preset.Category)</small>
                     </div>
                     <div class="card-body d-flex flex-column p-3">
-                        <h6 class="card-title fw-bold mb-1">@preset.Title</h6>
-                        <p class="card-text text-muted small flex-grow-1 mb-2">@preset.Summary</p>
+                        <h6 class="card-title fw-bold mb-1">
+                            @(Lang.IsRtl ? preset.ArabicTitle ?? preset.Title : preset.Title)
+                        </h6>
+                        <p class="card-text text-muted small flex-grow-1 mb-2">
+                            @(Lang.IsRtl ? preset.ArabicSummary ?? preset.Summary : preset.Summary)
+                        </p>
                         <div class="mt-2 pt-2 border-top">
                             <a href="bridge?preset=@preset.Id" class="btn btn-sm btn-outline-primary w-100">
-                                Explore in Bridge &rarr;
+                                @(Lang.IsRtl ? "استكشف في جسر التحويل ←" : "Explore in Bridge →")
                             </a>
                         </div>
                     </div>
@@ -258,18 +303,18 @@
 </div>
 
 @code {
-    private record ChecklistItem(string Title, string Description, string Route, bool IsCompleted);
+    private record ChecklistItem(string Title, string ArabicTitle, string Description, string ArabicDescription, string Route, bool IsCompleted);
 
     private List<ChecklistItem> ChecklistTasks = new()
     {
-        new("1. Learn 5 ER7 Delimiters", "Understand |, ^, ~, &, and \\ in the Delimiter Microscope.", "hl7-inspector", false),
-        new("2. Trace v2 to FHIR Mapping", "Inspect PID demographics and PV1 encounter in the Bridge.", "bridge", false),
-        new("3. Inspect Port 2575 MLLP Framing", "Step through the <0x0B> and <0x1C 0x0D> packet envelope.", "mllp-simulator", false),
-        new("4. Explore FHIR Resource Graph", "Click resource references in the FHIR Explorer.", "fhir-explorer", false),
-        new("5. Execute a Chained REST Query", "Query FHIR searchsets with _include joins.", "rest-playground", false),
-        new("6. Solve a War Room Bug Puzzle", "Fix real-world hospital message syntax errors.", "war-room", false),
-        new("7. Master 4-Part Arabic Naming", "Generate PID-5 dual scripts & FHIR Middle East name extensions.", "regional-interop", false),
-        new("8. Earn Interoperability Certificate", "Follow the STEMI clinical pathway & pass the 3-tier exam.", "training-academy", false)
+        new("1. Learn 5 ER7 Delimiters", "1. تعلّم فواصل ER7 الخمسة", "Understand |, ^, ~, &, and \\ in the Delimiter Microscope.", "افهم دور الرموز |, ^, ~, &, و \\ في مجهر الفواصل.", "hl7-inspector", false),
+        new("2. Trace v2 to FHIR Mapping", "2. تتبع التحويل من v2 إلى FHIR", "Inspect PID demographics and PV1 encounter in the Bridge.", "عاين تحويل بيانات المريض والزيارة في جسر التحويل.", "bridge", false),
+        new("3. Inspect Port 2575 MLLP Framing", "3. فحص تأطير MLLP على المنفذ 2575", "Step through the <0x0B> and <0x1C 0x0D> packet envelope.", "تتبع تدفق بايت البداية <0x0B> وبايتي النهاية <0x1C 0x0D>.", "mllp-simulator", false),
+        new("4. Explore FHIR Resource Graph", "4. استكشف شبكة موارد FHIR", "Click resource references in the FHIR Explorer.", "اضغط على المراجع المترابطة بين الموارد في مستكشف FHIR.", "fhir-explorer", false),
+        new("5. Execute a Chained REST Query", "5. نفّذ استعلام REST مع روابط الربط", "Query FHIR searchsets with _include joins.", "استعلم عن المرضى والفحوصات مدمجة عبر المعامل _include.", "rest-playground", false),
+        new("6. Solve a War Room Bug Puzzle", "6. حل لغز خطأ سريري في غرفة العمليات", "Fix real-world hospital message syntax errors.", "صحح أخطاء الصيغة ومحارف الهروب في ألغاز غرفة العمليات.", "war-room", false),
+        new("7. Master 4-Part Arabic Naming", "7. أتقن تمثيل الأسماء العربية الرباعية", "Generate PID-5 dual scripts & FHIR Middle East name extensions.", "ولّد تكرارات PID-5 وملحقات HumanName للشرق الأوسط.", "regional-interop", false),
+        new("8. Earn Interoperability Certificate", "8. احصل على شهادة الكفاءة المهنية", "Follow the STEMI clinical pathway & pass the 3-tier exam.", "تتبع مسار الأزمة القلبية السريري واجتز تقييم المستويات الثلاثة.", "training-academy", false)
     };
 
     protected override void OnInitialized()
@@ -284,14 +329,29 @@
 
     private int ProgressPercentage => ChecklistTasks.Count == 0 ? 0 : (int)Math.Round((double)ChecklistTasks.Count(t => t.IsCompleted) / ChecklistTasks.Count * 100);
 
-    private string MasteryTitle => ProgressPercentage switch
+    private string GetMasteryTitle()
     {
-        100 => "🏆 Senior Interoperability Architect",
-        >= 75 => "⭐ Certified Interop Bridge Specialist",
-        >= 50 => "🚀 Clinical Integration Engineer",
-        >= 25 => "📘 Junior Integration Specialist",
-        _ => "🌱 Novice Integrator"
-    };
+        if (Lang.IsRtl)
+        {
+            return ProgressPercentage switch
+            {
+                100 => "🏆 مهندس تكامل أنظمة صحية خبير (Senior Architect)",
+                >= 75 => "⭐ مهندس جسور تكامل معتمد (Certified Specialist)",
+                >= 50 => "🚀 أخصائي تكامل سريري (Integration Engineer)",
+                >= 25 => "📘 ممارس تكامل مبتدئ (Junior Specialist)",
+                _ => "🌱 متدرب واعد (Novice)"
+            };
+        }
+
+        return ProgressPercentage switch
+        {
+            100 => "🏆 Senior Interoperability Architect",
+            >= 75 => "⭐ Certified Interop Bridge Specialist",
+            >= 50 => "🚀 Clinical Integration Engineer",
+            >= 25 => "📘 Junior Integration Specialist",
+            _ => "🌱 Novice Integrator"
+        };
+    }
 
     private string GetBadgeStyle() => ProgressPercentage switch
     {

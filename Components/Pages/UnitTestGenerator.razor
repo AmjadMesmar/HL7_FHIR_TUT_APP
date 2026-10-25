@@ -1,23 +1,30 @@
 @page "/test-generator"
 @rendermode InteractiveServer
+@implements IDisposable
+@inject LanguageService Lang
 @inject IJSRuntime JS
 
-<PageTitle>C# xUnit Test Generator - Healthcare Unit Testing</PageTitle>
+<PageTitle>@(Lang.IsRtl ? "مولد اختبارات الوحدة xUnit - فحص الأنظمة الصحية" : "C# xUnit Test Generator - Healthcare Unit Testing")</PageTitle>
 
 <div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
     <!-- Hero Header -->
     <div class="p-4 mb-4 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #198754 0%, #20c997 100%);">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-                <span class="badge bg-light text-dark mb-2 px-3 py-1 fw-semibold">Quality Engineering &amp; CI/CD</span>
-                <h1 class="h2 fw-bold mb-1">C# xUnit Unit Test Generator</h1>
+                <span class="badge bg-light text-dark mb-2 px-3 py-1 fw-semibold">
+                    @(Lang.IsRtl ? "هندسة الجودة وأتمتة CI/CD" : "Quality Engineering & CI/CD")
+                </span>
+                <h1 class="h2 fw-bold mb-1">
+                    @(Lang.IsRtl ? "مولد اختبارات الوحدة الآلية بلغة C# و xUnit" : "C# xUnit Unit Test Generator")
+                </h1>
                 <p class="mb-0 text-white-50">
-                    Instantly generate production-grade xUnit test fixtures with assertions for FHIR R4 models and HL7 v2 parsing in .NET 10.
+                    @(Lang.IsRtl ? "توليد فوري لاختبارات xUnit معتمدة لبيئات الإنتاج مع فحوصات توكيد (Assertions) لنماذج FHIR R4 وتحليل HL7 v2 في .NET."
+                                 : "Instantly generate production-grade xUnit test fixtures with assertions for FHIR R4 models and HL7 v2 parsing in .NET 10.")
                 </p>
             </div>
             <div class="d-flex gap-2">
                 <span class="badge bg-dark align-self-center px-3 py-2 fw-semibold">
-                    <i class="bi bi-check2-all me-1"></i> Ready for CI/CD
+                    <i class="bi bi-check2-all me-1"></i> @(Lang.IsRtl ? "جاهز لخطوط CI/CD" : "Ready for CI/CD")
                 </span>
             </div>
         </div>
@@ -27,7 +34,10 @@
     <div class="card shadow-sm mb-3 border">
         <div class="card-body p-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div class="d-flex align-items-center gap-2">
-                <span class="fw-semibold small text-muted"><i class="bi bi-ui-checks text-success"></i> Select Unit Test Suite:</span>
+                <span class="fw-semibold small text-muted">
+                    <i class="bi bi-ui-checks text-success me-1"></i> 
+                    @(Lang.IsRtl ? "اختر حزمة الاختبارات:" : "Select Unit Test Suite:")
+                </span>
                 <div class="btn-group btn-group-sm">
                     @for (int t = 0; t < TestSuites.Count; t++)
                     {
@@ -35,7 +45,7 @@
                         var item = TestSuites[idx];
                         <button class="btn @(selectedSuiteIndex == idx ? "btn-success shadow-sm" : "btn-outline-secondary")"
                                 @onclick="() => selectedSuiteIndex = idx">
-                            @item.Title
+                            @(Lang.IsRtl && !string.IsNullOrEmpty(item.TitleAr) ? item.TitleAr : item.Title)
                         </button>
                     }
                 </div>
@@ -44,11 +54,11 @@
                 <button class="btn btn-outline-success btn-sm" @onclick="CopyTestCode">
                     @if (copied)
                     {
-                        <i class="bi bi-check-circle-fill text-success"></i> <span class="text-success fw-bold">Copied Test Class!</span>
+                        <i class="bi bi-check-circle-fill text-success me-1"></i> <span class="text-success fw-bold">@(Lang.IsRtl ? "تم نسخ فئة الاختبار!" : "Copied Test Class!")</span>
                     }
                     else
                     {
-                        <i class="bi bi-clipboard"></i> <span>Copy Test Class</span>
+                        <i class="bi bi-clipboard me-1"></i> <span>@(Lang.IsRtl ? "نسخ فئة الاختبار" : "Copy Test Class")</span>
                     }
                 </button>
             </div>
@@ -60,16 +70,16 @@
         var curSuite = TestSuites[selectedSuiteIndex];
     }
     <div class="card shadow-sm border mb-4">
-        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2 flex-wrap gap-2">
             <div>
-                <strong class="text-dark">@curSuite.FileName</strong>
-                <span class="text-muted small ms-2">&bull; @curSuite.Description</span>
+                <strong class="text-dark font-monospace">@curSuite.FileName</strong>
+                <span class="text-muted small ms-2">&bull; @(Lang.IsRtl && !string.IsNullOrEmpty(curSuite.DescriptionAr) ? curSuite.DescriptionAr : curSuite.Description)</span>
             </div>
             <span class="badge bg-secondary font-monospace">xUnit .NET 10</span>
         </div>
         <div class="card-body p-0">
             <pre class="bg-dark text-light p-3 m-0 font-monospace small overflow-auto" 
-                 style="max-height: 550px; tab-size: 4; white-space: pre-wrap; word-break: break-all; border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius);"><code>@curSuite.TestCode</code></pre>
+                 style="max-height: 550px; tab-size: 4; white-space: pre-wrap; word-break: break-all; border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius); direction: ltr !important; text-align: left !important; unicode-bidi: isolate;"><code>@curSuite.TestCode</code></pre>
         </div>
     </div>
 </div>
@@ -78,7 +88,14 @@
     private int selectedSuiteIndex = 0;
     private bool copied = false;
 
-    private record TestSuiteItem(string Title, string FileName, string Description, string TestCode);
+    private record TestSuiteItem(
+        string Title, 
+        string FileName, 
+        string Description, 
+        string TestCode,
+        string? TitleAr = null,
+        string? DescriptionAr = null
+    );
 
     private static readonly List<TestSuiteItem> TestSuites = new()
     {
@@ -138,22 +155,21 @@ public class PatientSerializationTests
         // Assert Identifier
         Assert.Single(parsed.Identifier);
         Assert.Equal(""MRN982341"", parsed.Identifier[0].Value);
-        Assert.Equal(""http://hospital.example.org/mrn"", parsed.Identifier[0].System);
 
-        // Assert Name Parts
-        Assert.Single(parsed.Name);
+        // Assert Name components
         Assert.Equal(""Smith"", parsed.Name[0].Family);
-        Assert.Equal(2, parsed.Name[0].Given.Count());
-        Assert.Equal(""Eleanor"", parsed.Name[0].Given.First());
+        Assert.Contains(""Eleanor"", parsed.Name[0].Given);
     }
-}"
+}",
+            TitleAr: "1. اختبار تسلسل بيانات المريض (Patient)",
+            DescriptionAr: "يتحقق من تسلسل واسترجاع معرّف MRN، وأجزاء الاسم البشري الرسمي، وتاريخ الميلاد بصيغة ISO الدولية بدقة تامة."
         ),
 
-        // 2. Quantitative Observation Test
+        // 2. Lab Observation Test
         new(
-            Title: "2. Lab Observation & UCUM Unit",
+            Title: "2. Lab Observation & UCUM Units",
             FileName: "ObservationValidationTests.cs",
-            Description: "Verifies quantitative lab measurement (Glucose 142 mg/dL), LOINC code binding, and abnormal interpretation.",
+            Description: "Tests LOINC coding, numeric Quantity value, UCUM units, and abnormal interpretation flags.",
             TestCode:
 @"using Xunit;
 using Hl7.Fhir.Model;
@@ -163,61 +179,42 @@ namespace HealthcareSystem.Tests;
 public class ObservationValidationTests
 {
     [Fact]
-    public void Observation_GlucoseMeasurement_ContainsValidLoincAndQuantity()
+    public void Observation_GlucoseHigh_ContainsValidLoincAndUcumUnits()
     {
         // Arrange
         var obs = new Observation
         {
             Status = ObservationStatus.Final,
-            Subject = new ResourceReference(""Patient/10042"")
+            Code = new CodeableConcept(""http://loinc.org"", ""2345-7"", ""Glucose""),
+            Value = new Quantity(142m, ""mg/dL"")
+            {
+                System = ""http://unitsofmeasure.org"",
+                Code = ""mg/dL""
+            }
         };
 
-        // LOINC 2345-7 (Glucose)
-        obs.Code = new CodeableConcept(""http://loinc.org"", ""2345-7"", ""Glucose [Mass/volume] in Serum or Plasma"");
-
-        // Value: 142 mg/dL
-        obs.Value = new Quantity
-        {
-            Value = 142m,
-            Unit = ""mg/dL"",
-            System = ""http://unitsofmeasure.org"",
-            Code = ""mg/dL""
-        };
-
-        // Reference range: 70 - 99 mg/dL
-        obs.ReferenceRange.Add(new Observation.ReferenceRangeComponent
-        {
-            Low = new Quantity(70m, ""mg/dL""),
-            High = new Quantity(99m, ""mg/dL"")
-        });
-
-        // Interpretation: 'H' (High)
         obs.Interpretation.Add(new CodeableConcept(
-            ""http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation"", 
-            ""H"", 
-            ""High""));
+            ""http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation"", ""H"", ""High""));
 
         // Assert
-        Assert.Equal(ObservationStatus.Final, obs.Status);
-        Assert.Equal(""2345-7"", obs.Code.Coding[0].Code);
-        
-        var quantity = Assert.IsType<Quantity>(obs.Value);
-        Assert.Equal(142m, quantity.Value);
-        Assert.Equal(""mg/dL"", quantity.Unit);
-        Assert.Equal(""http://unitsofmeasure.org"", quantity.System);
+        var qty = Assert.IsType<Quantity>(obs.Value);
+        Assert.Equal(142m, qty.Value);
+        Assert.Equal(""http://unitsofmeasure.org"", qty.System);
+        Assert.Equal(""mg/dL"", qty.Code);
 
-        // Assert that the measured value exceeds upper reference range
-        Assert.True(quantity.Value > obs.ReferenceRange[0].High.Value);
+        Assert.Equal(""2345-7"", obs.Code.Coding[0].Code);
         Assert.Equal(""H"", obs.Interpretation[0].Coding[0].Code);
     }
-}"
+}",
+            TitleAr: "2. اختبار الملاحظات المخبرية ووحدات UCUM",
+            DescriptionAr: "يختبر ترميز LOINC، والقيم الرقمية، ووحدات قياس UCUM القياسية، وعلامات التفسير السريري المرتفعة."
         ),
 
-        // 3. HL7 v2 Parser Test
+        // 3. HL7 v2 ER7 Parser Test
         new(
-            Title: "3. HL7 v2 ER7 Pipe Parser",
+            Title: "3. HL7 v2 ER7 Parser Verification",
             FileName: "Hl7V2ParserTests.cs",
-            Description: "Tests that raw ER7 pipe-and-hat string deconstructs correctly into MSH, PID, and PV1 segments.",
+            Description: "Tests pipe and hat splitting, MSH delimiter detection, and multi-component name parsing.",
             TestCode:
 @"using Xunit;
 using System.Linq;
@@ -227,41 +224,31 @@ namespace HealthcareSystem.Tests;
 public class Hl7V2ParserTests
 {
     [Fact]
-    public void Hl7Message_WithMshAndPid_ExtractsCorrectDelimitersAndFields()
+    public void Parse_AdmitMessage_ExtractsPatientDemographicsCorrectly()
     {
         // Arrange
-        string rawMessage =
-            ""MSH|^~\\&|EPIC|HOSP|EHR|HOSP|202610111100||ADT^A01|MSG9901|P|2.5\n"" +
-            ""PID|1||MRN12345^^^HOSP^MR||Doe^John^A||19800520|M\n"" +
-            ""PV1|1|I|ICU_CARDIO^ROOM_101^BED_A"";
+        string rawEr7 = ""MSH|^~\\&|PAS|HOSP|EHR|HOSP|20261011||ADT^A01|MSG001|P|2.5\r\n"" +
+                        ""PID|1||MRN1002^^^HOSP^MR||Smith^Eleanor^Jane||19850614|F"";
 
         // Act
-        var lines = rawMessage.Split('\n');
-        var mshFields = lines[0].Split('|');
-        var pidFields = lines[1].Split('|');
-        var pv1Fields = lines[2].Split('|');
+        var lines = rawEr7.Split(new[] { ""\r\n"", ""\n"" }, System.StringSplitOptions.RemoveEmptyEntries);
+        var pidLine = lines.FirstOrDefault(l => l.StartsWith(""PID""));
+        Assert.NotNull(pidLine);
 
-        // Assert MSH
-        Assert.Equal(""MSH"", mshFields[0]);
-        Assert.Equal(""ADT^A01"", mshFields[8]); // Message Type
-        Assert.Equal(""MSG9901"", mshFields[9]); // Control ID
-
-        // Assert PID
-        Assert.Equal(""PID"", pidFields[0]);
-        var mrnParts = pidFields[3].Split('^');
-        Assert.Equal(""MRN12345"", mrnParts[0]); // MRN
-        Assert.Equal(""HOSP"", mrnParts[3]);     // Assigning Authority
-
+        var pidFields = pidLine.Split('|');
+        var idComp = pidFields[3].Split('^')[0];
         var nameParts = pidFields[5].Split('^');
-        Assert.Equal(""Doe"", nameParts[0]);      // Family Name
-        Assert.Equal(""John"", nameParts[1]);     // Given Name
 
-        // Assert PV1 Inpatient
-        Assert.Equal(""PV1"", pv1Fields[0]);
-        Assert.Equal(""I"", pv1Fields[2]);        // Inpatient Class
-        Assert.Contains(""ICU_CARDIO"", pv1Fields[3]);
+        // Assert
+        Assert.Equal(""MRN1002"", idComp);
+        Assert.Equal(""Smith"", nameParts[0]);
+        Assert.Equal(""Eleanor"", nameParts[1]);
+        Assert.Equal(""Jane"", nameParts[2]);
+        Assert.Equal(""F"", pidFields[8]);
     }
-}"
+}",
+            TitleAr: "3. اختبار محلل رسائل HL7 v2 ER7",
+            DescriptionAr: "يتحقق من تجزئة الفواصل والقبعات، واكتشاف فواصل MSH، واستخراج مكونات الاسم ورقم الملف بدقة."
         )
     };
 
@@ -273,5 +260,15 @@ public class Hl7V2ParserTests
         await Task.Delay(2000);
         copied = false;
         StateHasChanged();
+    }
+
+    protected override void OnInitialized()
+    {
+        Lang.OnLanguageChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        Lang.OnLanguageChanged -= StateHasChanged;
     }
 }
