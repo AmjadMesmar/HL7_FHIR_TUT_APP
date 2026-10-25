@@ -1,7 +1,9 @@
 @page "/"
 @rendermode InteractiveServer
+@implements IDisposable
+@inject LanguageService Lang
 
-<PageTitle>HL7 v2 & FHIR Teaching Workbench</PageTitle>
+<PageTitle>@(Lang.IsRtl ? "منصة تعليم معايير HL7 و FHIR التفاعلية" : "HL7 v2 & FHIR Teaching Workbench")</PageTitle>
 
 <div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
     <!-- Header Hero Banner -->
@@ -9,25 +11,31 @@
         <div class="row align-items-center g-3">
             <div class="col-lg-8">
                 <span class="badge bg-light text-primary mb-2 px-3 py-1 fw-semibold">.NET 10 • Blazor Server • SignalR</span>
-                <h1 class="h2 fw-bold mb-2">HL7 v2 & FHIR Interoperability Workbench</h1>
+                <h1 class="h2 fw-bold mb-2">
+                    @(Lang.IsRtl ? "منصة ومختبر تعليم تكامل الأنظمة الصحية (HL7 v2 & FHIR)" : "HL7 v2 & FHIR Interoperability Workbench")
+                </h1>
                 <p class="mb-3 text-white-50">
-                    A lightweight, hands-on teaching laboratory comparing legacy pipe-and-hat ER7 messaging against modern FHIR R4 JSON RESTful architecture.
+                    @(Lang.IsRtl ? "مختبر تدريبي تفاعلي متكامل يقارن بين رسائل ER7 القديمة (HL7 v2) وهندسة الموارد الحديثة (FHIR R4 JSON)، مع دعم كامل للمعايير الإقليمية العربية."
+                                 : "A lightweight, hands-on teaching laboratory comparing legacy pipe-and-hat ER7 messaging against modern FHIR R4 JSON RESTful architecture.")
                 </p>
                 <div class="d-flex flex-wrap gap-2">
                     <a href="get-started" class="btn btn-light fw-bold px-3 text-primary shadow-sm">
-                        <i class="bi bi-book-half me-1"></i> Get Started Guide
+                        <i class="bi bi-book-half me-1"></i> @(Lang.IsRtl ? "الدليل الشامل" : "Get Started Guide")
+                    </a>
+                    <a href="regional-interop" class="btn btn-success fw-bold px-3 shadow-sm">
+                        <i class="bi bi-globe-central-south-asia me-1"></i> @(Lang.IsRtl ? "المعايير الإقليمية (NPHIES/الملفي)" : "Regional Interop (NPHIES)")
+                    </a>
+                    <a href="training-academy" class="btn btn-info text-dark fw-bold px-3 shadow-sm">
+                        <i class="bi bi-mortarboard-fill me-1"></i> @(Lang.IsRtl ? "الأكاديمية والشهادات" : "Academy & Certificate")
                     </a>
                     <a href="bridge" class="btn btn-warning fw-bold px-3 shadow-sm">
-                        <i class="bi bi-play-circle-fill me-1"></i> Interactive Bridge
+                        <i class="bi bi-play-circle-fill me-1"></i> @(Lang.IsRtl ? "جسر التحويل" : "Interactive Bridge")
                     </a>
                     <a href="hl7-inspector" class="btn btn-outline-light px-3">
-                        <i class="bi bi-code-slash me-1"></i> HL7 v2 Inspector
+                        <i class="bi bi-code-slash me-1"></i> @(Lang.IsRtl ? "فاحص HL7" : "HL7 v2 Inspector")
                     </a>
                     <a href="fhir-explorer" class="btn btn-outline-light px-3">
-                        <i class="bi bi-filetype-json me-1"></i> FHIR Explorer
-                    </a>
-                    <a href="rest-playground" class="btn btn-outline-light px-3">
-                        <i class="bi bi-cloud-arrow-down me-1"></i> REST Playground
+                        <i class="bi bi-filetype-json me-1"></i> @(Lang.IsRtl ? "مستكشف FHIR" : "FHIR Explorer")
                     </a>
                 </div>
             </div>
@@ -259,33 +267,48 @@
         new("3. Inspect Port 2575 MLLP Framing", "Step through the <0x0B> and <0x1C 0x0D> packet envelope.", "mllp-simulator", false),
         new("4. Explore FHIR Resource Graph", "Click resource references in the FHIR Explorer.", "fhir-explorer", false),
         new("5. Execute a Chained REST Query", "Query FHIR searchsets with _include joins.", "rest-playground", false),
-        new("6. Solve a War Room Bug Puzzle", "Fix real-world hospital message syntax errors.", "war-room", false)
+        new("6. Solve a War Room Bug Puzzle", "Fix real-world hospital message syntax errors.", "war-room", false),
+        new("7. Master 4-Part Arabic Naming", "Generate PID-5 dual scripts & FHIR Middle East name extensions.", "regional-interop", false),
+        new("8. Earn Interoperability Certificate", "Follow the STEMI clinical pathway & pass the 3-tier exam.", "training-academy", false)
     };
+
+    protected override void OnInitialized()
+    {
+        Lang.OnLanguageChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        Lang.OnLanguageChanged -= StateHasChanged;
+    }
 
     private int ProgressPercentage => ChecklistTasks.Count == 0 ? 0 : (int)Math.Round((double)ChecklistTasks.Count(t => t.IsCompleted) / ChecklistTasks.Count * 100);
 
     private string MasteryTitle => ProgressPercentage switch
     {
         100 => "🏆 Senior Interoperability Architect",
-        >= 66 => "⭐ Certified Bridge Engineer",
-        >= 33 => "🚀 Junior Integration Specialist",
+        >= 75 => "⭐ Certified Interop Bridge Specialist",
+        >= 50 => "🚀 Clinical Integration Engineer",
+        >= 25 => "📘 Junior Integration Specialist",
         _ => "🌱 Novice Integrator"
     };
 
     private string GetBadgeStyle() => ProgressPercentage switch
     {
         100 => "bg-success text-white shadow",
-        >= 66 => "bg-primary text-white",
-        >= 33 => "bg-warning text-dark",
+        >= 75 => "bg-primary text-white",
+        >= 50 => "bg-info text-dark",
+        >= 25 => "bg-warning text-dark",
         _ => "bg-secondary text-white"
     };
 
     private string GetProgressColor() => ProgressPercentage switch
     {
         100 => "bg-success",
-        >= 66 => "bg-primary",
-        >= 33 => "bg-warning",
-        _ => "bg-info"
+        >= 75 => "bg-primary",
+        >= 50 => "bg-info",
+        >= 25 => "bg-warning",
+        _ => "bg-secondary"
     };
 
     private void ToggleTask(int index)

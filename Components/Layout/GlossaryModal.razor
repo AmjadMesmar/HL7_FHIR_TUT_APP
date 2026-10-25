@@ -1,16 +1,21 @@
 @using Hl7FhirWorkbench.Models.Glossary
+@inject LanguageService Lang
 
 @if (IsOpen)
 {
-    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.6); z-index: 1060;">
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.6); z-index: 1060;" dir="@Lang.Direction">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content shadow-lg border-0">
                 <div class="modal-header bg-dark text-white py-3">
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-book-half text-warning fs-4"></i>
                         <div>
-                            <h5 class="modal-title fw-bold mb-0">Healthcare Jargon &amp; Interoperability Glossary</h5>
-                            <small class="text-white-50">Quick-reference definitions for hospital software engineering terms</small>
+                            <h5 class="modal-title fw-bold mb-0">
+                                @(Lang.IsRtl ? "معجم مصطلحات وتكامل الأنظمة الصحية" : "Healthcare Jargon & Interoperability Glossary")
+                            </h5>
+                            <small class="text-white-50">
+                                @(Lang.IsRtl ? "دليل المصطلحات السريرية والبروتوكولات لمهندسي تكامل المستشفيات" : "Quick-reference definitions for hospital software engineering terms")
+                            </small>
                         </div>
                     </div>
                     <button type="button" class="btn-close btn-close-white" @onclick="Close"></button>
@@ -20,22 +25,22 @@
                         <div class="col-md-7">
                             <div class="input-group input-group-sm">
                                 <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
-                                <input type="text" class="form-control" placeholder="Search term, acronym, or concept..." 
+                                <input type="text" class="form-control" placeholder="@(Lang.IsRtl ? "ابحث عن مصطلح أو اختصار أو مفهوم..." : "Search term, acronym, or concept...")" 
                                        @bind="searchTerm" @bind:event="oninput" />
                             </div>
                         </div>
                         <div class="col-md-5">
                             <select class="form-select form-select-sm" @bind="selectedCategory">
-                                <option value="All">All Categories</option>
-                                <option value="Identity">Identity &amp; Demographics</option>
-                                <option value="Encounter">Visits &amp; Encounters</option>
-                                <option value="Orders">Orders &amp; Results</option>
-                                <option value="Networking">Networking &amp; Wire Protocols</option>
-                                <option value="Syntax">Syntax &amp; Delimiters</option>
-                                <option value="Terminology">Clinical Terminologies</option>
-                                <option value="FHIR Core">FHIR R4 Core</option>
-                                <option value="HL7 v2">HL7 v2 Message Types</option>
-                                <option value="Architecture">System Architecture</option>
+                                <option value="All">@(Lang.IsRtl ? "جميع التصنيفات" : "All Categories")</option>
+                                <option value="Identity">@(Lang.IsRtl ? "الهوية والديموغرافيا" : "Identity & Demographics")</option>
+                                <option value="Encounter">@(Lang.IsRtl ? "الزيارات والتنويم" : "Visits & Encounters")</option>
+                                <option value="Orders">@(Lang.IsRtl ? "الطلبات والنتائج" : "Orders & Results")</option>
+                                <option value="Networking">@(Lang.IsRtl ? "الشبكات والبروتوكولات" : "Networking & Wire Protocols")</option>
+                                <option value="Syntax">@(Lang.IsRtl ? "الصيغة وفواصل ER7" : "Syntax & Delimiters")</option>
+                                <option value="Terminology">@(Lang.IsRtl ? "المصطلحات السريرية" : "Clinical Terminologies")</option>
+                                <option value="FHIR Core">@(Lang.IsRtl ? "معايير FHIR الأساسية" : "FHIR R4 Core")</option>
+                                <option value="HL7 v2">@(Lang.IsRtl ? "رسائل HL7 v2" : "HL7 v2 Message Types")</option>
+                                <option value="Architecture">@(Lang.IsRtl ? "هندسة الأنظمة الصحية" : "System Architecture")</option>
                             </select>
                         </div>
                     </div>
@@ -46,28 +51,43 @@
                             <div class="list-group-item p-3">
                                 <div class="d-flex justify-content-between align-items-start mb-1 flex-wrap gap-1">
                                     <h6 class="fw-bold mb-0 text-primary">
-                                        @item.Term <span class="text-muted fw-normal small">(@item.ShortDefinition)</span>
+                                        @if (Lang.IsRtl && !string.IsNullOrEmpty(item.ArabicTerm))
+                                        {
+                                            @item.ArabicTerm <span class="text-muted fw-normal small">(@(item.ArabicDefinition ?? item.ShortDefinition))</span>
+                                        }
+                                        else
+                                        {
+                                            @item.Term <span class="text-muted fw-normal small">(@item.ShortDefinition)</span>
+                                        }
                                     </h6>
                                     <div>
                                         <span class="badge @GetStandardBadge(item.Standard) me-1">@item.Standard</span>
                                         <span class="badge bg-secondary">@item.Category</span>
                                     </div>
                                 </div>
-                                <p class="small text-muted mb-0">@item.LongExplanation</p>
+                                <p class="small text-muted mb-0">
+                                    @(Lang.IsRtl && !string.IsNullOrEmpty(item.ArabicExplanation) ? item.ArabicExplanation : item.LongExplanation)
+                                </p>
                             </div>
                         }
                         @if (!FilteredItems.Any())
                         {
                             <div class="p-4 text-center text-muted">
                                 <i class="bi bi-search fs-3"></i>
-                                <p class="mt-2 mb-0">No glossary terms matched "@searchTerm".</p>
+                                <p class="mt-2 mb-0">
+                                    @(Lang.IsRtl ? $"لم يتم العثور على أي مصطلح يطابق \"{searchTerm}\"." : $"No glossary terms matched \"{searchTerm}\".")
+                                </p>
                             </div>
                         }
                     </div>
                 </div>
                 <div class="modal-footer bg-light py-2">
-                    <span class="small text-muted me-auto">Showing @FilteredItems.Count() of @GlossaryData.Items.Count terms</span>
-                    <button type="button" class="btn btn-secondary btn-sm" @onclick="Close">Close</button>
+                    <span class="small text-muted me-auto">
+                        @(Lang.IsRtl ? $"عرض {FilteredItems.Count()} من أصل {GlossaryData.Items.Count} مصطلحاً" : $"Showing {FilteredItems.Count()} of {GlossaryData.Items.Count} terms")
+                    </span>
+                    <button type="button" class="btn btn-secondary btn-sm" @onclick="Close">
+                        @(Lang.IsRtl ? "إغلاق" : "Close")
+                    </button>
                 </div>
             </div>
         </div>
@@ -87,7 +107,10 @@
             (string.IsNullOrWhiteSpace(searchTerm) ||
              i.Term.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
              i.ShortDefinition.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-             i.LongExplanation.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
+             i.LongExplanation.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+             (i.ArabicTerm != null && i.ArabicTerm.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+             (i.ArabicDefinition != null && i.ArabicDefinition.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+             (i.ArabicExplanation != null && i.ArabicExplanation.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))));
 
     private async Task Close()
     {

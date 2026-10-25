@@ -22,6 +22,8 @@ HL7_FHIR_TUT_APP/
 │   ├── Home.razor                  # Overview, Mastery Pathway checklist & 3-Step Guided Learning Path
 │   ├── GetStarted.razor            # Master in-depth curriculum, 1989 HW context & Rosetta Stone matrix
 │   ├── DocumentationViewer.razor   # In-app interactive Markdown doc reader
+│   ├── RegionalInterop.razor       # Middle East 4-Part Arabic Naming Sandbox (PID-5 vs HumanName) & NPHIES/Malaffi
+│   ├── TrainingAcademy.razor       # Acute STEMI patient journey simulator & 3-tier certification assessment
 │   ├── HospitalFlowSimulator.razor # Multi-system hospital topology & message flow simulator
 │   ├── InteropBridge.razor         # Side-by-side interactive visual mapping
 │   ├── Hl7Inspector.razor          # ER7 syntax deconstructor, Delimiter Microscope & Message Builder
@@ -41,14 +43,16 @@ HL7_FHIR_TUT_APP/
 ## 2. Automated Verification & Test Results
 
 ### Build Verification
-* **Target:** `.NET 10.0.201` (`net10.0`).
-* **Command:** `dotnet build`
+* **Target:** `.NET 10.0` (`net10.0`).
+* **Command:** `dotnet build -c Release`
 * **Result:** `Build succeeded. 0 Warning(s), 0 Error(s)`.
 
 ### Endpoint & Route Verification
 * `GET /` &rarr; **HTTP 200 OK** (Overview, Mastery Pathway and scenario grid rendered)
 * `GET /get-started` &rarr; **HTTP 200 OK** (In-depth 6-topic masterclass + Rosetta Stone matrix)
 * `GET /docs` &rarr; **HTTP 200 OK** (In-app Living Documentation viewer)
+* `GET /regional-interop` &rarr; **HTTP 200 OK** (4-Part Arabic Naming sandbox and NPHIES/Malaffi profiles)
+* `GET /training-academy` &rarr; **HTTP 200 OK** (Acute STEMI patient journey & 3-tier certificate exam)
 * `GET /hospital-flow` &rarr; **HTTP 200 OK** (Multi-system hospital topology sequence simulator)
 * `GET /bridge` &rarr; **HTTP 200 OK** (Side-by-side mapping with live JSON generation)
 * `GET /hl7-inspector` &rarr; **HTTP 200 OK** (Interactive ER7 parser, Delimiter Microscope and live linter)

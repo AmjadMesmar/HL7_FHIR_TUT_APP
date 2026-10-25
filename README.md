@@ -29,17 +29,23 @@ Connecting these two worlds requires bridging two radically different philosophi
 
 ## 🚀 Key Features & Interactive Labs
 
-The workbench includes **14 interactive modules** categorized into three core engineering areas:
+The workbench includes **16 interactive modules** categorized into four core engineering areas:
 
 ### 1. Curriculum & Docs
 | Tool | Route | What It Does |
 | :--- | :--- | :--- |
-| **Overview & Paths** | `/` | 3-Day Mastery Pathway checklist, interactive learning journey, scenario selector, and architectural comparison table. |
+| **Overview & Paths** | `/` | 8-step Mastery Pathway checklist, interactive learning journey, scenario selector, and architectural comparison table. |
 | **Master Curriculum** | `/get-started` | 1989 Historical Hardware Constraints infographic, The Rosetta Stone Concept Translation Matrix (v2 vs FHIR vs Modern equivalents), Data body comparisons (JSON vs XML vs ER7 vs RDF), Delimiters & Escape characters, 5 surgery-level messages (`ADT^A01`, `A08`, `A03`, `ORM^O01`, `ORU^R01`), 24h patient journey simulator, and knowledge check quiz. |
 | **Living Documentation** | `/docs` | In-app Markdown document reader powered by `Markdig`, rendering version-controlled markdown guides directly from the `Docs/` directory. |
-| **Jargon Glossary** | Global Modal | Global header search modal with 22+ clinical/interop dictionary definitions across Core Protocols, v2 Standards, FHIR Terminology, and Hospital IT. |
+| **Jargon Glossary** | Global Modal | Global header search modal with 22+ bilingual clinical/interop dictionary definitions across Core Protocols, v2 Standards, FHIR Terminology, and Hospital IT. |
 
-### 2. Interactive Labs
+### 2. Regional Standards & Training Academy (Bilingual / RTL)
+| Tool | Route | What It Does |
+| :--- | :--- | :--- |
+| **Regional Interop & Arabic Names** | `/regional-interop` | 4-Part Arabic Naming Sandbox (First, Father, Grandfather, Family) comparing dual ER7 `PID-5` scripts vs FHIR `HumanName` with Middle East extensions, plus profiles for Saudi NPHIES, UAE Malaffi/Nabidh, and Jordan EHS Hakeem. |
+| **Training Academy & Certification** | `/training-academy` | Continuous acute cardiac STEMI patient journey simulator (ER &rarr; STAT Order &rarr; Critical Troponin &rarr; Cath Lab &rarr; Discharge) + 3-tier competency assessment (10 questions) + verifiable, printable completion certificate. |
+
+### 3. Interactive Labs
 | Tool | Route | What It Does |
 | :--- | :--- | :--- |
 | **Hospital Flow Simulator** | `/hospital-flow` | Interactive multi-system hospital sequence simulator (EHR, Integration Engine, LIS, FHIR Gateway) with step-by-step trace inspection and wire formats. |
@@ -48,7 +54,7 @@ The workbench includes **14 interactive modules** categorized into three core en
 | **FHIR Resource Explorer** | `/fhir-explorer` | Interactive Firely SDK serialization sandbox, Resource Reference Graph visualizer, US Core Conformance Validator, and datatypes guide. |
 | **REST Playground** | `/rest-playground` | Visual FHIR Search Builder (`_include`, comparator prefixes, summary modes) with live Plain-English Query Explainer and HAPI FHIR query sandbox. |
 
-### 3. Engineering & QA Tools
+### 4. Engineering & QA Tools
 | Tool | Route | What It Does |
 | :--- | :--- | :--- |
 | **Synthetic Data Factory** | `/data-factory` | Generates realistic clinical scenarios (Diabetic Outpatient, Acute Cardiac STEMI, Trauma ICU) in matched ER7 and FHIR formats with 1-click clipboard copy and `.hl7` / `.json` downloads. |

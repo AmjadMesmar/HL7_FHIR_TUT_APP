@@ -15,6 +15,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<Hl7FhirWorkbench.Models.Fhir.FhirService>();
+builder.Services.AddScoped<Hl7FhirWorkbench.Services.Localization.LanguageService>();
 
 var app = builder.Build();
 

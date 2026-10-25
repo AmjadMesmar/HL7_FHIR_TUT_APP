@@ -1,0 +1,570 @@
+@page "/training-academy"
+@rendermode InteractiveServer
+@implements IDisposable
+@inject LanguageService Lang
+@inject IJSRuntime JS
+
+<PageTitle>@(Lang.IsRtl ? "أكاديمية التدريب والشهادات المهنية - منصة HL7 و FHIR" : "Training Academy & Certification - HL7 & FHIR Workbench")</PageTitle>
+
+<div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
+    <!-- Hero Header -->
+    <div class="p-4 mb-4 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #1b6ec2 0%, #4c1d95 100%);">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <span class="badge bg-warning text-dark mb-2 px-3 py-1 fw-bold">
+                    <i class="bi bi-mortarboard-fill me-1"></i> @(Lang.IsRtl ? "أكاديمية التميز السريري الرقمي" : "Clinical Interop Academy")
+                </span>
+                <h1 class="h2 fw-bold mb-1">
+                    @(Lang.IsRtl ? "أكاديمية التدريب المهني والشهادات المعتمدة" : "Healthcare Interoperability Academy & Certification")
+                </h1>
+                <p class="mb-0 text-white-50">
+                    @(Lang.IsRtl ? "تدريب عملي متقدم يحاكي سيناريو مريض حقيقي من الدخول إلى الخروج، واختبار كفاءة من 3 مستويات يمنحك شهادة إتقان قابلة للطباعة."
+                                 : "Hands-on clinical workflow simulation, 3-tier competency assessment, and verifiable certificate of completion.")
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <span class="badge bg-light text-dark align-self-center px-3 py-2 fw-semibold">
+                    <i class="bi bi-award-fill text-warning me-1"></i> @(Lang.IsRtl ? "شهادة إتمام رقمية" : "Verifiable Certificate")
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-pills mb-4 gap-2">
+        <li class="nav-item">
+            <button class="nav-link @(activeTab == "journey" ? "active" : "btn-outline-primary") fw-semibold"
+                    @onclick='() => activeTab = "journey"'>
+                <i class="bi bi-diagram-3-fill me-1"></i> @(Lang.IsRtl ? "1. رحلة المريض السريرية المتكاملة" : "1. Complete Patient Clinical Journey")
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(activeTab == "exam" ? "active" : "btn-outline-primary") fw-semibold"
+                    @onclick='() => activeTab = "exam"'>
+                <i class="bi bi-patch-check-fill me-1"></i> @(Lang.IsRtl ? "2. اختبار الكفاءة والشهادة" : "2. Competency Exam & Certificate")
+            </button>
+        </li>
+    </ul>
+
+    @if (activeTab == "journey")
+    {
+        <!-- Continuous Case Study: Acute Cardiac Emergency -->
+        <div class="card shadow-sm border mb-4">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+                <div>
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-heart-pulse-fill text-danger me-2"></i>
+                        @(Lang.IsRtl ? "دراسة حالة سريرية: متلازمة الشريان التاجي الحادة (Acute Cardiac STEMI)" : "Clinical Case Study: Acute Coronary Syndrome (STEMI Protocol)")
+                    </h5>
+                    <small class="text-white-50">
+                        @(Lang.IsRtl ? "تتبع بيانات المريض عمر الفلاسي عبر 5 محطات سريرية، وشاهد التحول الفوري بين رسائل HL7 v2 وموارد FHIR R4."
+                                     : "Follow patient Omar Al-Falasi across 5 clinical touchpoints; observe synchronous HL7 v2 and FHIR R4 representations.")
+                    </small>
+                </div>
+                <span class="badge bg-danger">Critical Pathway</span>
+            </div>
+            <div class="card-body">
+                <!-- Step Selector Stepper -->
+                <div class="d-flex justify-content-between mb-4 flex-wrap gap-2">
+                    @for (int i = 0; i < JourneySteps.Count; i++)
+                    {
+                        var stepIndex = i;
+                        var step = JourneySteps[i];
+                        <button class="btn @(currentStepIndex == stepIndex ? "btn-primary shadow" : "btn-outline-secondary") btn-sm text-start"
+                                @onclick="() => currentStepIndex = stepIndex">
+                            <span class="fw-bold">Step @(stepIndex + 1):</span> @(Lang.IsRtl ? step.ArabicTitle : step.Title)
+                        </button>
+                    }
+                </div>
+
+                <!-- Active Step Detail -->
+                @{
+                    var activeStep = JourneySteps[currentStepIndex];
+                }
+                <div class="alert alert-primary d-flex align-items-center justify-content-between mb-3">
+                    <div>
+                        <h6 class="fw-bold mb-1">
+                            <i class="bi bi-activity me-1"></i> @(Lang.IsRtl ? activeStep.ArabicTitle : activeStep.Title)
+                        </h6>
+                        <small class="text-muted">@(Lang.IsRtl ? activeStep.ArabicDescription : activeStep.Description)</small>
+                    </div>
+                    <span class="badge bg-dark font-monospace fs-6">@activeStep.V2MessageType</span>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <!-- HL7 v2 ER7 Payload -->
+                    <div class="col-lg-6">
+                        <div class="card h-100 border">
+                            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-2">
+                                <span class="small fw-bold">
+                                    <i class="bi bi-hdd-network text-warning me-1"></i> HL7 v2 Wire Message (@activeStep.V2MessageType)
+                                </span>
+                                <button class="btn btn-outline-light btn-sm py-0 px-2" @onclick="() => CopyText(activeStep.V2Message)">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                            </div>
+                            <div class="card-body bg-light p-2">
+                                <pre class="p-2 bg-dark text-warning rounded small font-monospace mb-0" style="white-space: pre-wrap; word-break: break-all; min-height: 220px;">@activeStep.V2Message</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Corresponding FHIR R4 Resource Bundle -->
+                    <div class="col-lg-6">
+                        <div class="card h-100 border">
+                            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-2">
+                                <span class="small fw-bold">
+                                    <i class="bi bi-filetype-json text-success me-1"></i> FHIR R4 Target Resource (@activeStep.FhirResourceType)
+                                </span>
+                                <button class="btn btn-outline-light btn-sm py-0 px-2" @onclick="() => CopyText(activeStep.FhirJson)">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                            </div>
+                            <div class="card-body bg-light p-2">
+                                <pre class="p-2 bg-dark text-success rounded small font-monospace mb-0" style="max-height: 250px; overflow-y: auto;">@activeStep.FhirJson</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-3">
+                    <button class="btn btn-outline-secondary btn-sm" 
+                            disabled="@(currentStepIndex == 0)"
+                            @onclick="() => currentStepIndex--">
+                        <i class="bi bi-arrow-left me-1"></i> @(Lang.IsRtl ? "المحطة السابقة" : "Previous Step")
+                    </button>
+                    <button class="btn btn-primary btn-sm" 
+                            disabled="@(currentStepIndex == JourneySteps.Count - 1)"
+                            @onclick="() => currentStepIndex++">
+                        @(Lang.IsRtl ? "المحطة التالية" : "Next Step") <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Tiered Competency Exam & Certificate Generator -->
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="card shadow-sm border mb-4">
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="bi bi-check2-circle text-info me-2"></i>
+                            @(Lang.IsRtl ? "اختبار التقييم المهني الشامل (10 أسئلة معتمدة)" : "Healthcare Interoperability Competency Assessment")
+                        </h5>
+                        <span class="badge bg-info text-dark">3 Skill Tiers</span>
+                    </div>
+                    <div class="card-body">
+                        @for (int qIdx = 0; qIdx < Questions.Count; qIdx++)
+                        {
+                            var q = Questions[qIdx];
+                            var currentIdx = qIdx;
+                            <div class="card mb-3 border">
+                                <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold small">
+                                        Q@(currentIdx + 1): @(Lang.IsRtl ? q.ArabicQuestion : q.Question)
+                                    </span>
+                                    <span class="badge @(q.Tier == "HL7 v2" ? "bg-warning text-dark" : q.Tier == "FHIR" ? "bg-success" : "bg-primary")">
+                                        @q.Tier
+                                    </span>
+                                </div>
+                                <div class="card-body p-2">
+                                    <div class="list-group list-group-flush">
+                                        @for (int optIdx = 0; optIdx < q.Options.Count; optIdx++)
+                                        {
+                                            var optionText = Lang.IsRtl ? q.ArabicOptions[optIdx] : q.Options[optIdx];
+                                            var optIndex = optIdx;
+                                            var isSelected = userAnswers.ContainsKey(currentIdx) && userAnswers[currentIdx] == optIndex;
+                                            <button class="list-group-item list-group-item-action py-2 small @(isSelected ? "active" : "")"
+                                                    @onclick="() => SelectAnswer(currentIdx, optIndex)">
+                                                <i class="bi @(isSelected ? "bi-check-circle-fill" : "bi-circle") me-2"></i>
+                                                @optionText
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <button class="btn btn-outline-secondary btn-sm" @onclick="ResetExam">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i> @(Lang.IsRtl ? "إعادة الضبط" : "Reset Answers")
+                            </button>
+                            <button class="btn btn-success btn-sm px-4 fw-bold" @onclick="CalculateScore">
+                                <i class="bi bi-award-fill me-1"></i> @(Lang.IsRtl ? "تصحيح الاختبار وإصدار الشهادة" : "Submit & Generate Certificate")
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Certificate Generator Panel -->
+            <div class="col-lg-5">
+                <div class="card shadow-sm border mb-4 sticky-top" style="top: 1rem;">
+                    <div class="card-header bg-light py-3">
+                        <h6 class="mb-0 fw-bold text-dark">
+                            <i class="bi bi-award text-warning me-2"></i>
+                            @(Lang.IsRtl ? "شهادة الإتمام والاعتماد المهني" : "Verifiable Completion Certificate")
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">@(Lang.IsRtl ? "اسم المتدرب / المهندس:" : "Candidate Name for Certificate:"):</label>
+                            <input type="text" class="form-control" @bind="candidateName" placeholder="e.g. Amjad Mesmar" />
+                        </div>
+
+                        @if (examSubmitted)
+                        {
+                            <div class="alert @(scorePercentage >= 70 ? "alert-success" : "alert-warning") text-center py-3 mb-3">
+                                <h5 class="fw-bold mb-1">
+                                    @(scorePercentage >= 70 ? (Lang.IsRtl ? "🎉 مبروك! اجتزت الاختبار بنجاح" : "🎉 Congratulations! You Passed")
+                                                            : (Lang.IsRtl ? "⚠️ نتيجة الاختبار بحاجة إلى تحسين" : "⚠️ Keep practicing! Passing score is 70%"))
+                                </h5>
+                                <div class="display-6 fw-bold">@scorePercentage%</div>
+                                <small class="text-muted">
+                                    @(Lang.IsRtl ? $"أجبت بشكل صحيح على {correctCount} من أصل {Questions.Count} أسئلة"
+                                                 : $"Correct answers: {correctCount} out of {Questions.Count}")
+                                </small>
+                            </div>
+
+                            @if (scorePercentage >= 70)
+                            {
+                                <!-- Official Printable Certificate Container -->
+                                <div id="printableCertificate" class="p-4 border rounded shadow-sm text-center bg-white position-relative mb-3"
+                                     style="border: 4px double #1b6ec2 !important; min-height: 340px;">
+                                    <div class="text-uppercase text-muted small fw-bold tracking-wider mb-2">Certificate of Technical Mastery</div>
+                                    <h4 class="fw-bold text-primary mb-1">Healthcare Interoperability Specialist</h4>
+                                    <small class="text-muted d-block mb-3">HL7 v2.x ER7 &amp; HL7 FHIR Release 4 Certified Practitioner</small>
+                                    
+                                    <div class="my-3 py-2 border-top border-bottom">
+                                        <div class="small text-muted mb-1">This is proudly presented to</div>
+                                        <h3 class="fw-bold text-dark mb-0 font-monospace">@candidateName</h3>
+                                    </div>
+
+                                    <p class="small text-muted mb-3" style="font-size: 0.78rem;">
+                                        For demonstrating proficiency in HL7 v2 segment pipelines, MLLP socket transmission,
+                                        FHIR R4 resource architecture, RESTful query syntax, and Middle Eastern clinical data profiles (NPHIES/Malaffi).
+                                    </p>
+
+                                    <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top text-muted small" style="font-size: 0.7rem;">
+                                        <span>Date: @DateTime.UtcNow.ToString("MMM dd, yyyy")</span>
+                                        <span class="badge bg-success">Passed with Distinction (@scorePercentage%)</span>
+                                        <span class="font-monospace">ID: AGY-@Math.Abs(candidateName.GetHashCode()).ToString("X6")</span>
+                                    </div>
+                                </div>
+
+                                <button class="btn btn-outline-primary btn-sm w-100" @onclick="PrintCertificate">
+                                    <i class="bi bi-printer me-1"></i> @(Lang.IsRtl ? "طباعة / حفظ الشهادة PDF" : "Print / Export Certificate PDF")
+                                </button>
+                            }
+                        }
+                        else
+                        {
+                            <div class="p-4 text-center text-muted bg-light rounded">
+                                <i class="bi bi-file-earmark-lock fs-1 text-secondary"></i>
+                                <p class="mt-2 mb-0 small">
+                                    @(Lang.IsRtl ? "أجب عن أسئلة التقييم واضغط \"تصحيح الاختبار\" لإصدار شهادتك الرسمية."
+                                                 : "Complete the 10-question evaluation on the left and submit to unlock your verified credential.")
+                                </p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private string activeTab = "journey";
+    private int currentStepIndex = 0;
+    private string candidateName = "Healthcare Engineer";
+    private bool examSubmitted = false;
+    private int correctCount = 0;
+    private int scorePercentage = 0;
+    private Dictionary<int, int> userAnswers = new();
+
+    private record JourneyStepItem(
+        string Title, string ArabicTitle,
+        string Description, string ArabicDescription,
+        string V2MessageType, string V2Message,
+        string FhirResourceType, string FhirJson);
+
+    private static readonly List<JourneyStepItem> JourneySteps = new()
+    {
+        new(
+            "Emergency Room Arrival & Triage", "الدخول إلى قسم الطوارئ والفرز السريري",
+            "Patient arrives with acute crushing chest pain radiating to left arm. Registered in hospital EHR.",
+            "وصول المريض عمر الفلاسي للطوارئ بألم حاد في الصدر يمتد للذراع الأيسر. تسجيل أولي وتصنيف سريري.",
+            "ADT^A01 (Admit / Visit Notice)",
+            "MSH|^~\\&|ER_REG|GENERAL_HOSP|HIS|CORE|20261025120000||ADT^A01|MSG90101|P|2.5\nEVN|A01|20261025120000\nPID|1||MRN98214^^^HOSP||AL-FALASI^OMAR^ABDULLAH^MOHAMMED~الفلاسي^عمر^عبدالله^محمد||19880415|M|||DUBAI^UAE\nPV1|1|E|ER^BED_02^BAY_A||||9821^AL-MANSOORI^KHALID^^DR|||EMERGENCY||||||||ADM90214",
+            "Bundle (Patient + Encounter)",
+            """
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "pat-001",
+        "identifier": [{ "system": "http://hospital.org/mrn", "value": "MRN98214" }],
+        "name": [{ "family": "Al-Falasi", "given": ["Omar", "Abdullah", "Mohammed"] }],
+        "gender": "male"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Encounter",
+        "status": "in-progress",
+        "class": { "code": "EMER", "display": "emergency" },
+        "subject": { "reference": "Patient/pat-001" }
+      }
+    }
+  ]
+}
+"""
+        ),
+        new(
+            "STAT Cardiac Lab & ECG Order", "طلب فحص إنزيمات القلب وتخطيط الصدر الفوري",
+            "Emergency physician orders STAT Troponin I, CK-MB, and 12-lead ECG.",
+            "طبيب الطوارئ يطلب فحوصات إنزيمات القلب الإسعافية (تروبونين) وتخطيط القلب العاجل.",
+            "ORM^O01 (General Order Message)",
+            "MSH|^~\\&|EHR_CPOE|EMERGENCY|LIS_CORE|CENTRAL_LAB|20261025120500||ORM^O01|ORD9812|P|2.5\nPID|1||MRN98214^^^HOSP||AL-FALASI^OMAR\nORC|NW|ORD-2026-01|||||^^^STAT||20261025120500|9821^AL-MANSOORI\nOBR|1|ORD-2026-01||49563-0^Cardiac Troponin I^LN|||20261025120500|||||||||9821^AL-MANSOORI",
+            "ServiceRequest (Lab Order)",
+            """
+{
+  "resourceType": "ServiceRequest",
+  "id": "req-cardiac-01",
+  "status": "active",
+  "intent": "order",
+  "priority": "stat",
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "49563-0",
+        "display": "Cardiac troponin I [Mass/volume] in Blood"
+      }
+    ]
+  },
+  "subject": { "reference": "Patient/pat-001" }
+}
+"""
+        ),
+        new(
+            "Critical High Troponin Alert", "نتيجة التروبونين الحرجة والإنذار المخبري",
+            "Laboratory automated analyzer returns Troponin I = 2.85 ng/mL (Reference < 0.04). Critical flag triggers alert.",
+            "جهاز الفحص المخبري الآلي يُصدر نتيجة تروبونين حرجة جداً 2.85 ng/mL مع تنبيه باللون الأحمر.",
+            "ORU^R01 (Unsolicited Result with OBX)",
+            "MSH|^~\\&|COBAS_6000|CENTRAL_LAB|EHR_CORE|EMERGENCY|20261025122500||ORU^R01|RES9821|P|2.5\nPID|1||MRN98214^^^HOSP||AL-FALASI^OMAR\nOBR|1|ORD-2026-01|LAB-99210|49563-0^Cardiac Troponin I^LN|||20261025121000|||||||||F\nOBX|1|NM|49563-0^Troponin I^LN||2.85|ng/mL|<0.04|HH|||F|||20261025122500",
+            "DiagnosticReport + Observation",
+            """
+{
+  "resourceType": "Observation",
+  "id": "obs-trop-01",
+  "status": "final",
+  "category": [{ "coding": [{ "code": "laboratory" }] }],
+  "code": {
+    "coding": [{ "system": "http://loinc.org", "code": "49563-0", "display": "Troponin I" }]
+  },
+  "subject": { "reference": "Patient/pat-001" },
+  "valueQuantity": {
+    "value": 2.85,
+    "unit": "ng/mL",
+    "system": "http://unitsofmeasure.org",
+    "code": "ng/mL"
+  },
+  "interpretation": [{ "coding": [{ "code": "HH", "display": "Critical high" }] }]
+}
+"""
+        ),
+        new(
+            "Emergency Transfer to Cath Lab", "النقل الطارئ إلى مختبر القسطرة القلبية",
+            "Cardiology team activates Cath Lab. Patient transferred from ER bed to Cath Lab 1.",
+            "فريق أمراض القلب يستنفر غرفة القسطرة، ويتم تحويل سرير المريض فوراً من الطوارئ إلى جناح القسطرة 1.",
+            "ADT^A02 (Patient Transfer)",
+            "MSH|^~\\&|ER_REG|GENERAL_HOSP|HIS|CORE|20261025124000||ADT^A02|MSG90104|P|2.5\nEVN|A02|20261025124000\nPID|1||MRN98214^^^HOSP||AL-FALASI^OMAR\nPV1|1|I|CATH_LAB^SUITE_1^TABLE||||9910^AL-HASHEMI^TARIQ^^DR|||CARDIO||||||||ADM90214",
+            "Encounter (Location Update)",
+            """
+{
+  "resourceType": "Encounter",
+  "id": "enc-001",
+  "status": "in-progress",
+  "class": { "code": "IMP", "display": "inpatient encounter" },
+  "location": [
+    {
+      "location": { "display": "Cath Lab Suite 1" },
+      "status": "active"
+    }
+  ]
+}
+"""
+        ),
+        new(
+            "Stabilized Discharge & Electronic Rx", "الخروج الآمن والوصفة الدوائية الإلكترونية",
+            "Successful coronary angioplasty with drug-eluting stent. Patient discharged with Dual Antiplatelet Therapy.",
+            "إجراء قسطرة وتركيب شبكة دوائية بنجاح وخروج المريض مع وصفة إلكترونية لعلاج مميعات الدم.",
+            "ADT^A03 (Discharge Notice)",
+            "MSH|^~\\&|CARDIO_DEPT|GENERAL_HOSP|HIS|CORE|20261027100000||ADT^A03|MSG90109|P|2.5\nEVN|A03|20261027100000\nPID|1||MRN98214^^^HOSP||AL-FALASI^OMAR\nPV1|1|I|CCU^ROOM_301^BED_A||||9910^AL-HASHEMI|||CARDIO||||||||ADM90214|||||||||||||||||||20261027100000|01",
+            "MedicationRequest (Discharge Prescription)",
+            """
+{
+  "resourceType": "MedicationRequest",
+  "id": "med-aspirin-01",
+  "status": "active",
+  "intent": "order",
+  "medicationCodeableConcept": {
+    "coding": [
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "code": "1191",
+        "display": "Aspirin 81 MG Oral Tablet"
+      }
+    ]
+  },
+  "subject": { "reference": "Patient/pat-001" },
+  "dosageInstruction": [{ "text": "Take 1 tablet daily with food" }]
+}
+"""
+        )
+    };
+
+    private record QuestionItem(
+        string Question, string ArabicQuestion,
+        string Tier,
+        List<string> Options, List<string> ArabicOptions,
+        int CorrectOptionIndex);
+
+    private static readonly List<QuestionItem> Questions = new()
+    {
+        new(
+            "In an HL7 v2 ER7 message, what character is the standard field separator?",
+            "في رسالة HL7 v2 بنظام ER7، ما هو الرمز القياسي المستخدم كفاصل للحقول؟",
+            "HL7 v2",
+            new() { "Pipe (|)", "Caret (^)", "Tilde (~)", "Ampersand (&)" },
+            new() { "الأنبوب (|)", "القبعة (^)", "المدّة (~)", "علامة (&)" },
+            0
+        ),
+        new(
+            "Which HL7 v2 segment contains the patient's MRN, legal name, and date of birth?",
+            "أي قطاع في رسالة HL7 v2 يحتوي على الرقم الطبي للمريض، اسمه الرسمي، وتاريخ ميلاده؟",
+            "HL7 v2",
+            new() { "MSH", "PID", "PV1", "OBX" },
+            new() { "قطاع MSH", "قطاع PID", "قطاع PV1", "قطاع OBX" },
+            1
+        ),
+        new(
+            "What byte combination marks the END of an MLLP message frame?",
+            "ما هي تركيبة البايتات التي تحدد نهاية حزمة رسالة MLLP عبر مقبس TCP؟",
+            "HL7 v2",
+            new() { "0x0B", "0x0D 0x0A (CR LF)", "0x1C 0x0D (FS CR)", "0x00 (Null Byte)" },
+            new() { "البايت 0x0B", "البايتان 0x0D 0x0A (CR LF)", "البايتان 0x1C 0x0D (FS CR)", "البايت 0x00 (Null)" },
+            2
+        ),
+        new(
+            "What does an MSA-1 acknowledgment code of 'AA' indicate in HL7 v2?",
+            "ماذا يعني كود إشعار الاستلام MSA-1 الذي يحمل القيمة 'AA' في رسائل HL7 v2؟",
+            "HL7 v2",
+            new() { "Application Accept (Successfully Processed)", "Application Error (Data Error)", "Application Reject (Network Failure)", "Authentication Alert" },
+            new() { "قبول التطبيق بنجاح (معالجة صحيحة)", "خطأ في التطبيق (بيانات خاطئة)", "رفض التطبيق (فشل في الشبكة)", "تنبيه مصادقة أمنية" },
+            0
+        ),
+        new(
+            "Which FHIR R4 resource is specifically used to represent an individual laboratory result such as Glucose or Troponin?",
+            "أي مورد في معيار FHIR R4 يُستخدم خصيصاً لتمثيل نتيجة فحص مخبري منفردة مثل الجلوكوز أو التروبونين؟",
+            "FHIR",
+            new() { "Observation", "DiagnosticReport", "Condition", "Specimen" },
+            new() { "مورد الملاحظة السريرية (Observation)", "مورد التقرير التشخيصي (DiagnosticReport)", "مورد الحالة المرضية (Condition)", "مورد العينة (Specimen)" },
+            0
+        ),
+        new(
+            "What standard FHIR search parameter allows returning linked patient records in a single REST request using joins?",
+            "ما هو معامل البحث القياسي في FHIR الذي يسمح بجلب سجلات المرضى المرتبطة في طلب REST واحد؟",
+            "FHIR",
+            new() { "_include", "_join", "_expand", "_reference" },
+            new() { "المعامل _include", "المعامل _join", "المعامل _expand", "المعامل _reference" },
+            0
+        ),
+        new(
+            "How are polymorphic fields that support multiple datatypes denoted in the official FHIR specification?",
+            "كيف يُرمز للحقول متعددة الأشكال (Polymorphic) التي تقبل أكثر من نوع بيانات في مواصفة FHIR؟",
+            "FHIR",
+            new() { "Suffix [x] (e.g. value[x])", "Prefix $ (e.g. $value)", "Wildcard * (e.g. value*)", "Type Union <T1|T2>" },
+            new() { "اللاحقة [x] (مثل value[x])", "البادئة $ (مثل $value)", "النجمة * (مثل value*)", "الاتحاد <T1|T2>" },
+            0
+        ),
+        new(
+            "Which national Middle Eastern initiative mandates 100% FHIR R4 for insurance claims and clinical approvals?",
+            "أي مبادرة وطنية في الشرق الأوسط تلزم باستخدام معيار FHIR R4 بنسبة 100% لمطالبات التأمين والموافقات الطبية؟",
+            "Interoperability",
+            new() { "Saudi NPHIES (CHI)", "US HIPAA EDI 837", "European epSOS", "HL7 v2 RIM" },
+            new() { "منصة نفيس السعودية (NPHIES)", "معيار هيبا الأمريكي EDI 837", "مشروع epSOS الأوروبي", "معيار HL7 v2 RIM" },
+            0
+        ),
+        new(
+            "When mapping an Arab 4-part legal name (First, Father, Grandfather, Family) to HL7 v2, which field is used?",
+            "عند ربط الاسم العربي الرباعي (الاسم الأول، الأب، الجد، العائلة) في HL7 v2، ما هو الحقل المخصص لذلك؟",
+            "Interoperability",
+            new() { "PID-5 (Patient Name)", "PID-3 (Patient Identifier)", "PV1-7 (Attending Doctor)", "MSH-4 (Sending Facility)" },
+            new() { "الحقل PID-5 (اسم المريض)", "الحقل PID-3 (معرّف المريض)", "الحقل PV1-7 (الطبيب المعالج)", "الحقل MSH-4 (المنشأة المرسلة)" },
+            0
+        ),
+        new(
+            "What is the main role of a hospital Interface Engine (such as Mirth Connect or Rhapsody)?",
+            "ما هو الدور الأساسي لمحرك التكامل في المستشفيات (مثل Mirth Connect أو Rhapsody)؟",
+            "Interoperability",
+            new() { "Translate between legacy HL7 v2 feeds and modern FHIR APIs with message routing", "Store the hospital's primary SQL database tables", "Act as a DNS server for hospital workstations", "Provide direct biometric login to physician tablets" },
+            new() { "الترجمة بين رسائل HL7 v2 القديمة وخدمات FHIR الحديثة وتوجيه الرسائل", "تخزين جداول قاعدة بيانات SQL الرئيسية للمستشفى", "العمل كخادم DNS لأجهزة كمبيوتر المستشفى", "توفير تسجيل الدخول بالبصمة لأجهزة الأطباء" },
+            0
+        )
+    };
+
+    protected override void OnInitialized()
+    {
+        Lang.OnLanguageChanged += StateHasChanged;
+    }
+
+    private void SelectAnswer(int questionIndex, int optionIndex)
+    {
+        userAnswers[questionIndex] = optionIndex;
+    }
+
+    private void ResetExam()
+    {
+        userAnswers.Clear();
+        examSubmitted = false;
+        correctCount = 0;
+        scorePercentage = 0;
+    }
+
+    private void CalculateScore()
+    {
+        correctCount = 0;
+        for (int i = 0; i < Questions.Count; i++)
+        {
+            if (userAnswers.TryGetValue(i, out var selected) && selected == Questions[i].CorrectOptionIndex)
+            {
+                correctCount++;
+            }
+        }
+        scorePercentage = (int)Math.Round((double)correctCount / Questions.Count * 100);
+        examSubmitted = true;
+    }
+
+    private async Task PrintCertificate()
+    {
+        await JS.InvokeVoidAsync("window.print");
+    }
+
+    private async Task CopyText(string text)
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", text);
+    }
+
+    public void Dispose()
+    {
+        Lang.OnLanguageChanged -= StateHasChanged;
+    }
+}

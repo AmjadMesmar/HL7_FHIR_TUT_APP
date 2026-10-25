@@ -75,3 +75,51 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+/* ========================================================
+   Arabic Typography & Cultural RTL Styling
+   ======================================================== */
+[dir="rtl"] {
+    font-family: 'Cairo', 'IBM Plex Sans Arabic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    text-align: right;
+}
+
+[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4, [dir="rtl"] h5, [dir="rtl"] h6 {
+    font-family: 'Cairo', 'IBM Plex Sans Arabic', sans-serif !important;
+    font-weight: 700;
+}
+
+/* Strict LTR Islands for technical payloads: ER7, JSON, MLLP, Hex, C# Code */
+[dir="rtl"] pre,
+[dir="rtl"] code,
+[dir="rtl"] kbd,
+[dir="rtl"] samp,
+[dir="rtl"] .font-monospace,
+[dir="rtl"] .code-font,
+[dir="rtl"] textarea.font-monospace,
+[dir="rtl"] .er7-payload,
+[dir="rtl"] .json-payload,
+[dir="rtl"] .hl7-token {
+    direction: ltr !important;
+    text-align: left !important;
+    unicode-bidi: isolate !important;
+    font-family: 'IBM Plex Mono', 'Cascadia Code', Consolas, monospace !important;
+}
+
+/* RTL directional spacing and border adjustments */
+[dir="rtl"] .me-1 { margin-left: 0.25rem !important; margin-right: 0 !important; }
+[dir="rtl"] .me-2 { margin-left: 0.5rem !important; margin-right: 0 !important; }
+[dir="rtl"] .me-3 { margin-left: 1rem !important; margin-right: 0 !important; }
+[dir="rtl"] .ms-1 { margin-right: 0.25rem !important; margin-left: 0 !important; }
+[dir="rtl"] .ms-2 { margin-right: 0.5rem !important; margin-left: 0 !important; }
+[dir="rtl"] .ms-3 { margin-right: 1rem !important; margin-left: 0 !important; }
+[dir="rtl"] .text-end { text-align: left !important; }
+[dir="rtl"] .text-start { text-align: right !important; }
+[dir="rtl"] .border-start { border-right: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important; border-left: 0 !important; }
+[dir="rtl"] .border-end { border-left: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important; border-right: 0 !important; }
+
+/* Flip directional icons in RTL */
+[dir="rtl"] .bi-arrow-right::before { content: "\f12f"; } /* arrow-left */
+[dir="rtl"] .bi-chevron-right::before { content: "\f284"; } /* chevron-left */
+[dir="rtl"] .bi-arrow-left::before { content: "\f138"; } /* arrow-right */
+[dir="rtl"] .bi-chevron-left::before { content: "\f285"; } /* chevron-right */

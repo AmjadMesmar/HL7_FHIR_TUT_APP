@@ -1,0 +1,365 @@
+@page "/regional-interop"
+@rendermode InteractiveServer
+@implements IDisposable
+@inject LanguageService Lang
+@inject IJSRuntime JS
+
+<PageTitle>@(Lang.IsRtl ? "المعايير الإقليمية والأسماء العربية - منصة HL7 و FHIR" : "Regional Interoperability & Arabic Profiles - HL7 & FHIR Workbench")</PageTitle>
+
+<div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
+    <!-- Hero Header -->
+    <div class="p-4 mb-4 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #0f5132 0%, #198754 50%, #0d6efd 100%);">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <span class="badge bg-warning text-dark mb-2 px-3 py-1 fw-bold">
+                    <i class="bi bi-globe-central-south-asia me-1"></i> @(Lang.IsRtl ? "تكامل الأنظمة الصحية في الشرق الأوسط" : "Middle East Healthcare Interoperability")
+                </span>
+                <h1 class="h2 fw-bold mb-1">
+                    @(Lang.IsRtl ? "المعايير الإقليمية وتمثيل الأسماء العربية (NPHIES / الملفي / حكيم)" : "Regional Interop Profiles & 4-Part Arabic Naming Sandbox")
+                </h1>
+                <p class="mb-0 text-white-50">
+                    @(Lang.IsRtl ? "معايير تبادل البيانات السريرية في العالم العربي، ونظام نفيس (NPHIES) السعودي، ومنصة الملفي الإماراتي، وتمثيل الأسماء الرباعية في HL7 v2 و FHIR R4."
+                                 : "Deep-dive into Arab clinical data standards: Saudi NPHIES (FHIR R4), UAE Malaffi/Nabidh (HIE), and 4-part Arabic naming conventions in PID-5 vs HumanName.")
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <span class="badge bg-light text-dark align-self-center px-3 py-2 fw-semibold">
+                    <i class="bi bi-translate text-primary me-1"></i> @(Lang.IsRtl ? "دعم ثنائي اللغة" : "Bilingual Arab Standards")
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Middle East 4-Part Name Interactive Generator -->
+    <div class="card shadow-sm border mb-4">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-person-badge text-success me-2"></i>
+                @(Lang.IsRtl ? "مختبر الأسماء العربية الرباعية (HL7 v2 PID-5 مقابل FHIR HumanName)" : "4-Part Arabic Name Generator (HL7 PID-5 vs FHIR HumanName)")
+            </h5>
+            <span class="badge bg-success">
+                @(Lang.IsRtl ? "الاسم الأول • الأب • الجد • العائلة" : "First • Father • Grandfather • Family")
+            </span>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small">
+                @(Lang.IsRtl ? "في منطقة الشرق الأوسط، تتكون أسماء المرضى الرسمية عادة من أربعة أجزاء: الاسم الأول، اسم الأب، اسم الجد، واسم العائلة أو القبيلة. يوضح هذا المختبر كيفية تمثيل هذه البنية في حقول HL7 v2 المحددة بفواصل (مع تكرار الاسم بالعربية والإنجليزية)، وكيفية تمثيلها في FHIR R4 عبر مصفوفة given والملحقات القياسية (Extensions)."
+                             : "In Middle Eastern healthcare systems, legal names comprise 4 distinct parts: Given, Father, Grandfather, and Family/Tribal names. This interactive builder demonstrates the dual ER7 repetition standard (Latin + Arabic script) in PID-5 and the corresponding FHIR R4 HumanName with international extensions.")
+            </p>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">@(Lang.IsRtl ? "الاسم الأول (عربي / إنجليزي)" : "First / Given Name"):</label>
+                    <div class="input-group input-group-sm mb-1">
+                        <span class="input-group-text">AR</span>
+                        <input type="text" class="form-control" @bind="arabicFirst" @bind:after="GenerateOutputs" />
+                    </div>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">EN</span>
+                        <input type="text" class="form-control" @bind="latinFirst" @bind:after="GenerateOutputs" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">@(Lang.IsRtl ? "اسم الأب (عربي / إنجليزي)" : "Father Name"):</label>
+                    <div class="input-group input-group-sm mb-1">
+                        <span class="input-group-text">AR</span>
+                        <input type="text" class="form-control" @bind="arabicFather" @bind:after="GenerateOutputs" />
+                    </div>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">EN</span>
+                        <input type="text" class="form-control" @bind="latinFather" @bind:after="GenerateOutputs" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">@(Lang.IsRtl ? "اسم الجد (عربي / إنجليزي)" : "Grandfather Name"):</label>
+                    <div class="input-group input-group-sm mb-1">
+                        <span class="input-group-text">AR</span>
+                        <input type="text" class="form-control" @bind="arabicGrandfather" @bind:after="GenerateOutputs" />
+                    </div>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">EN</span>
+                        <input type="text" class="form-control" @bind="latinGrandfather" @bind:after="GenerateOutputs" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">@(Lang.IsRtl ? "اسم العائلة / القبيلة" : "Family / Tribal Name"):</label>
+                    <div class="input-group input-group-sm mb-1">
+                        <span class="input-group-text">AR</span>
+                        <input type="text" class="form-control" @bind="arabicFamily" @bind:after="GenerateOutputs" />
+                    </div>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">EN</span>
+                        <input type="text" class="form-control" @bind="latinFamily" @bind:after="GenerateOutputs" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mb-3">
+                <button class="btn btn-outline-secondary btn-sm" @onclick="LoadPresetOmar">
+                    <i class="bi bi-arrow-clockwise me-1"></i> @(Lang.IsRtl ? "نموذج: عمر الفلاسي (الإمارات)" : "Preset: Omar Al-Falasi (UAE)")
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" @onclick="LoadPresetFatimah">
+                    <i class="bi bi-arrow-clockwise me-1"></i> @(Lang.IsRtl ? "نموذج: فاطمة الغامدي (السعودية)" : "Preset: Fatimah Al-Ghamdi (KSA)")
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" @onclick="LoadPresetTariq">
+                    <i class="bi bi-arrow-clockwise me-1"></i> @(Lang.IsRtl ? "نموذج: طارق المجالي (الأردن)" : "Preset: Tariq Majali (Jordan)")
+                </button>
+            </div>
+
+            <div class="row g-3">
+                <!-- HL7 v2 Output -->
+                <div class="col-lg-6">
+                    <div class="card h-100 border">
+                        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-2">
+                            <span class="small fw-bold">
+                                <i class="bi bi-file-code me-1 text-warning"></i> HL7 v2 ER7 PID-5 (Dual-Script Repetition)
+                            </span>
+                            <button class="btn btn-outline-light btn-sm py-0 px-2" @onclick="() => CopyText(hl7PidOutput)">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
+                        <div class="card-body bg-light">
+                            <pre class="p-2 bg-dark text-warning rounded small font-monospace mb-2" style="white-space: pre-wrap; word-break: break-all;">@hl7PidOutput</pre>
+                            <div class="small text-muted">
+                                <strong>@(Lang.IsRtl ? "تحليل بنية ER7:" : "ER7 Structure Breakdown:")</strong>
+                                <ul class="mb-0 ps-3">
+                                    <li><code>~</code> @(Lang.IsRtl ? "يفصل بين التكرار اللاتيني والتكرار العربي (Repetition Separator)." : "Repetition separator between Latin and Arabic official scripts.")</li>
+                                    <li><code>PID-5.1</code>: @(Lang.IsRtl ? "اسم العائلة (Family Name)" : "Family Name")</li>
+                                    <li><code>PID-5.2</code>: @(Lang.IsRtl ? "الاسم الأول (Given Name)" : "First/Given Name")</li>
+                                    <li><code>PID-5.3</code>: @(Lang.IsRtl ? "اسم الأب واسم الجد (Middle / Second Names)" : "Father and Grandfather Names")</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FHIR R4 Output -->
+                <div class="col-lg-6">
+                    <div class="card h-100 border">
+                        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-2">
+                            <span class="small fw-bold">
+                                <i class="bi bi-filetype-json me-1 text-success"></i> FHIR R4 HumanName with Extensions
+                            </span>
+                            <button class="btn btn-outline-light btn-sm py-0 px-2" @onclick="() => CopyText(fhirJsonOutput)">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
+                        <div class="card-body bg-light">
+                            <pre class="p-2 bg-dark text-success rounded small font-monospace mb-2" style="max-height: 250px; overflow-y: auto;">@fhirJsonOutput</pre>
+                            <div class="small text-muted">
+                                <strong>@(Lang.IsRtl ? "تحليل بنية FHIR R4:" : "FHIR R4 Structure Breakdown:")</strong>
+                                <ul class="mb-0 ps-3">
+                                    <li><code>given[]</code>: @(Lang.IsRtl ? "مصفوفة تحتوي [الاسم الأول, اسم الأب, اسم الجد]." : "Array containing [First, Father, Grandfather].")</li>
+                                    <li><code>extension</code>: @(Lang.IsRtl ? "ملحق معتمد لتحديد اسم الأب والجد بشكل منفصل." : "Standard extensions explicitly tagging father and grandfather.")</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Regional Frameworks Comparison Cards -->
+    <div class="row g-3 mb-4">
+        <!-- Saudi NPHIES -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-top border-4 border-success">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge bg-success p-2 fs-6"><i class="bi bi-shield-check"></i></span>
+                        <div>
+                            <h5 class="fw-bold mb-0">Saudi NPHIES</h5>
+                            <small class="text-muted">المملكة العربية السعودية</small>
+                        </div>
+                    </div>
+                    <p class="small text-muted mb-2">
+                        @(Lang.IsRtl ? "منصة نفيس الوطنية الموحدة لتبادل البيانات الصحية والمطالبات التأمينية (CHI / Seha Virtual Hospital). تعتمد معيار HL7 FHIR R4 بالكامل بنسبة 100% لجميع المعاملات المالية والسريرية."
+                                     : "National Platform for Health and Insurance Exchange Services. Mandatory 100% FHIR R4 RESTful architecture for all insurance pre-authorizations, claims, and medical summaries.")
+                    </p>
+                    <ul class="small mb-0 ps-3 text-muted">
+                        <li><strong>Standard:</strong> FHIR R4 JSON</li>
+                        <li><strong>Key Resources:</strong> <code>Coverage</code>, <code>Claim</code>, <code>ClaimResponse</code>, <code>Patient</code></li>
+                        <li><strong>Security:</strong> Mutual TLS (mTLS) + OAuth2</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- UAE Malaffi & Nabidh -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-top border-4 border-primary">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge bg-primary p-2 fs-6"><i class="bi bi-diagram-3"></i></span>
+                        <div>
+                            <h5 class="fw-bold mb-0">UAE Malaffi / Nabidh</h5>
+                            <small class="text-muted">دولة الإمارات العربية المتحدة</small>
+                        </div>
+                    </div>
+                    <p class="small text-muted mb-2">
+                        @(Lang.IsRtl ? "منظومة تبادل المعلومات الصحية في أبوظبي (الملفي) ودبي (نابض). تستخدم نموذجاً هجيناً (Hybrid Interop) يجمع بين تدفق رسائل HL7 v2 عبر MLLP لربط المستشفيات وبوابات FHIR للتحليلات."
+                                     : "Health Information Exchanges (HIE) across Abu Dhabi (Malaffi) and Dubai (Nabidh). Employs hybrid interop: high-throughput HL7 v2 over MLLP for real-time telemetry + FHIR for population health.")
+                    </p>
+                    <ul class="small mb-0 ps-3 text-muted">
+                        <li><strong>Standard:</strong> HL7 v2.5.1 + FHIR R4</li>
+                        <li><strong>Key Messages:</strong> <code>ADT^A01/A08</code>, <code>ORU^R01</code>, <code>MDM^T02</code></li>
+                        <li><strong>Topology:</strong> Centralized HIE Data Repository</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jordan EHS Hakeem -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-top border-4 border-warning">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge bg-warning text-dark p-2 fs-6"><i class="bi bi-hospital"></i></span>
+                        <div>
+                            <h5 class="fw-bold mb-0">Jordan EHS (Hakeem)</h5>
+                            <small class="text-muted">المملكة الأردنية الهاشمية</small>
+                        </div>
+                    </div>
+                    <p class="small text-muted mb-2">
+                        @(Lang.IsRtl ? "شركة الحوسبة الصحية (EHS) - برنامج حكيم الوطني لأتمتة المستشفيات والمراكز الصحية الحكومية والعسكرية والجامعية. يربط أنظمة المختبرات والأشعة والسجلات عبر محركات تكامل HL7 v2."
+                                     : "Electronic Health Solutions (EHS) national Hakeem program automating public, military, and university hospitals across Jordan using enterprise HL7 integration engines.")
+                    </p>
+                    <ul class="small mb-0 ps-3 text-muted">
+                        <li><strong>Standard:</strong> HL7 v2.3 / v2.5 + DICOM</li>
+                        <li><strong>Core Stack:</strong> VistA EHR + Interface Engines (Mirth)</li>
+                        <li><strong>Key Flows:</strong> LIS Lab Automation & PACS DICOM</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string arabicFirst = "عمر";
+    private string arabicFather = "عبدالله";
+    private string arabicGrandfather = "محمد";
+    private string arabicFamily = "الفلاسي";
+
+    private string latinFirst = "Omar";
+    private string latinFather = "Abdullah";
+    private string latinGrandfather = "Mohammed";
+    private string latinFamily = "Al-Falasi";
+
+    private string hl7PidOutput = string.Empty;
+    private string fhirJsonOutput = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        Lang.OnLanguageChanged += StateHasChanged;
+        GenerateOutputs();
+    }
+
+    private void GenerateOutputs()
+    {
+        // HL7 v2 ER7 PID-5 with Latin and Arabic repetitions
+        // PID-5: Family^Given^Middle^Suffix^Prefix^Degree
+        var latinRep = $"{latinFamily}^{latinFirst}^{latinFather} {latinGrandfather}";
+        var arabicRep = $"{arabicFamily}^{arabicFirst}^{arabicFather} {arabicGrandfather}";
+        hl7PidOutput = $"PID|1||MRN98214^^^HOSPITAL||{latinRep}~{arabicRep}||19880415|M|||DUBAI^UAE";
+
+        // FHIR R4 HumanName with international and Middle East extensions
+        fhirJsonOutput = $$"""
+{
+  "resourceType": "Patient",
+  "id": "patient-me-001",
+  "name": [
+    {
+      "use": "official",
+      "family": "{{latinFamily}}",
+      "given": [
+        "{{latinFirst}}",
+        "{{latinFather}}",
+        "{{latinGrandfather}}"
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/humanname-father-name",
+          "valueString": "{{latinFather}}"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/humanname-grandfather-name",
+          "valueString": "{{latinGrandfather}}"
+        }
+      ]
+    },
+    {
+      "use": "official",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/language",
+          "valueCode": "ar"
+        }
+      ],
+      "family": "{{arabicFamily}}",
+      "given": [
+        "{{arabicFirst}}",
+        "{{arabicFather}}",
+        "{{arabicGrandfather}}"
+      ]
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1988-04-15"
+}
+""";
+    }
+
+    private void LoadPresetOmar()
+    {
+        arabicFirst = "عمر";
+        arabicFather = "عبدالله";
+        arabicGrandfather = "محمد";
+        arabicFamily = "الفلاسي";
+
+        latinFirst = "Omar";
+        latinFather = "Abdullah";
+        latinGrandfather = "Mohammed";
+        latinFamily = "Al-Falasi";
+        GenerateOutputs();
+    }
+
+    private void LoadPresetFatimah()
+    {
+        arabicFirst = "فاطمة";
+        arabicFather = "سعيد";
+        arabicGrandfather = "خالد";
+        arabicFamily = "الغامدي";
+
+        latinFirst = "Fatimah";
+        latinFather = "Saeed";
+        latinGrandfather = "Khalid";
+        latinFamily = "Al-Ghamdi";
+        GenerateOutputs();
+    }
+
+    private void LoadPresetTariq()
+    {
+        arabicFirst = "طارق";
+        arabicFather = "محمود";
+        arabicGrandfather = "أحمد";
+        arabicFamily = "المجالي";
+
+        latinFirst = "Tariq";
+        latinFather = "Mahmoud";
+        latinGrandfather = "Ahmad";
+        latinFamily = "Majali";
+        GenerateOutputs();
+    }
+
+    private async Task CopyText(string text)
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", text);
+    }
+
+    public void Dispose()
+    {
+        Lang.OnLanguageChanged -= StateHasChanged;
+    }
+}

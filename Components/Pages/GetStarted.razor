@@ -1,22 +1,32 @@
 @page "/get-started"
 @rendermode InteractiveServer
+@implements IDisposable
+@inject LanguageService Lang
 
-<PageTitle>Get Started - The Master Healthcare Interoperability Guide</PageTitle>
+<PageTitle>@(Lang.IsRtl ? "الدليل التعليمي الشامل لمعايير HL7 و FHIR" : "Get Started - The Master Healthcare Interoperability Guide")</PageTitle>
 
 <div class="py-2 w-100" style="max-width: 100%; overflow-x: hidden;">
     <!-- Hero Header -->
     <div class="p-4 mb-4 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #198754 0%, #0d6efd 100%);">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-                <span class="badge bg-light text-dark mb-2 px-3 py-1 fw-semibold">In-Depth Healthcare Engineering Curriculum</span>
-                <h1 class="h2 fw-bold mb-1">HL7 v2 & FHIR: The Master Educational Guide</h1>
+                <span class="badge bg-light text-dark mb-2 px-3 py-1 fw-semibold">
+                    @(Lang.IsRtl ? "المنهج المتعمق لهندسة تكامل المستشفيات" : "In-Depth Healthcare Engineering Curriculum")
+                </span>
+                <h1 class="h2 fw-bold mb-1">
+                    @(Lang.IsRtl ? "دليل إتقان معايير HL7 v2 و FHIR R4 الشامل" : "HL7 v2 & FHIR: The Master Educational Guide")
+                </h1>
                 <p class="mb-0 text-white-50">
-                    Comprehensive deep-dive covering body formats (JSON vs XML vs ER7), delimiters and escape operators, 5 surgical message dissections, and interactive tools.
+                    @(Lang.IsRtl ? "شرح معمق لصيغ البيانات (JSON vs XML vs ER7)، والفواصل ومحارف الهروب، وتشريح 5 رسائل جراحية، ومصفوفة حجر رشيد لترجمة المفاهيم."
+                                 : "Comprehensive deep-dive covering body formats (JSON vs XML vs ER7), delimiters and escape operators, 5 surgical message dissections, and interactive tools.")
                 </p>
             </div>
             <div class="d-flex gap-2">
-                <a href="bridge" class="btn btn-warning fw-bold px-3">
-                    <i class="bi bi-shuffle me-1"></i> Open Live Bridge
+                <a href="regional-interop" class="btn btn-warning fw-bold px-3">
+                    <i class="bi bi-globe-central-south-asia me-1"></i> @(Lang.IsRtl ? "المعايير الإقليمية (NPHIES)" : "Regional Interop")
+                </a>
+                <a href="training-academy" class="btn btn-light fw-bold px-3 text-primary">
+                    <i class="bi bi-mortarboard-fill me-1"></i> @(Lang.IsRtl ? "الأكاديمية والشهادة" : "Academy & Cert")
                 </a>
             </div>
         </div>
@@ -26,14 +36,14 @@
     <div class="card shadow-sm mb-4 border-0 bg-light">
         <div class="card-body p-3">
             <div class="d-flex flex-wrap gap-2 align-items-center small">
-                <span class="fw-bold text-muted me-1"><i class="bi bi-compass"></i> Jump to Topic:</span>
+                <span class="fw-bold text-muted me-1"><i class="bi bi-compass"></i> @(Lang.IsRtl ? "انتقل إلى الموضوع:" : "Jump to Topic:")</span>
                 <a href="get-started#topic-formats" class="btn btn-sm btn-outline-primary py-0">1. JSON vs XML vs ER7</a>
                 <a href="get-started#topic-rosetta" class="btn btn-sm btn-outline-warning py-0 fw-semibold">The Rosetta Stone &amp; 1989 Origins</a>
                 <a href="get-started#topic-operators" class="btn btn-sm btn-outline-primary py-0">2. HL7 Delimiters &amp; Operators</a>
                 <a href="get-started#topic-messages" class="btn btn-sm btn-outline-primary py-0">3. 5 Deep-Dive Messages</a>
                 <a href="get-started#topic-journey" class="btn btn-sm btn-outline-primary py-0">4. Patient Journey Simulator</a>
-                <a href="get-started#topic-jargon" class="btn btn-sm btn-outline-primary py-0">5. Jargon Buster Dictionary</a>
-                <a href="get-started#topic-quiz" class="btn btn-sm btn-outline-primary py-0">6. Practice Quiz &amp; Specs</a>
+                <a href="regional-interop" class="btn btn-sm btn-outline-success py-0 fw-semibold"><i class="bi bi-globe me-1"></i> @(Lang.IsRtl ? "المعايير العربية والأسماء" : "Arabic 4-Part Names")</a>
+                <a href="training-academy" class="btn btn-sm btn-outline-info py-0 fw-semibold"><i class="bi bi-award me-1"></i> @(Lang.IsRtl ? "شهادة الكفاءة" : "Certification")</a>
             </div>
         </div>
     </div>
@@ -1079,5 +1089,15 @@ OBX|3|NM|2951-2^Sodium [Moles/volume] in Serum or Plasma^LN||138|mmol/L|135-145|
     private void AnswerQuestion(int questionIndex, int optionIndex)
     {
         userAnswers[questionIndex] = optionIndex;
+    }
+
+    protected override void OnInitialized()
+    {
+        Lang.OnLanguageChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        Lang.OnLanguageChanged -= StateHasChanged;
     }
 }
